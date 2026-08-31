@@ -72,7 +72,7 @@
     lead.innerHTML = (!have(h) ? "" :
       `<article class="card hero-card">
          <div class="card-head"><div class="titles">
-           <div class="eyebrow">Month to date</div>
+           <div class="eyebrow">${esc(h.eyebrow || "Month to date")}</div>
            <h3>${esc(h.label)}</h3>
          </div></div>
          <div class="hero-figure">${h.value.toFixed(1)}<span class="unit">${esc(h.unit)}</span></div>
@@ -81,7 +81,7 @@
            ${chip("Target " + h.target, "", true)}
          </div>
          <div class="chart" id="hero-spark" style="margin:-4px 0 -2px"></div>
-         <p class="card-note">${esc(h.note)}${ACTUALS.length ? ". Twelve-month trend above" : ""}.</p>
+         <p class="card-note">${esc(h.note)}${ACTUALS.length > 1 ? `. ${ACTUALS.length}-month trend above` : ""}.</p>
        </article>`) +
       (D.kpis || []).map((k) => {
         const val = FMT[k.format](k.value);
@@ -127,6 +127,8 @@
         </div>
       </div>`;
     }).join("");
+    const note = $("#targets-note");
+    if (note && have(D.targetsNote)) note.textContent = D.targetsNote;
     const el = $("#targets-summary");
     el.textContent = `${onTarget} of ${D.targets.length} on target`;
     el.className = "chip " + (onTarget >= D.targets.length * 0.75 ? "good" : onTarget >= D.targets.length / 2 ? "warning" : "serious");
@@ -158,6 +160,16 @@
       const ctl = $("#controls"); if (ctl) ctl.hidden = true;
       return;
     }
+    const hasMoney = ACTUALS.some((m) => m.revenue != null && m.expenses != null);
+    if (!hasMoney) {
+      ["card-finance", "card-margin", "card-projection"].forEach((id) => {
+        const n = document.getElementById(id); if (n) n.hidden = true;
+      });
+      if (!AWAITING.includes("Revenue, expenses and margin")) AWAITING.push("Revenue, expenses and margin");
+    }
+    if (ACTUALS.length <= 6 && !PROJECTED.length) {
+      const ctl = $("#controls"); if (ctl) ctl.hidden = true;
+    }
     if (!PROJECTED.length) {
       const pg = $("#proj-group"); if (pg) pg.hidden = true;
       const pc = document.getElementById("card-projection"); if (pc) pc.hidden = true;
@@ -183,13 +195,20 @@
       ],
       format: F.int,
       projectFrom,
-      target: { value: 45, label: "CENSUS TARGET 45" },
+      target: have(D.censusTarget) ? { value: D.censusTarget, label: `TARGET ${D.censusTarget}` } : null,
       tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
       tipNote: (i) => "Attendance " + F.pct1(rows[i].adc / rows[i].enrolled)
     });
     twin($("#twin-census"), ["Month", "Enrolled", "Avg daily census", "Attendance"],
       rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.int(m.enrolled), F.dec1(m.adc), F.pct1(m.adc / m.enrolled)]));
-    $("#census-gap").textContent = `${55 - CUR.enrolled} seats to the December target`;
+    const gap = $("#census-gap");
+    if (have(D.censusTarget)) {
+      const short = D.censusTarget - CUR.enrolled;
+      gap.textContent = short > 0 ? `${short} short of the target of ${D.censusTarget}`
+                                  : `at or above the target of ${D.censusTarget}`;
+    } else { gap.hidden = true; }
+
+    if (!hasMoney) return;
 
     // Revenue & expenses — both dollars, one axis.
     legend($("#legend-finance"), [
@@ -233,7 +252,7 @@
      Projection table
      ==================================================================== */
   function renderProjection() {
-    if (have(CUR) && have(PREV)) {
+    if (have(CUR) && have(PREV) && CUR.revenue != null && PREV.revenue != null) {
       const m = margin(CUR), pm = margin(PREV);
       const mc = $("#margin-chip");
       mc.textContent = `${F.pct1(m)} MTD · ${signed((m - pm) * 100)} pts vs. ${PREV.label}`;
@@ -335,33 +354,35 @@
         `<tr><td>${esc(r.reason)}${r.note ? `<span class="sub">${esc(r.note)}</span>` : ""}</td>
          <td class="n">${esc(F.pct0(r.share))}</td></tr>`).join("");
     }
-    if (!need("card-attendance", "Attendance", D.attendanceDaily)) return;
-    const a = D.attendanceDaily;
-    const rates = a.map((d) => d.present / d.enrolled);
-    const kpi = (D.kpis || []).find((k) => k.key === "attendance");
-    const mtd = kpi ? kpi.value : a.reduce((s, d) => s + d.present / d.enrolled, 0) / a.length;
+    if (!need("card-attendance", "Attendance", D.attendancePeriods)) return;
+    const a = D.attendancePeriods;
+    const rate = (d) => d.adc / d.roster;
+
     Charts.columns($("#chart-attendance"), {
-      labels: a.map((d) => d.date.replace("Aug ", "")),
-      sublabels: a.map((d) => d.dow),
-      values: rates,
+      labels: a.map((d) => d.label),
+      sublabels: a.map((d) => d.sub),
+      values: a.map(rate),
       format: F.pct1,
       yFormat: F.pct0,
       height: 214,
-      target: { value: D.attendanceTargetRate, label: "TARGET 85%" },
+      target: have(D.attendanceTargetRate)
+        ? { value: D.attendanceTargetRate, label: "TARGET " + F.pct0(D.attendanceTargetRate) } : null,
       seriesName: "Attendance",
-      tipTitle: (i) => a[i].date + " · " + a[i].dow,
-      tipNote: (i) => `${a[i].present} of ${a[i].enrolled} children present`
+      tipTitle: (i) => a[i].label + " " + a[i].sub,
+      tipNote: (i) => `${F.dec1(a[i].adc)} of ${a[i].roster} on the roster · ` +
+        `${F.pct0(a[i].adc / a[i].attending)} of the ${a[i].attending} who attended`
     });
-    twin($("#twin-attendance"), ["Day", "Present", "Enrolled", "Rate"],
-      a.map((d) => [`${d.date} (${d.dow})`, F.int(d.present), F.int(d.enrolled), F.pct1(d.present / d.enrolled)]));
+    twin($("#twin-attendance"),
+      ["Month", "Roster", "Attended", "Operating days", "Child-days", "Daily census", "Rate vs. roster", "Rate vs. attending"],
+      a.map((d) => [d.label + " " + d.sub, F.int(d.roster), F.int(d.attending), F.int(d.opDays),
+        F.int(d.childDays), F.dec1(d.adc), F.pct1(rate(d)), F.pct1(d.adc / d.attending)]));
 
-    const hit = rates.filter((r) => r >= D.attendanceTargetRate).length;
+    const cur = a[a.length - 1], prev = a[a.length - 2];
     const ac = $("#attendance-chip");
-    ac.textContent = `${F.pct1(mtd)} MTD · ${hit} of ${a.length} days at target`;
-    ac.className = "chip " + (mtd >= D.attendanceTargetRate ? "good" : mtd >= 0.8 ? "warning" : "serious");
-    if (mtd < D.attendanceTargetRate) $("#card-attendance").dataset.state = "warning";
-    else delete $("#card-attendance").dataset.state;
-
+    const delta = prev ? signed((rate(cur) - rate(prev)) * 100) + " pts vs. " + prev.label : "";
+    ac.textContent = `${F.pct1(rate(cur))} in ${cur.label}${delta ? " · " + delta : ""}`;
+    ac.className = "chip " + (rate(cur) >= 0.85 ? "good" : rate(cur) >= 0.75 ? "warning" : "serious");
+    delete $("#card-attendance").dataset.state;
   }
 
   /* =======================================================================
@@ -573,6 +594,7 @@
     $("#as-of").textContent = D.meta.asOf;
     $("#period-label").textContent = D.meta.period;
     if (D.meta.sampleData) $("#demo-chip").hidden = false;
+    if (have(D.meta.sourceNote)) $("#foot-source").textContent = D.meta.sourceNote;
     $("#foot-note").innerHTML = D.meta.sampleData
       ? "Figures on this board are <strong>illustrative sample data</strong> for a " +
         D.meta.licensedCapacity + "-seat PPEC, not the center's records. Replace them before anyone makes a decision from this page."
@@ -623,6 +645,7 @@
     const note = $("#coverage-note");
     if (!note) return;
     if (!AWAITING.length) { note.hidden = true; return; }
+    note.hidden = false;
     note.innerHTML = "Waiting on data: <strong>" + AWAITING.map(esc).join("</strong>, <strong>") +
       "</strong>. Those sections stay hidden until their numbers land in <code>data.js</code>.";
   }

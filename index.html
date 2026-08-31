@@ -65,7 +65,7 @@
           <div class="card-meta"><span class="chip" id="targets-summary">—</span></div>
         </div>
         <div class="meters" id="meters"></div>
-        <p class="card-note">A filled bar is the current value against target. Bars past 100% are capped; the numbers to the right are exact.</p>
+        <p class="card-note" id="targets-note">A filled bar is the current value against target. Bars past 100% are capped; the numbers to the right are exact.</p>
       </article>
 
       <article class="card col-7" id="card-census">
@@ -193,13 +193,16 @@
       <article class="card col-8" id="card-attendance">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Last 14 operating days</div>
-            <h3>Daily attendance rate</h3>
+            <div class="eyebrow">By month</div>
+            <h3>Attendance rate</h3>
           </div>
           <div class="card-meta"><span class="chip" id="attendance-chip">—</span></div>
         </div>
         <div class="chart" id="chart-attendance"></div>
         <details class="twin" id="twin-attendance"><summary>Table view</summary></details>
+        <p class="card-note">Daily census divided by the children on that month's roster. The
+          table view also carries the rate against only the children who attended at least once,
+          which is the higher of the two and the one that reflects scheduling rather than roster hygiene.</p>
       </article>
 
       <article class="card col-4" id="card-absence">
@@ -413,6 +416,7 @@
       Every figure comes from <code>assets/js/data.js</code> — edit that one file and the whole board updates.
     </div>
     <div class="grow" id="foot-note"></div>
+    <div class="grow" id="foot-source"></div>
     <div class="grow" id="coverage-note" hidden></div>
   </footer>
 

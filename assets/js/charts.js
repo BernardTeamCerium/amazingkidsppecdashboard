@@ -263,9 +263,9 @@ const Charts = (() => {
     const draw = (W) => {
       const M = { t: 14, r: 12, b: 30, l: 42 };
       const H = height, iw = Math.max(60, W - M.l - M.r), ih = H - M.t - M.b;
+      // Columns always grow from zero — a truncated baseline misstates bar length.
       const hi = Math.max(...values, target ? target.value : 0);
-      const lo = Math.min(...values, target ? target.value : Infinity);
-      const tk = ticks(Math.max(0, lo - (hi - lo) * 0.9), hi + (hi - lo) * 0.15 || hi * 1.1, 4);
+      const tk = ticks(0, hi * 1.08, 4);
       const yMin = tk[0], yMax = tk[tk.length - 1];
       const Y = (v) => M.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
       const band = iw / values.length;
