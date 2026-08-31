@@ -278,9 +278,9 @@ window.AKP_DATA = {
       owner: "Unassigned", due: null, status: "Not started", priority: "Low", area: "Marketing" },
     { id: "T-12", title: "Run more marketing campaigns, including video footage and local exposure",
       owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Marketing" },
-    { id: "T-13", title: "Stand up the Amazing Kids PPEC operations board on a shared link",
-      owner: "Unassigned", due: null, status: "In progress", priority: "High", area: "Operations",
-      note: "Live on the artifact link now — decide who gets access and share it from there" }
+    { id: "T-13", title: "Create the Amazing Kids PPEC software",
+      owner: "Unassigned", due: null, status: "In progress", priority: "High", area: "Software",
+      note: "Operations board is the first piece and is live on a shared link; remaining scope to be defined" }
   ],
   /* TASKS:END */
   tasksNote: "Owners and due dates are maintained in the “Amazing Kids PPEC - Task Board” sheet " +
