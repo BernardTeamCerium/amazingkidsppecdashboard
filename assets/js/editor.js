@@ -46,9 +46,8 @@ const Editor = (() => {
         ["distributions.assumedMonthlyCost", "Assumed monthly cost", "usd2"],
         ["distributions.startingReserve", "Reserve in the bank today", "usd2"],
         ["distributions.startingDebt", "Revolving debt outstanding", "usd2"],
-        ["distributions.whileBuilding.savings", "Share to savings", "pct"],
-        ["distributions.whileBuilding.debt", "Share to debt paydown", "pct"],
-        ["distributions.whileBuilding.owners", "Share to owner distributions", "pct"]
+        ["distributions.split.debt", "Of what is left, to debt", "pct"],
+        ["distributions.split.owners", "Of what is left, to distributions", "pct"]
       ] }
     ] },
 
@@ -137,19 +136,19 @@ const Editor = (() => {
     checkSplit();
   }
 
-  // The three shares are a split of net income; over 100% would be spending
-  // money twice, so say so rather than quietly producing nonsense.
+  // Debt and distributions split what is left after savings; over 100% would be
+  // spending the same money twice, so say so rather than producing nonsense.
   function checkSplit() {
-    const d = get(window.AKP_STATE.raw, "distributions.whileBuilding");
+    const d = get(window.AKP_STATE.raw, "distributions.split");
     const warn = $("#ed-split-warning");
     if (!d || !warn) return;
-    const total = (d.savings || 0) + (d.debt || 0) + (d.owners || 0);
+    const total = (d.debt || 0) + (d.owners || 0);
     if (total > 1.0001) {
       warn.hidden = false;
-      warn.textContent = `The savings, debt and owner shares add to ${Math.round(total * 100)}% of net income. Anything over 100% is being spent twice.`;
+      warn.textContent = `Debt and distributions add to ${Math.round(total * 100)}% of what is left after savings. Over 100% is spending the same money twice.`;
     } else if (total < 0.9999) {
       warn.hidden = false;
-      warn.textContent = `The three shares add to ${Math.round(total * 100)}% — the remaining ${Math.round((1 - total) * 100)}% stays in the operating account.`;
+      warn.textContent = `Debt and distributions add to ${Math.round(total * 100)}% — the other ${Math.round((1 - total) * 100)}% stays in the operating account.`;
     } else warn.hidden = true;
   }
 

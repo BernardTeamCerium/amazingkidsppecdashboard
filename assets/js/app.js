@@ -331,11 +331,10 @@
       const x = document.getElementById("card-reserve"); if (x) x.hidden = true;
       return;
     }
-    const pol = d.whileBuilding;
     $("#dist-policy").innerHTML = stats([
-      { v: F.pct0(pol.savings), k: "To company savings" },
-      { v: F.pct0(pol.debt), k: "To paying down debt" },
-      { v: F.pct0(pol.owners), k: "To owner distributions" }
+      { v: "First", k: `To savings, until ${F.usdk(d.reserveTarget)} is banked` },
+      { v: F.pct0(d.split.debt), k: "Of the rest, to paying down debt" },
+      { v: F.pct0(d.split.owners), k: "Of the rest, to owner distributions" }
     ]);
     $("#tbl-distributions tbody").innerHTML = d.schedule.map((x) =>
       `<tr>
@@ -358,7 +357,7 @@
     chipEl.textContent = `${F.usdk(d.totals.owners)} to owners over ${d.schedule.length} months`;
     chipEl.className = "chip accent";
     $("#dist-note").textContent = d.note + " " + d.caveat +
-      ` At the realized rate the four months net about ${F.usdk(d.downside)}, which would put roughly ${F.usdk(d.downsideOwners)} in the distribution pool instead of ${F.usdk(d.totals.owners)}.`;
+      ` At the realized rate the four months net about ${F.usdk(d.downside)} rather than ${F.usdk(d.totals.net)}, which funds the reserve later and leaves less to distribute.`;
 
     if (!need("card-reserve", null, d.reserveTarget)) return;
     const pctFunded = d.startingReserve / d.reserveTarget;
@@ -378,6 +377,20 @@
     const rc = $("#reserve-chip");
     rc.textContent = d.targetMonth ? `funded by ${d.targetMonth}` : "target not reached";
     rc.className = "chip " + (d.targetMonth ? "good" : "warning");
+
+    const R = d.required;
+    $("#required-stats").innerHTML = stats([
+      { v: F.usdk(R.revenue), k: `Revenue needed over ${R.months} months` },
+      { v: F.usdk(R.monthlyRevenue), k: "Per month" },
+      { v: R.adc.toFixed(1), k: "Children a day it takes" },
+      { v: R.enrolled.toFixed(0), k: `Enrolled at ${F.pct0(M.projection.attendanceRate)} attendance` }
+    ]);
+    $("#required-note").textContent =
+      `The gap is ${F.usd(R.gap)}; the rest of that revenue just covers running the months it is earned over. ` +
+      (R.surplus >= 0
+        ? `The projection makes ${F.usdk(M.projection.totalRevenue)}, ${F.usdk(R.surplus)} more than needed. `
+        : `The projection makes ${F.usdk(M.projection.totalRevenue)}, ${F.usdk(-R.surplus)} short. `) +
+      `Break-even alone is ${F.usdk(R.breakEvenMonthly)} a month — about ${R.breakEvenAdc.toFixed(1)} children a day.`;
 
     const members = $("#tbl-members");
     if (d.showMembers && have(d.members)) {

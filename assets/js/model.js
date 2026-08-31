@@ -146,47 +146,75 @@ const Model = (() => {
     }
 
 
-    /* -- distributions & reserve ------------------------------------------ */
+    /* -- distributions & reserve ------------------------------------------
+       Reserve first: each month savings takes whatever is still needed to reach
+       the target, then the split applies to what is left. A loss draws the
+       reserve down rather than being distributed. */
     const d = raw.distributions;
     if (d && m.projection) {
+      const split = d.split || { debt: 0, owners: 1 };
       let reserve = d.startingReserve, debt = d.startingDebt;
       const schedule = m.projection.months.map((x) => {
-        const funded = reserve >= d.reserveTarget && debt <= 0;
-        const split = funded ? d.onceFunded : d.whileBuilding;
         const net = x.revenue - d.assumedMonthlyCost;
-        // A loss is not distributed — it comes out of the reserve.
-        const toSavings = net > 0 ? net * (split.savings || 0) : net;
-        const toDebt = net > 0 ? Math.min(net * (split.debt || 0), debt) : 0;
-        const toOwners = net > 0 ? net * (split.owners || 0) : 0;
-        const toReinvest = net > 0 ? net * (split.reinvest || 0) : 0;
+        let toSavings = 0, toDebt = 0, toOwners = 0;
+        if (net <= 0) {
+          toSavings = net;                                  // a loss comes out of the reserve
+        } else {
+          const gap = Math.max(0, d.reserveTarget - reserve);
+          toSavings = Math.min(net, gap);
+          const rest = net - toSavings;
+          toDebt = Math.min(rest * (split.debt || 0), Math.max(0, debt));
+          toOwners = rest - toDebt;                         // the rest is distributed
+        }
         reserve += toSavings;
         debt -= toDebt;
-        return { ...x, net, toSavings, toDebt, toOwners, toReinvest,
-                 reserve, debt, phase: funded ? "funded" : "building" };
+        return { ...x, net, toSavings, toDebt, toOwners, reserve, debt,
+                 phase: toSavings > 0 ? "building" : "funded" };
       });
       const tot = (k) => sum(schedule, (x) => x[k]);
       const owners = tot("toOwners");
       const equity = sum(d.members || [], (x) => x.equity);
-      const hitsTarget = schedule.find((x) => x.reserve >= d.reserveTarget);
+      const funded = schedule.find((x) => x.reserve >= d.reserveTarget);
+
+      /* What it takes to fund the reserve, in money and then in children.
+         The gap is the only thing savings has to cover, so the revenue needed
+         is that gap plus the cost of running the months it is earned over. */
+      const gap = Math.max(0, d.reserveTarget - d.startingReserve);
+      const n = m.projection.months.length;
+      const requiredRevenue = gap + n * d.assumedMonthlyCost;
+      const perDiem = raw.perDiem, rate = m.projection.attendanceRate;
+      const requiredChildDays = div(requiredRevenue, perDiem);
+      const requiredAdc = div(requiredChildDays, m.projection.totalOpDays);
+      const breakEvenRevenue = n * d.assumedMonthlyCost;
+      const breakEvenAdc = div(div(breakEvenRevenue, perDiem), m.projection.totalOpDays);
+
       m.distributions = {
-        ...d, schedule,
-        totals: { net: tot("net"), savings: tot("toSavings"), debt: tot("toDebt"),
-                  owners, reinvest: tot("toReinvest") },
+        ...d, schedule, split,
+        totals: { net: tot("net"), savings: tot("toSavings"), debt: tot("toDebt"), owners },
         endReserve: schedule.length ? schedule[schedule.length - 1].reserve : d.startingReserve,
         endDebt: schedule.length ? schedule[schedule.length - 1].debt : d.startingDebt,
-        reserveNow: div(d.startingReserve, d.reserveTarget),
-        targetMonth: hitsTarget ? hitsTarget.full : null,
+        targetMonth: funded ? funded.full : null,
         equity,
         members: (d.members || []).map((x) => ({
           ...x, share: div(x.equity, equity), amount: owners * div(x.equity, equity)
         })),
-        // What the reserve target is worth in months at the assumed cost
         monthsCovered: div(d.reserveTarget, d.assumedMonthlyCost),
+        required: {
+          gap, months: n,
+          revenue: requiredRevenue,
+          monthlyRevenue: div(requiredRevenue, n),
+          childDays: requiredChildDays,
+          adc: requiredAdc,
+          enrolled: div(requiredAdc, rate),
+          surplus: m.projection.totalRevenue - requiredRevenue,
+          breakEvenRevenue,
+          breakEvenMonthly: d.assumedMonthlyCost,
+          breakEvenAdc,
+          breakEvenEnrolled: div(breakEvenAdc, rate)
+        },
         downside: m.ytd.realization
           ? sum(m.projection.months, (x) => x.revenue * m.ytd.realization - d.assumedMonthlyCost) : null
       };
-      m.distributions.downsideOwners = m.distributions.downside === null ? null
-        : Math.max(0, m.distributions.downside) * d.whileBuilding.owners;
     }
 
     return m;

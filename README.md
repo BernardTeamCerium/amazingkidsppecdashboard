@@ -90,8 +90,10 @@ A few rules the file expects:
   board does not check this for you.
 - `projection.months` rows carry only `weekdays`, `closures` and `enrolled`.
   Operating days, daily census and revenue are calculated from them.
-- `distributions` is a policy, not a forecast. The three shares split each
-  month's net income; the panel warns if they add to more or less than 100%.
+- `distributions` is a policy, not a forecast. Savings takes whatever is still
+  needed to reach `reserveTarget` first; `split` then divides what is left
+  between debt paydown and distributions, and the panel warns if those two do
+  not add to 100%. A loss draws the reserve down rather than being distributed.
   `assumedMonthlyCost` is the one figure with no source — the management report
   gives no basis for forecasting cost, so the schedule holds it at the
   year-to-date average.

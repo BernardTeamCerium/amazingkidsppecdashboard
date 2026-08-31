@@ -145,8 +145,10 @@ window.AKP_DATA = {
     assumedMonthlyCost: 68890.88,
     startingReserve: 71116.36,          /* cash in bank at Jul 31 */
     startingDebt: 53134.99,             /* credit card + line of credit drawn */
-    whileBuilding: { savings: 0.50, debt: 0.25, owners: 0.25 },
-    onceFunded:    { savings: 0.25, debt: 0.00, owners: 0.60, reinvest: 0.15 },
+    /* Reserve first: savings takes whatever is still needed to reach the target,
+       then 15% of what is left pays down debt and the rest is distributed. */
+    reserveFirst: true,
+    split: { debt: 0.15, owners: 0.85 },
     /* The one place member-level detail appears. Set showMembers to false and
        the split collapses to a single distribution pool. */
     showMembers: true,
