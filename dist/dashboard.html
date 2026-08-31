@@ -1,0 +1,2388 @@
+<title>Amazing Kids PPEC Operations Board</title>
+<meta name="description" content="Operating picture for Amazing Kids PPEC: census, attendance, staffing, budget, margin, enrollment pipeline, removals, marketing and the open task list.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* =============================================================================
+   Amazing Kids PPEC — Operations Board
+   Tokens first, components second. Every color is a token so both themes
+   resolve as a complete set; nothing is defined only inside a theme block.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces & ink — a cool, slightly blue-biased neutral, chosen to sit under
+     the clinical blue accent rather than a default grey. */
+  --plane:        #eef1f5;
+  --surface:      #ffffff;
+  --surface-2:    #f5f8fb;
+  --surface-3:    #eaeff5;
+  --ink:          #10151c;
+  --ink-2:        #4c5666;
+  --ink-3:        #77828f;
+  --rule:         #dce3ea;
+  --rule-strong:  #c3cdd9;
+  --shadow:       0 1px 2px rgba(16, 21, 28, .05), 0 8px 24px -16px rgba(16, 21, 28, .18);
+
+  /* Accent + chart series (validated: adjacent CVD ΔE 24.7, all checks pass) */
+  --accent:       #2a78d6;
+  --accent-ink:   #1c5cab;
+  --accent-wash:  rgba(42, 120, 214, .10);
+  --series-1:     #2a78d6;
+  --series-2:     #eb6834;
+
+  /* Ordinal ramp for the pipeline stages (validated --ordinal, light end 2.11:1) */
+  --ord-1: #86b6ef;
+  --ord-2: #5598e7;
+  --ord-3: #2a78d6;
+  --ord-4: #1c5cab;
+  --ord-5: #104281;
+
+  /* Status — reserved, never reused as a series color */
+  --good:      #0ca30c;
+  --warning:   #fab219;
+  --serious:   #ec835a;
+  --critical:  #d03b3b;
+  --good-ink:     #006300;
+  --warning-ink:  #8a5a00;
+  --serious-ink:  #a2451f;
+  --critical-ink: #b02c2c;
+  --good-wash:     rgba(12, 163, 12, .10);
+  --warning-wash:  rgba(250, 178, 25, .16);
+  --serious-wash:  rgba(236, 131, 90, .16);
+  --critical-wash: rgba(208, 59, 59, .10);
+
+  /* Chart chrome */
+  --grid:     #e6ebf1;
+  --axis:     #c3cdd9;
+  --chart-bg: var(--surface);
+
+  --font-display: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --r-card: 10px;
+  --r-chip: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --plane:       #0b0e13;
+    --surface:     #161b22;
+    --surface-2:   #1b212a;
+    --surface-3:   #222a34;
+    --ink:         #f1f4f8;
+    --ink-2:       #a9b4c2;
+    --ink-3:       #7d8896;
+    --rule:        #262e39;
+    --rule-strong: #384352;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .6);
+
+    --accent:      #3987e5;
+    --accent-ink:  #86b6ef;
+    --accent-wash: rgba(57, 135, 229, .16);
+    --series-1:    #3987e5;
+    --series-2:    #d95926;
+
+    --ord-1: #cde2fb;
+    --ord-2: #9ec5f4;
+    --ord-3: #6da7ec;
+    --ord-4: #3987e5;
+    --ord-5: #256abf;
+
+    --good-ink:     #0ca30c;
+    --warning-ink:  #fab219;
+    --serious-ink:  #ec835a;
+    --critical-ink: #e26a6a;
+    --good-wash:     rgba(12, 163, 12, .16);
+    --warning-wash:  rgba(250, 178, 25, .14);
+    --serious-wash:  rgba(236, 131, 90, .14);
+    --critical-wash: rgba(208, 59, 59, .18);
+
+    --grid: #232b35;
+    --axis: #38424f;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plane:       #0b0e13;
+  --surface:     #161b22;
+  --surface-2:   #1b212a;
+  --surface-3:   #222a34;
+  --ink:         #f1f4f8;
+  --ink-2:       #a9b4c2;
+  --ink-3:       #7d8896;
+  --rule:        #262e39;
+  --rule-strong: #384352;
+  --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .6);
+
+  --accent:      #3987e5;
+  --accent-ink:  #86b6ef;
+  --accent-wash: rgba(57, 135, 229, .16);
+  --series-1:    #3987e5;
+  --series-2:    #d95926;
+
+  --ord-1: #cde2fb;
+  --ord-2: #9ec5f4;
+  --ord-3: #6da7ec;
+  --ord-4: #3987e5;
+  --ord-5: #256abf;
+
+  --good-ink:     #0ca30c;
+  --warning-ink:  #fab219;
+  --serious-ink:  #ec835a;
+  --critical-ink: #e26a6a;
+  --good-wash:     rgba(12, 163, 12, .16);
+  --warning-wash:  rgba(250, 178, 25, .14);
+  --serious-wash:  rgba(236, 131, 90, .14);
+  --critical-wash: rgba(208, 59, 59, .18);
+
+  --grid: #232b35;
+  --axis: #38424f;
+}
+
+/* ---- Base ---------------------------------------------------------------- */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--plane);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; text-wrap: balance; }
+
+a { color: var(--accent-ink); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.num { font-variant-numeric: tabular-nums; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: .92em;
+  background: var(--surface-3);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ink-2);
+}
+
+/* ---- Masthead ------------------------------------------------------------ */
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+}
+
+.masthead-inner {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mark {
+  width: 38px; height: 38px;
+  flex: 0 0 38px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .02em;
+}
+
+.masthead h1 { font-size: 17px; letter-spacing: -.01em; line-height: 1.2; }
+.masthead .sub { color: var(--ink-3); font-size: 12px; }
+.masthead .spacer { flex: 1 1 auto; }
+
+.asof {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.asof strong { color: var(--ink); font-weight: 500; }
+
+.demo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: var(--r-chip);
+  background: var(--warning-wash);
+  color: var(--warning-ink);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(250, 178, 25, .35);
+}
+
+.icon-btn {
+  height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+
+/* ---- Control bar --------------------------------------------------------- */
+.controls {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 16px 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.segmented button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  padding: 7px 13px;
+  cursor: pointer;
+  border-right: 1px solid var(--rule);
+}
+.segmented button:last-child { border-right: 0; }
+.segmented button:hover { background: var(--surface-2); color: var(--ink); }
+.segmented button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+
+.controls .hint { color: var(--ink-3); font-size: 12px; }
+
+/* ---- Board layout -------------------------------------------------------- */
+.board {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 16px 24px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.section-head h2 { font-size: 13px; letter-spacing: .02em; }
+.section-head .section-note { color: var(--ink-3); font-size: 12px; margin-left: auto; }
+
+.section { display: flex; flex-direction: column; gap: 14px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;   /* cards hug their content — no dead space under short cards */
+}
+.col-3  { grid-column: span 3; }
+.col-4  { grid-column: span 4; }
+.col-5  { grid-column: span 5; }
+.col-6  { grid-column: span 6; }
+.col-7  { grid-column: span 7; }
+.col-8  { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
+
+@media (max-width: 1180px) {
+  .col-3, .col-4, .col-5 { grid-column: span 6; }
+  .col-7, .col-8 { grid-column: span 12; }
+}
+@media (max-width: 760px) {
+  .col-3, .col-4, .col-5, .col-6, .col-7, .col-8 { grid-column: span 12; }
+  .masthead-inner, .controls, .board { padding-left: 14px; padding-right: 14px; }
+}
+
+/* ---- Card ---------------------------------------------------------------- */
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 15px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* A severity stripe on the left edge — only on cards that need attention. */
+.card[data-state]::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.card[data-state="warning"]::before  { background: var(--warning); }
+.card[data-state="serious"]::before  { background: var(--serious); }
+.card[data-state="critical"]::before { background: var(--critical); }
+.card[data-state="good"]::before     { background: var(--good); }
+
+.card-head { display: flex; align-items: flex-start; gap: 10px; }
+.card-head .titles { min-width: 0; }
+.card-head h3 { font-size: 14.5px; letter-spacing: -.005em; margin-top: 2px; }
+.card-head .card-meta { margin-left: auto; text-align: right; flex: 0 0 auto; }
+
+.card-note {
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 1.45;
+  border-top: 1px solid var(--rule);
+  padding-top: 10px;
+  margin-top: auto;
+}
+
+/* ---- Chips --------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--r-chip);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+.chip::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 6px;
+}
+.chip.plain::before { display: none; }
+.chip.good     { background: var(--good-wash);     color: var(--good-ink); }
+.chip.warning  { background: var(--warning-wash);  color: var(--warning-ink); }
+.chip.serious  { background: var(--serious-wash);  color: var(--serious-ink); }
+.chip.critical { background: var(--critical-wash); color: var(--critical-ink); }
+.chip.accent   { background: var(--accent-wash);   color: var(--accent-ink); }
+
+.delta { font-family: var(--font-mono); font-size: 11.5px; }
+.delta.up   { color: var(--good-ink); }
+.delta.down { color: var(--critical-ink); }
+.delta.flat { color: var(--ink-3); }
+
+/* ---- Lead band ----------------------------------------------------------- */
+.lead {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.15fr) repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+@media (max-width: 1180px) { .lead { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px)  { .lead { grid-template-columns: minmax(0, 1fr); } }
+
+.hero-card { justify-content: space-between; }
+.hero-figure {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--ink);
+}
+.hero-figure .unit {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink-3);
+  margin-left: 8px;
+}
+.hero-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.tile { gap: 8px; padding: 14px 15px; }
+.tile .tile-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+.tile .tile-sub { color: var(--ink-3); font-size: 12px; }
+.tile .tile-foot {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: auto; padding-top: 4px;
+}
+
+/* ---- Meters (targets) ---------------------------------------------------- */
+.meters { display: flex; flex-direction: column; gap: 14px; }
+.meter-row { display: flex; flex-direction: column; gap: 6px; }
+.meter-head { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.meter-head .name { color: var(--ink); }
+.meter-head .vals {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.meter-head .vals .actual { color: var(--ink); font-weight: 500; }
+.meter-head .who {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.meter-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.meter-fill { height: 100%; border-radius: 4px; background: var(--accent); }
+.meter-fill.good     { background: var(--good); }
+.meter-fill.warning  { background: var(--warning); }
+.meter-fill.serious  { background: var(--serious); }
+.meter-fill.critical { background: var(--critical); }
+.meter-sub { font-size: 11.5px; color: var(--ink-3); font-family: var(--font-mono); }
+
+/* ---- Tables -------------------------------------------------------------- */
+.table-wrap { overflow-x: auto; }
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+table.data th, table.data td {
+  text-align: left;
+  padding: 7px 10px 7px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+table.data thead th {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+  border-bottom: 1px solid var(--rule-strong);
+  white-space: nowrap;
+}
+table.data tbody tr:last-child td { border-bottom: 0; }
+table.data td.n, table.data th.n {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-right: 14px;
+}
+table.data td.n:last-child, table.data th.n:last-child { padding-right: 0; }
+table.data td.mono, table.data th.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-right: 14px;
+}
+table.data tbody tr:hover td { background: var(--surface-2); }
+table.data td .sub { color: var(--ink-3); font-size: 11.5px; display: block; }
+table.data tfoot td {
+  padding-top: 8px;
+  border-top: 1px solid var(--rule-strong);
+  font-weight: 600;
+}
+
+/* ---- Stat strip ---------------------------------------------------------- */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+  padding: 11px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.stat-strip.no-rule { border: 0; padding: 0; }
+.stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stat .v {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+}
+.stat .k { font-size: 11.5px; color: var(--ink-3); line-height: 1.3; }
+
+/* ---- Charts -------------------------------------------------------------- */
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--font-mono); }
+.tick { font-size: 10px; fill: var(--ink-3); }
+.axis-line { stroke: var(--axis); stroke-width: 1; }
+.grid-line { stroke: var(--grid); stroke-width: 1; }
+.ref-line { stroke: var(--ink-3); stroke-width: 1; }
+.ref-label { font-size: 10px; fill: var(--ink-3); }
+.dlabel { font-size: 11px; fill: var(--ink); font-weight: 500; }
+.bar-name { font-family: var(--font-body); font-size: 11.5px; fill: var(--ink-2); }
+.dlabel.muted { fill: var(--ink-2); }
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.legend .swatch { width: 12px; height: 3px; border-radius: 2px; background: var(--series-1); }
+.legend .swatch.dot { width: 9px; height: 9px; border-radius: 50%; }
+.legend .swatch.dashed {
+  height: 0;
+  border-top: 3px dotted var(--ink-3);
+  border-radius: 0;
+  background: none;
+  width: 14px;
+}
+
+.chart-tip {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -100%);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 8px 10px;
+  font-size: 12px;
+  min-width: 128px;
+  transition: opacity .09s linear;
+}
+.chart-tip[data-show="1"] { opacity: 1; }
+.chart-tip .tip-title {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 5px;
+}
+.chart-tip .tip-row {
+  display: flex; align-items: center; gap: 8px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.6;
+}
+.chart-tip .tip-row .sw { width: 9px; height: 9px; border-radius: 2px; flex: 0 0 9px; }
+.chart-tip .tip-row .v { margin-left: auto; font-family: var(--font-mono); font-size: 12px; }
+.chart-tip .tip-note { color: var(--ink-3); font-size: 11px; margin-top: 4px; }
+
+/* Table-view twin — every chart has one. */
+details.twin { margin-top: 2px; }
+details.twin > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 3px 0;
+}
+details.twin > summary::-webkit-details-marker { display: none; }
+details.twin > summary::before { content: "▸"; font-size: 9px; }
+details.twin[open] > summary::before { content: "▾"; }
+details.twin > summary:hover { color: var(--ink); }
+details.twin .table-wrap { margin-top: 6px; max-height: 260px; overflow-y: auto; }
+
+/* ---- Lists --------------------------------------------------------------- */
+.feed { display: flex; flex-direction: column; }
+.feed-item {
+  display: flex;
+  gap: 11px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.feed-item:first-child { padding-top: 0; }
+.feed-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.feed-item .when {
+  flex: 0 0 46px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  padding-top: 1px;
+}
+.feed-item .body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.feed-item .t { font-weight: 600; font-size: 13px; }
+.feed-item .d { color: var(--ink-2); font-size: 12.5px; line-height: 1.45; }
+
+.assumptions { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 12.5px; line-height: 1.55; }
+.assumptions li { margin-bottom: 5px; }
+.assumptions li:last-child { margin-bottom: 0; }
+
+/* ---- Task board ---------------------------------------------------------- */
+.task-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.task-toolbar .count { margin-left: auto; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); }
+
+table.tasks td.check { width: 26px; padding-right: 8px; }
+table.tasks input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin: 2px 0 0;
+}
+table.tasks tr.is-done td.title { color: var(--ink-3); text-decoration: line-through; }
+table.tasks td.title { font-size: 13px; }
+table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.5px; text-decoration: none; }
+.pri { font-family: var(--font-mono); font-size: 11px; }
+.pri.Critical { color: var(--critical-ink); font-weight: 600; }
+.pri.High { color: var(--serious-ink); }
+.pri.Medium { color: var(--ink-2); }
+.pri.Low { color: var(--ink-3); }
+
+/* ---- Footer -------------------------------------------------------------- */
+.board-foot {
+  border-top: 1px solid var(--rule-strong);
+  padding-top: 14px;
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 1.6;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.board-foot .grow { flex: 1 1 320px; }
+.board-foot code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  background: var(--surface-3);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ink-2);
+}
+
+@media print {
+  .masthead { position: static; }
+  .card { break-inside: avoid; box-shadow: none; }
+  .controls, .icon-btn { display: none; }
+}
+
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="mark" aria-hidden="true">AK</div>
+    <div>
+      <h1 id="facility-name">Amazing Kids PPEC</h1>
+      <div class="sub" id="board-name">Operations Board</div>
+    </div>
+    <span class="demo-chip" id="demo-chip" hidden>Sample data</span>
+    <div class="spacer"></div>
+    <div class="asof">
+      <div>As of <strong id="as-of">—</strong></div>
+      <div id="period-label">—</div>
+    </div>
+    <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch color theme">Theme</button>
+  </div>
+</header>
+
+<div class="controls">
+  <span class="eyebrow">Trend window</span>
+  <div class="segmented" role="group" aria-label="Trend window">
+    <button type="button" data-range="6"  aria-pressed="false">6 months</button>
+    <button type="button" data-range="12" aria-pressed="true">12 months</button>
+  </div>
+  <div class="segmented" role="group" aria-label="Projection">
+    <button type="button" id="proj-toggle" aria-pressed="true">Projection to Dec</button>
+  </div>
+  <span class="hint">Scopes the three trend charts below. Everything else is month-to-date.</span>
+</div>
+
+<main class="board">
+
+  <!-- ================= LEAD BAND ================= -->
+  <section class="section" aria-label="Headline numbers">
+    <div class="lead" id="lead"></div>
+  </section>
+
+  <!-- ================= TARGETS & PROJECTIONS ================= -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Targets &amp; projections</h2>
+      <span class="section-note">Where the operation stands against what it committed to</span>
+    </div>
+    <div class="grid">
+
+      <article class="card col-5" id="card-targets">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Scorecard</div>
+            <h3>Targets</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="targets-summary">—</span></div>
+        </div>
+        <div class="meters" id="meters"></div>
+        <p class="card-note">A filled bar is the current value against target. Bars past 100% are capped; the numbers to the right are exact.</p>
+      </article>
+
+      <article class="card col-7">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Census</div>
+            <h3>Enrollment and average daily census</h3>
+          </div>
+          <div class="card-meta"><span class="chip plain" id="census-gap">—</span></div>
+        </div>
+        <div class="legend" id="legend-census"></div>
+        <div class="chart" id="chart-census"></div>
+        <details class="twin" id="twin-census"><summary>Table view</summary></details>
+      </article>
+
+      <article class="card col-5">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Outlook</div>
+            <h3>Projection to year end</h3>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-projection">
+            <thead><tr><th>Month</th><th class="n">Enrolled</th><th class="n">ADC</th><th class="n">Revenue</th><th class="n">Margin</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="eyebrow" style="margin-top:2px">What this assumes</div>
+        <ul class="assumptions" id="assumptions"></ul>
+      </article>
+
+      <article class="card col-7">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Financials</div>
+            <h3>Revenue and operating expenses</h3>
+          </div>
+          <div class="card-meta"><span class="chip plain" id="finance-note">—</span></div>
+        </div>
+        <div class="legend" id="legend-finance"></div>
+        <div class="chart" id="chart-finance"></div>
+        <details class="twin" id="twin-finance"><summary>Table view</summary></details>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= MONEY ================= -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Budget &amp; margin</h2>
+      <span class="section-note">Month-to-date actuals against the approved operating budget</span>
+    </div>
+    <div class="grid">
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Profitability</div>
+            <h3>Net margin</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="margin-chip">—</span></div>
+        </div>
+        <div class="chart" id="chart-margin"></div>
+        <details class="twin" id="twin-margin"><summary>Table view</summary></details>
+      </article>
+
+      <article class="card col-8">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Operating budget</div>
+            <h3 id="budget-title">Budget vs. actual</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="budget-chip">—</span></div>
+        </div>
+        <div class="stat-strip" id="budget-stats"></div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-budget">
+            <thead><tr><th>Category</th><th class="n">Budget</th><th class="n">Actual</th><th class="n">Variance</th><th class="n">Used</th></tr></thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+      </article>
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Composition</div>
+            <h3>Where the money goes</h3>
+          </div>
+        </div>
+        <div class="chart" id="chart-expense-mix"></div>
+        <p class="card-note">Share of this month's operating spend. Payroll is the only lever big enough to move margin, and it is also the one that moves ratios.</p>
+      </article>
+
+      <article class="card col-8" id="card-upcoming">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Cash planning</div>
+            <h3>Upcoming major expenses</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="reserve-chip">—</span></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-upcoming">
+            <thead><tr><th>Item</th><th>When</th><th>Status</th><th class="n">Amount</th></tr></thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= ATTENDANCE ================= -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Attendance</h2>
+      <span class="section-note">Enrollment is authorization; attendance is revenue</span>
+    </div>
+    <div class="grid">
+      <article class="card col-8" id="card-attendance">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Last 14 operating days</div>
+            <h3>Daily attendance rate</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="attendance-chip">—</span></div>
+        </div>
+        <div class="chart" id="chart-attendance"></div>
+        <details class="twin" id="twin-attendance"><summary>Table view</summary></details>
+      </article>
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Month to date</div>
+            <h3>Why children are absent</h3>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-absence">
+            <thead><tr><th>Reason</th><th class="n">Share</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="card-note">Transport and unexcused absences are the two the center controls directly — together about a quarter of lost days.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= ENROLLMENT FLOW ================= -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Enrollment, pending &amp; removals</h2>
+      <span class="section-note">Seats coming in, seats going out</span>
+    </div>
+    <div class="grid">
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Pipeline</div>
+            <h3>Pending enrollments by stage</h3>
+          </div>
+          <div class="card-meta"><span class="chip accent" id="pipeline-chip">—</span></div>
+        </div>
+        <div class="chart" id="chart-pipeline"></div>
+        <div class="stat-strip" id="pipeline-stats"></div>
+        <p class="card-note">Stages run in order from first contact to a confirmed start date. Every pending child sits in exactly one of them.</p>
+      </article>
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Last 90 days</div>
+            <h3>Why seats opened</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="removals-chip">—</span></div>
+        </div>
+        <div class="chart" id="chart-removals"></div>
+        <p class="card-note">Aging out is predictable and should be backfilled months ahead; eligibility and attendance losses are recoverable.</p>
+      </article>
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Recent</div>
+            <h3>Removals and seat status</h3>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-removals">
+            <thead><tr><th>Date</th><th>Record</th><th>Reason</th><th>Seat</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="card-note">Records are referenced by internal ID only. No names or clinical detail belong on an operations board.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= PEOPLE ================= -->
+  <section class="section">
+    <div class="section-head">
+      <h2>People</h2>
+      <span class="section-note">Headcount, load and credentials</span>
+    </div>
+    <div class="grid">
+
+      <article class="card col-5">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Headcount</div>
+            <h3>Staff by role</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="staff-chip">—</span></div>
+        </div>
+        <div class="chart" id="chart-staff"></div>
+        <details class="twin" id="twin-staff"><summary>Table view</summary></details>
+      </article>
+
+      <article class="card col-3">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Load</div>
+            <h3>Workforce pressure</h3>
+          </div>
+        </div>
+        <div class="stat-strip no-rule" id="staff-stats" style="grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px"></div>
+        <p class="card-note">Overtime and agency shifts are what vacancies cost before they show up as turnover.</p>
+      </article>
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Compliance</div>
+            <h3>Credentials expiring</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="cred-chip">—</span></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-credentials">
+            <thead><tr><th>Who</th><th>Item</th><th class="n">Due</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="card-note">A lapsed competency pulls a nurse off the floor the same day it expires. Treat these as staffing, not paperwork.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= MARKETING ================= -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Marketing &amp; referrals</h2>
+      <span class="section-note">What is actually filling the pipeline</span>
+    </div>
+    <div class="grid">
+
+      <article class="card col-4">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Last 90 days</div>
+            <h3>Referral sources</h3>
+          </div>
+          <div class="card-meta"><span class="chip plain" id="sources-chip">—</span></div>
+        </div>
+        <div class="chart" id="chart-sources"></div>
+        <details class="twin" id="twin-sources"><summary>Table view</summary></details>
+      </article>
+
+      <article class="card col-3">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Conversion</div>
+            <h3>Tours and cost</h3>
+          </div>
+        </div>
+        <div class="stat-strip no-rule" id="tour-stats" style="grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px"></div>
+        <p class="card-note">Two clinical sources — discharge planners and pediatric practices — bring more than half of all referrals. Spend follows them.</p>
+      </article>
+
+      <article class="card col-5">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Updates</div>
+            <h3>Campaigns and outreach</h3>
+          </div>
+        </div>
+        <div class="feed" id="marketing-feed"></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= TASKS ================= -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Task board</h2>
+      <span class="section-note">Owner and due date on every line</span>
+    </div>
+    <div class="grid">
+      <article class="card col-12" id="card-tasks">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Operations</div>
+            <h3>Open work</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="tasks-chip">—</span></div>
+        </div>
+        <div class="task-toolbar">
+          <div class="segmented" role="group" aria-label="Task filter">
+            <button type="button" data-task-filter="open"    aria-pressed="true">Open</button>
+            <button type="button" data-task-filter="overdue" aria-pressed="false">Overdue</button>
+            <button type="button" data-task-filter="blocked" aria-pressed="false">Blocked</button>
+            <button type="button" data-task-filter="all"     aria-pressed="false">All</button>
+          </div>
+          <span class="count" id="task-count">—</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data tasks" id="tbl-tasks">
+            <thead>
+              <tr>
+                <th class="check"><span class="visually-hidden">Done</span></th>
+                <th>Task</th><th>Area</th><th>Owner</th><th>Priority</th><th class="n">Due</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="card-note">Ticking a box marks the task complete in your browser only — it is a personal working view, not a shared record. The task list itself lives in <code>assets/js/data.js</code>.</p>
+      </article>
+    </div>
+  </section>
+
+  <footer class="board-foot">
+    <div class="grow">
+      <strong id="foot-facility">Amazing Kids PPEC</strong> operations board.
+      Every figure comes from <code>assets/js/data.js</code> — edit that one file and the whole board updates.
+    </div>
+    <div class="grow" id="foot-note"></div>
+  </footer>
+
+</main>
+
+<script>
+/* =============================================================================
+   Amazing Kids PPEC — Operations Board
+   SINGLE SOURCE OF TRUTH FOR EVERY NUMBER ON THE BOARD.
+
+   Edit this file to update the dashboard. Nothing else needs to change.
+   All figures below are ILLUSTRATIVE SAMPLE DATA modeled on a 60-seat PPEC.
+   Replace them with real operational values before using this for decisions.
+
+   Privacy note: children are referenced by internal record ID only. Do not put
+   names, DOBs, diagnoses, or any other PHI in this file — the dashboard is a
+   static page and anything here ships to whoever can open it.
+   ========================================================================== */
+
+window.AKP_DATA = {
+  meta: {
+    facility: "Amazing Kids PPEC",
+    boardName: "Operations Board",
+    asOf: "August 31, 2026",
+    period: "August 2026 (month-to-date close)",
+    licensedCapacity: 60,
+    billableDaysThisMonth: 21,
+    blendedPerDiem: 158,
+    sampleData: true
+  },
+
+  /* ---- Lead band --------------------------------------------------------- */
+  hero: {
+    label: "Average daily census",
+    value: 38.4,
+    unit: "children/day",
+    deltaLabel: "vs. July",
+    delta: 1.3,
+    deltaGood: true,
+    target: 45,
+    note: "64% of 60 licensed seats in use"
+  },
+
+  kpis: [
+    { key: "enrollment", label: "Active enrollment", value: 47, format: "int",
+      sub: "of 60 licensed seats", delta: "+1 vs. July", deltaGood: true,
+      target: "55 by Dec 31", state: "warning" },
+    { key: "attendance", label: "Attendance rate", value: 0.817, format: "pct1",
+      sub: "MTD, census ÷ enrollment", delta: "+0.9 pts vs. July", deltaGood: true,
+      target: "85%", state: "warning" },
+    { key: "margin", label: "Net margin", value: 0.133, format: "pct1",
+      sub: "$17.5K on $131.4K revenue", delta: "+0.6 pts vs. July", deltaGood: true,
+      target: "15%", state: "warning" },
+    { key: "staff", label: "Staff on payroll", value: 28, format: "int",
+      sub: "3 positions open", delta: "+2 vs. July", deltaGood: true,
+      target: "31 budgeted", state: "serious" },
+    { key: "pending", label: "Pending enrollments", value: 15, format: "int",
+      sub: "eligible, not yet started", delta: "+4 vs. July", deltaGood: true,
+      target: "—", state: "good" },
+    { key: "removals", label: "Removals this month", value: 3, format: "int",
+      sub: "21 year-to-date", delta: "−1 vs. July", deltaGood: true,
+      target: "≤ 3/mo", state: "good" },
+    { key: "budget", label: "Operating budget used", value: 0.944, format: "pct1",
+      sub: "$113.9K of $120.7K", delta: "−1.8 pts vs. July", deltaGood: true,
+      target: "≤ 100%", state: "good" }
+  ],
+
+  /* ---- Targets ----------------------------------------------------------- */
+  targets: [
+    { name: "Average daily census", actual: 38.4, target: 45, format: "dec1",
+      owner: "Administrator", horizon: "Dec 2026", direction: "up" },
+    { name: "Active enrollment", actual: 47, target: 55, format: "int",
+      owner: "Intake", horizon: "Dec 2026", direction: "up" },
+    { name: "Attendance rate", actual: 0.817, target: 0.85, format: "pct1",
+      owner: "Nursing", horizon: "Monthly", direction: "up" },
+    { name: "Net margin", actual: 0.133, target: 0.15, format: "pct1",
+      owner: "Administrator", horizon: "Monthly", direction: "up" },
+    { name: "Clean-claim rate", actual: 0.946, target: 0.97, format: "pct1",
+      owner: "Billing", horizon: "Monthly", direction: "up" },
+    { name: "Days in A/R", actual: 38, target: 30, format: "int",
+      owner: "Billing", horizon: "Monthly", direction: "down" },
+    { name: "Open clinical positions", actual: 3, target: 1, format: "int",
+      owner: "HR", horizon: "Oct 2026", direction: "down" },
+    { name: "Overtime hours / month", actual: 218, target: 150, format: "int",
+      owner: "Dir. of Nursing", horizon: "Monthly", direction: "down" }
+  ],
+
+  /* ---- 12 actual months + 4 projected ------------------------------------ */
+  months: [
+    { label: "Sep",  full: "Sep 2025", enrolled: 38, adc: 30.1, revenue: 100200, expenses:  94100, projected: false },
+    { label: "Oct",  full: "Oct 2025", enrolled: 39, adc: 31.4, revenue: 104900, expenses:  96300, projected: false },
+    { label: "Nov",  full: "Nov 2025", enrolled: 40, adc: 31.0, revenue:  98700, expenses:  95800, projected: false },
+    { label: "Dec",  full: "Dec 2025", enrolled: 41, adc: 30.2, revenue:  95400, expenses:  97200, projected: false },
+    { label: "Jan",  full: "Jan 2026", enrolled: 42, adc: 33.6, revenue: 112800, expenses: 101400, projected: false },
+    { label: "Feb",  full: "Feb 2026", enrolled: 43, adc: 34.1, revenue: 108600, expenses: 100200, projected: false },
+    { label: "Mar",  full: "Mar 2026", enrolled: 44, adc: 35.2, revenue: 118500, expenses: 104300, projected: false },
+    { label: "Apr",  full: "Apr 2026", enrolled: 45, adc: 35.8, revenue: 119100, expenses: 105600, projected: false },
+    { label: "May",  full: "May 2026", enrolled: 45, adc: 36.4, revenue: 122300, expenses: 107100, projected: false },
+    { label: "Jun",  full: "Jun 2026", enrolled: 46, adc: 36.9, revenue: 123900, expenses: 109800, projected: false },
+    { label: "Jul",  full: "Jul 2026", enrolled: 46, adc: 37.1, revenue: 124600, expenses: 111200, projected: false },
+    { label: "Aug",  full: "Aug 2026", enrolled: 47, adc: 38.4, revenue: 131400, expenses: 113900, projected: false },
+    { label: "Sep",  full: "Sep 2026", enrolled: 49, adc: 40.2, revenue: 137500, expenses: 116400, projected: true },
+    { label: "Oct",  full: "Oct 2026", enrolled: 51, adc: 41.8, revenue: 143000, expenses: 118900, projected: true },
+    { label: "Nov",  full: "Nov 2026", enrolled: 52, adc: 41.5, revenue: 136800, expenses: 119400, projected: true },
+    { label: "Dec",  full: "Dec 2026", enrolled: 55, adc: 42.6, revenue: 138900, expenses: 122700, projected: true }
+  ],
+
+  projectionAssumptions: [
+    "Blended per-diem of $158 across full-day authorizations; 21 billable days in an average month.",
+    "9 of the 15 pending children start by Oct 31; remaining 6 slip to Nov–Dec or fall out.",
+    "Removals continue at 3 per month; November and December carry holiday closure days.",
+    "Two LPN hires close in September, moving agency shifts back to staff wages by October.",
+    "No rate change from the Medicaid plans; a rate action would reset every figure here."
+  ],
+
+  /* ---- Attendance -------------------------------------------------------- */
+  attendanceTargetRate: 0.85,
+  attendanceDaily: [
+    { date: "Aug 12", dow: "Wed", present: 39, enrolled: 47 },
+    { date: "Aug 13", dow: "Thu", present: 41, enrolled: 47 },
+    { date: "Aug 14", dow: "Fri", present: 37, enrolled: 47 },
+    { date: "Aug 17", dow: "Mon", present: 40, enrolled: 47 },
+    { date: "Aug 18", dow: "Tue", present: 42, enrolled: 47 },
+    { date: "Aug 19", dow: "Wed", present: 38, enrolled: 47 },
+    { date: "Aug 20", dow: "Thu", present: 41, enrolled: 47 },
+    { date: "Aug 21", dow: "Fri", present: 36, enrolled: 47 },
+    { date: "Aug 24", dow: "Mon", present: 40, enrolled: 47 },
+    { date: "Aug 25", dow: "Tue", present: 43, enrolled: 47 },
+    { date: "Aug 26", dow: "Wed", present: 39, enrolled: 47 },
+    { date: "Aug 27", dow: "Thu", present: 37, enrolled: 47 },
+    { date: "Aug 28", dow: "Fri", present: 35, enrolled: 47 },
+    { date: "Aug 31", dow: "Mon", present: 38, enrolled: 47 }
+  ],
+  absenceReasons: [
+    { reason: "Inpatient hospitalization", share: 0.31, note: "4 children, 2 long-stay" },
+    { reason: "Acute illness at home",     share: 0.27, note: "seasonal RSV uptick" },
+    { reason: "Family transport gap",      share: 0.18, note: "route 2 capacity" },
+    { reason: "Specialist appointments",   share: 0.15, note: "mostly half-days" },
+    { reason: "Unexcused / no contact",    share: 0.09, note: "3 families, outreach open" }
+  ],
+
+  /* ---- Budget & expenses ------------------------------------------------- */
+  budget: {
+    month: "August 2026",
+    revenueBudget: 128000,
+    revenueActual: 131400,
+    categories: [
+      { name: "Clinical payroll & benefits", budget: 77500, actual: 71200 },
+      { name: "Facility, rent & utilities",  budget: 13200, actual: 12800 },
+      { name: "Administrative payroll",      budget: 10300, actual:  9800 },
+      { name: "Transportation",              budget:  6000, actual:  6400 },
+      { name: "Medical supplies & DME",      budget:  5400, actual:  5900 },
+      { name: "Food & nutrition",            budget:  3200, actual:  2900 },
+      { name: "Insurance & licensing",       budget:  2700, actual:  2600 },
+      { name: "Software & billing services", budget:  2400, actual:  2300 }
+    ]
+  },
+
+  upcomingExpenses: [
+    { item: "Wheelchair-accessible van (replaces unit #2)", when: "Oct 2026", amount: 68500,
+      category: "Capital", status: "Board approved", note: "Quoted; 10-week build slot held" },
+    { item: "Rooftop HVAC replacement, 2 units", when: "Nov 2026", amount: 23400,
+      category: "Facilities", status: "Bids out", note: "2 of 3 bids received" },
+    { item: "General & professional liability renewal", when: "Dec 2026", amount: 27600,
+      category: "Insurance", status: "Market check", note: "Quoted +9% at current limits" },
+    { item: "EMR annual renewal", when: "Dec 2026", amount: 18900,
+      category: "Technology", status: "Notice received", note: "Per-seat increase of 8%" },
+    { item: "Playground resurfacing (poured-in-place)", when: "Jan 2027", amount: 31000,
+      category: "Facilities", status: "Quote pending", note: "Required before spring survey" },
+    { item: "AHCA license renewal & inspection fees", when: "Sep 2026", amount: 4200,
+      category: "Compliance", status: "Budgeted", note: "Packet due Sep 15" }
+  ],
+  capitalReserve: 210000,
+
+  /* ---- Enrollment pipeline ---------------------------------------------- */
+  pipeline: {
+    stages: [
+      { name: "Screening in progress",   count: 3, note: "records requested" },
+      { name: "Auth submitted to plan",  count: 5, note: "avg 12 days out" },
+      { name: "Auth approved",           count: 4, note: "ready to schedule" },
+      { name: "Intake & tour scheduled", count: 2, note: "week of Sep 8" },
+      { name: "Start date confirmed",    count: 1, note: "Sep 3" }
+    ],
+    referrals30: 19,
+    conversion: 0.63,
+    avgDaysToStart: 34,
+    stalled: 2
+  },
+
+  /* ---- Removals ---------------------------------------------------------- */
+  removals: {
+    mtd: 3,
+    ytd: 21,
+    reasons90: [
+      { reason: "Aged out (turned 21)",              count: 4 },
+      { reason: "Moved out of service area",         count: 3 },
+      { reason: "Transitioned to school / home health", count: 2 },
+      { reason: "Extended hospitalization",          count: 2 },
+      { reason: "Lost Medicaid eligibility",         count: 1 },
+      { reason: "Disenrolled for non-attendance",    count: 1 }
+    ],
+    recent: [
+      { date: "Aug 26", record: "AK-1183", reason: "Aged out (turned 21)", seat: "Filled Sep 3" },
+      { date: "Aug 19", record: "AK-1094", reason: "Moved out of service area", seat: "Open" },
+      { date: "Aug 07", record: "AK-1147", reason: "Extended hospitalization", seat: "Held 30 days" },
+      { date: "Jul 29", record: "AK-1052", reason: "Lost Medicaid eligibility", seat: "Filled Aug 11" },
+      { date: "Jul 15", record: "AK-1121", reason: "Disenrolled for non-attendance", seat: "Filled Aug 4" }
+    ]
+  },
+
+  /* ---- Staffing ---------------------------------------------------------- */
+  staffing: {
+    roles: [
+      { role: "LPN",                 count: 10, open: 2 },
+      { role: "CNA / child care aide", count: 6, open: 1 },
+      { role: "RN",                    count: 5, open: 0 },
+      { role: "Therapy (PT/OT/SLP)",   count: 3, open: 0 },
+      { role: "Transportation",        count: 2, open: 0 },
+      { role: "Administration",        count: 2, open: 0 }
+    ],
+    stats: {
+      overtimeHours: 218,
+      overtimeTarget: 150,
+      agencyShifts: 26,
+      calloutRate: 0.042,
+      turnover12mo: 0.19,
+      nurseToChild: "1 : 3.4"
+    },
+    credentials: [
+      { who: "RN — 2 staff",  item: "BLS/CPR card",        due: "Sep 14", state: "warning" },
+      { who: "LPN — 1 staff", item: "Florida LPN license", due: "Sep 30", state: "warning" },
+      { who: "All clinical",  item: "Annual TB screening", due: "Oct 15", state: "good" },
+      { who: "Drivers — 2",   item: "DOT physical",        due: "Oct 22", state: "good" },
+      { who: "LPN — 1 staff", item: "Ventilator competency", due: "Sep 05", state: "critical" }
+    ]
+  },
+
+  /* ---- Marketing --------------------------------------------------------- */
+  marketing: {
+    sources90: [
+      { source: "Hospital discharge / NICU", count: 24 },
+      { source: "Pediatric practices",       count: 18 },
+      { source: "Medicaid plan case managers", count: 11 },
+      { source: "Family & word of mouth",    count: 9 },
+      { source: "Digital (website & search)", count: 7 },
+      { source: "Community events",          count: 4 }
+    ],
+    tours: { booked: 14, completed: 11, converted: 6 },
+    spend90: 7800,
+    costPerStart: 650,
+    updates: [
+      { date: "Aug 19", title: "NICU discharge planner lunch-and-learn", tag: "6 referrals",
+        detail: "Held at Wolfson Children's. 6 referrals attributed in the 12 days since.", state: "good" },
+      { date: "Aug 08", title: "Spanish-language landing page live", tag: "Needs attention",
+        detail: "31% of web inquiries since launch came through it. Intake packet still English-only.", state: "warning" },
+      { date: "Aug 01", title: "Parent referral incentive launched", tag: "1 start so far",
+        detail: "4 referrals, 1 converted. Reassess at 90 days against the $650 cost per start.", state: "good" },
+      { date: "Aug 01", title: "Google Business profile refresh", tag: "+18% calls",
+        detail: "42 calls in August, up 18% month over month. Photos and hours updated.", state: "good" },
+      { date: "Sep 26", title: "Fall open house — scheduled", tag: "Sep 26 · 12 RSVPs",
+        detail: "12 RSVPs so far. Flyers out to 9 pediatric practices; need 2 staff volunteers.", state: "pending" }
+    ]
+  },
+
+  /* ---- Task board -------------------------------------------------------- */
+  tasks: [
+    { id: "T-101", title: "Clear the 30+ day A/R backlog ($42K across 61 claims)",
+      owner: "Billing", due: "2026-09-12", status: "In progress", priority: "Critical", area: "Revenue cycle" },
+    { id: "T-102", title: "Submit AHCA license renewal packet",
+      owner: "Administrator", due: "2026-09-15", status: "In progress", priority: "High", area: "Compliance" },
+    { id: "T-103", title: "Close fire inspection remediation items",
+      owner: "Facilities", due: "2026-09-08", status: "Blocked", priority: "High", area: "Compliance",
+      note: "Waiting on sprinkler vendor to schedule" },
+    { id: "T-104", title: "Onboard 2 LPN hires — badges, EMR access, competencies",
+      owner: "HR", due: "2026-09-05", status: "In progress", priority: "High", area: "Staffing" },
+    { id: "T-105", title: "Update 14 care plans due for 6-month review",
+      owner: "Dir. of Nursing", due: "2026-09-20", status: "In progress", priority: "High", area: "Clinical" },
+    { id: "T-106", title: "Run Q3 emergency evacuation drill and file documentation",
+      owner: "Dir. of Nursing", due: "2026-09-30", status: "Not started", priority: "Medium", area: "Compliance" },
+    { id: "T-107", title: "Launch NICU discharge planner outreach series",
+      owner: "Marketing", due: "2026-09-22", status: "Not started", priority: "Medium", area: "Growth" },
+    { id: "T-108", title: "Rebid transportation insurance ahead of renewal",
+      owner: "Administrator", due: "2026-10-01", status: "Not started", priority: "Medium", area: "Finance" },
+    { id: "T-109", title: "Annual OSHA and bloodborne pathogen training",
+      owner: "HR", due: "2026-09-29", status: "Not started", priority: "Medium", area: "Compliance" },
+    { id: "T-110", title: "Replace playground shade sails before survey",
+      owner: "Facilities", due: "2026-10-15", status: "Not started", priority: "Low", area: "Facilities" },
+    { id: "T-111", title: "Reconcile August per-diem units against attendance log",
+      owner: "Billing", due: "2026-09-04", status: "Done", priority: "High", area: "Revenue cycle" },
+    { id: "T-113", title: "Rework 3 denied claims from the July remittance ($6.1K)",
+      owner: "Billing", due: "2026-08-22", status: "In progress", priority: "Critical", area: "Revenue cycle",
+      note: "Denials: missing auth span on 2, units mismatch on 1" },
+    { id: "T-112", title: "Post two LPN openings to state and job boards",
+      owner: "HR", due: "2026-08-25", status: "Done", priority: "High", area: "Staffing" }
+  ]
+};
+
+
+/* =============================================================================
+   Chart primitives — hand-rolled SVG. No charting library.
+   Four forms only: line (with projection), column, horizontal bar, sparkline.
+   Shared rules: 2px lines, ≤24px bars with 4px rounded data-ends, 2px surface
+   gaps and rings, hairline solid grid, selective direct labels, one y-axis.
+   ========================================================================== */
+
+const Charts = (() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (name, attrs = {}) => {
+    const n = document.createElementNS(NS, name);
+    for (const k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+  const css = (name) =>
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  /* -- number formatting -------------------------------------------------- */
+  const fmt = {
+    int:   (v) => Math.round(v).toLocaleString("en-US"),
+    dec1:  (v) => v.toFixed(1),
+    pct0:  (v) => Math.round(v * 100) + "%",
+    pct1:  (v) => (v * 100).toFixed(1) + "%",
+    usd:   (v) => "$" + Math.round(v).toLocaleString("en-US"),
+    usdk:  (v) => (Math.abs(v) >= 1000 ? "$" + (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + "K" : "$" + Math.round(v)),
+    usdk0: (v) => "$" + Math.round(v / 1000) + "K"
+  };
+
+  /* -- rounded data-end paths --------------------------------------------- */
+  // Column: square at the baseline, 4px rounded cap on top.
+  function columnPath(x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h));
+    return `M${x},${y + h} L${x},${y + r} Q${x},${y} ${x + r},${y} L${x + w - r},${y} Q${x + w},${y} ${x + w},${y + r} L${x + w},${y + h} Z`;
+  }
+  // Horizontal bar: square at the baseline (left), 4px rounded tip on the right.
+  function barPath(x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w, h / 2));
+    return `M${x},${y} L${x + w - r},${y} Q${x + w},${y} ${x + w},${y + r} L${x + w},${y + h - r} Q${x + w},${y + h} ${x + w - r},${y + h} L${x},${y + h} Z`;
+  }
+
+  /* -- nice axis ticks ----------------------------------------------------- */
+  function ticks(min, max, count = 4) {
+    if (max === min) max = min + 1;
+    const raw = (max - min) / count;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const norm = raw / mag;
+    const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+    const lo = Math.floor(min / step) * step;
+    const hi = Math.ceil(max / step) * step;
+    const out = [];
+    for (let v = lo; v <= hi + step / 1000; v += step) out.push(Math.round(v * 1e6) / 1e6);
+    return out;
+  }
+
+  /* -- tooltip ------------------------------------------------------------- */
+  function makeTip(host) {
+    let tip = host.querySelector(".chart-tip");
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.className = "chart-tip";
+      host.appendChild(tip);
+    }
+    return {
+      show(x, y, html) {
+        tip.innerHTML = html;
+        const w = host.clientWidth;
+        tip.style.left = Math.max(70, Math.min(w - 70, x)) + "px";
+        tip.style.top = Math.max(34, y - 10) + "px";
+        tip.dataset.show = "1";
+      },
+      hide() { tip.dataset.show = "0"; }
+    };
+  }
+
+  const tipRows = (rows) =>
+    rows.map((r) =>
+      `<div class="tip-row">${r.color ? `<span class="sw" style="background:${r.color}"></span>` : ""}` +
+      `<span>${r.label}</span><span class="v">${r.value}</span></div>`).join("");
+
+  /* -- responsive host ----------------------------------------------------- */
+  function mount(host, draw) {
+    const render = () => {
+      const w = host.clientWidth;
+      if (!w) return;
+      const old = host.querySelector("svg");
+      if (old) old.remove();
+      host.insertBefore(draw(w), host.firstChild);
+    };
+    render();
+    // Re-mounting the same host (a filter change) must not stack observers.
+    if (host.__akpRO) host.__akpRO.disconnect();
+    if (window.ResizeObserver) {
+      let last = host.clientWidth;
+      const ro = new ResizeObserver(() => {
+        if (Math.abs(host.clientWidth - last) > 1) { last = host.clientWidth; render(); }
+      });
+      ro.observe(host);
+      host.__akpRO = ro;
+    }
+    if (host.__akpTheme) document.removeEventListener("akp:theme", host.__akpTheme);
+    host.__akpTheme = render;
+    document.addEventListener("akp:theme", render);
+    return render;
+  }
+
+  /* =========================================================================
+     LINE — 1..2 series on one axis, optional projected tail, optional target
+     reference line. Crosshair tooltip + arrow-key navigation.
+     ====================================================================== */
+  function line(host, opts) {
+    const {
+      labels, series, format = fmt.int, height = 224,
+      projectFrom = null, target = null, yZero = false, tipTitle = (i) => labels[i]
+    } = opts;
+    const tip = makeTip(host);
+    let focus = -1;
+
+    const draw = (W) => {
+      const surface = css("--chart-bg") || "#fff";
+      const M = { t: 16, r: 54, b: 26, l: 46 };
+      const H = height, iw = Math.max(60, W - M.l - M.r), ih = H - M.t - M.b;
+
+      const all = series.flatMap((s) => s.values).concat(target ? [target.value] : []);
+      let lo = Math.min(...all), hi = Math.max(...all);
+      if (yZero) lo = 0;
+      const pad = (hi - lo) * 0.12 || 1;
+      const tk = ticks(yZero ? 0 : lo - pad, hi + pad, 4);
+      const yMin = tk[0], yMax = tk[tk.length - 1];
+      const X = (i) => M.l + (labels.length === 1 ? iw / 2 : (i * iw) / (labels.length - 1));
+      const Y = (v) => M.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
+
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+
+      // projected region wash + label
+      if (projectFrom !== null && projectFrom < labels.length) {
+        const x0 = X(projectFrom - 0.5 < 0 ? 0 : projectFrom) - (iw / (labels.length - 1)) / 2;
+        svg.appendChild(el("rect", {
+          x: x0, y: M.t, width: M.l + iw - x0, height: ih,
+          fill: css("--surface-3"), opacity: .55
+        }));
+        const pl = el("text", { x: x0 + 6, y: M.t + ih - 6, class: "ref-label" });
+        pl.textContent = "PROJECTED";
+        svg.appendChild(pl);
+      }
+
+      // gridlines + y ticks
+      tk.forEach((v) => {
+        svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(v), y2: Y(v), class: "grid-line" }));
+        const t = el("text", { x: M.l - 8, y: Y(v) + 3.5, class: "tick", "text-anchor": "end" });
+        t.textContent = format(v);
+        svg.appendChild(t);
+      });
+      svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: "axis-line" }));
+
+      // target reference
+      if (target) {
+        svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(target.value), y2: Y(target.value), class: "ref-line" }));
+        const t = el("text", { x: M.l + iw, y: Y(target.value) - 5, class: "ref-label", "text-anchor": "end" });
+        t.textContent = target.label;
+        svg.appendChild(t);
+      }
+
+      // x labels — thinned so they never collide
+      const every = Math.ceil((labels.length * 34) / iw);
+      let lastX = -Infinity;
+      labels.forEach((l, i) => {
+        const forced = i === labels.length - 1;
+        if (i % every !== 0 && !forced) return;
+        if (X(i) - lastX < 30) return;          // no crowding at the tail
+        lastX = X(i);
+        const t = el("text", { x: X(i), y: H - 8, class: "tick", "text-anchor": "middle" });
+        t.textContent = l;
+        svg.appendChild(t);
+      });
+
+      // series
+      series.forEach((s) => {
+        const color = css(s.colorVar);
+        const solidEnd = projectFrom === null ? s.values.length : Math.min(projectFrom, s.values.length);
+        const d = (from, to) => s.values.slice(from, to)
+          .map((v, k) => `${k === 0 ? "M" : "L"}${X(from + k)},${Y(v)}`).join(" ");
+        svg.appendChild(el("path", {
+          d: d(0, solidEnd), fill: "none", stroke: color,
+          "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round"
+        }));
+        if (projectFrom !== null && projectFrom < s.values.length) {
+          svg.appendChild(el("path", {
+            d: d(Math.max(0, projectFrom - 1), s.values.length), fill: "none", stroke: color,
+            "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round",
+            "stroke-dasharray": "2 5", opacity: .85
+          }));
+        }
+        // endpoint marker with a 2px surface ring
+        const last = s.values.length - 1;
+        svg.appendChild(el("circle", {
+          cx: X(last), cy: Y(s.values[last]), r: 4.5,
+          fill: color, stroke: surface, "stroke-width": 2
+        }));
+        // one direct label per series, at the end
+        const lab = el("text", {
+          x: X(last) + 9, y: Y(s.values[last]) + 4, class: "dlabel"
+        });
+        lab.textContent = (s.endFormat || format)(s.values[last]);
+        svg.appendChild(lab);
+      });
+
+      // hover layer
+      const cross = el("line", { x1: 0, x2: 0, y1: M.t, y2: M.t + ih, class: "ref-line", opacity: 0 });
+      svg.appendChild(cross);
+      const dots = series.map((s) => {
+        const c = el("circle", { r: 4.5, fill: css(s.colorVar), stroke: surface, "stroke-width": 2, opacity: 0 });
+        svg.appendChild(c);
+        return c;
+      });
+
+      const at = (i) => {
+        cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i)); cross.setAttribute("opacity", .8);
+        series.forEach((s, k) => {
+          dots[k].setAttribute("cx", X(i)); dots[k].setAttribute("cy", Y(s.values[i]));
+          dots[k].setAttribute("opacity", 1);
+        });
+        tip.show(X(i), Y(Math.max(...series.map((s) => s.values[i]))), 
+          `<div class="tip-title">${tipTitle(i)}</div>` +
+          tipRows(series.map((s) => ({ color: css(s.colorVar), label: s.name, value: (s.tipFormat || format)(s.values[i]) }))) +
+          (opts.tipNote ? `<div class="tip-note">${opts.tipNote(i)}</div>` : ""));
+        focus = i;
+      };
+      const off = () => { cross.setAttribute("opacity", 0); dots.forEach((d) => d.setAttribute("opacity", 0)); tip.hide(); focus = -1; };
+
+      const slot = iw / Math.max(1, labels.length - 1);
+      labels.forEach((_, i) => {
+        const r = el("rect", {
+          x: X(i) - slot / 2, y: M.t, width: slot, height: ih, fill: "transparent"
+        });
+        r.addEventListener("mouseenter", () => at(i));
+        svg.appendChild(r);
+      });
+      svg.addEventListener("mouseleave", off);
+      host.tabIndex = 0;
+      host.onkeydown = (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          const n = focus < 0 ? 0 : focus + (e.key === "ArrowRight" ? 1 : -1);
+          at(Math.max(0, Math.min(labels.length - 1, n)));
+        } else if (e.key === "Escape") off();
+      };
+      host.onblur = off;
+      return svg;
+    };
+    return mount(host, draw);
+  }
+
+  /* =========================================================================
+     COLUMN — one series, optional target hairline. Per-mark hover.
+     ====================================================================== */
+  function columns(host, opts) {
+    const {
+      labels, values, colorVar = "--series-1", format = fmt.int, height = 200,
+      target = null, yFormat = null, tipTitle = (i) => labels[i], states = null
+    } = opts;
+    const tip = makeTip(host);
+
+    const draw = (W) => {
+      const M = { t: 14, r: 12, b: 30, l: 42 };
+      const H = height, iw = Math.max(60, W - M.l - M.r), ih = H - M.t - M.b;
+      const hi = Math.max(...values, target ? target.value : 0);
+      const lo = Math.min(...values, target ? target.value : Infinity);
+      const tk = ticks(Math.max(0, lo - (hi - lo) * 0.9), hi + (hi - lo) * 0.15 || hi * 1.1, 4);
+      const yMin = tk[0], yMax = tk[tk.length - 1];
+      const Y = (v) => M.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
+      const band = iw / values.length;
+      const bw = Math.min(24, Math.max(4, band - 6));      // ≤24px, air in the band
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+
+      tk.forEach((v) => {
+        svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(v), y2: Y(v), class: "grid-line" }));
+        const t = el("text", { x: M.l - 8, y: Y(v) + 3.5, class: "tick", "text-anchor": "end" });
+        t.textContent = (yFormat || format)(v);
+        svg.appendChild(t);
+      });
+      svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: "axis-line" }));
+
+      if (target) {
+        svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(target.value), y2: Y(target.value), class: "ref-line" }));
+        const t = el("text", { x: M.l + iw, y: Y(target.value) - 5, class: "ref-label", "text-anchor": "end" });
+        t.textContent = target.label;
+        svg.appendChild(t);
+      }
+
+      values.forEach((v, i) => {
+        const x = M.l + band * i + (band - bw) / 2;
+        const y = Y(v), h = M.t + ih - y;
+        const color = states ? css(states[i]) : css(colorVar);
+        const p = el("path", { d: columnPath(x, y, bw, Math.max(1, h), 4), fill: color });
+        svg.appendChild(p);
+        const hit = el("rect", { x: M.l + band * i, y: M.t, width: band, height: ih, fill: "transparent" });
+        hit.addEventListener("mouseenter", () => {
+          tip.show(x + bw / 2, y, `<div class="tip-title">${tipTitle(i)}</div>` +
+            tipRows([{ color, label: opts.seriesName || "Value", value: format(v) }]) +
+            (opts.tipNote ? `<div class="tip-note">${opts.tipNote(i)}</div>` : ""));
+        });
+        svg.appendChild(hit);
+      });
+      svg.addEventListener("mouseleave", () => tip.hide());
+
+      const every = Math.ceil((labels.length * 40) / iw);
+      labels.forEach((l, i) => {
+        if (i % every !== 0 && i !== labels.length - 1) return;
+        const t = el("text", { x: M.l + band * i + band / 2, y: H - 14, class: "tick", "text-anchor": "middle" });
+        t.textContent = l;
+        svg.appendChild(t);
+        if (opts.sublabels) {
+          const s = el("text", { x: M.l + band * i + band / 2, y: H - 3, class: "tick", "text-anchor": "middle", opacity: .75 });
+          s.textContent = opts.sublabels[i];
+          svg.appendChild(s);
+        }
+      });
+      return svg;
+    };
+    return mount(host, draw);
+  }
+
+  /* =========================================================================
+     BAR — horizontal, one color per set (or an ordinal ramp for ordered
+     stages). Value labels ride the tip; labels sit above each bar.
+     ====================================================================== */
+  function bars(host, opts) {
+    const { rows, format = fmt.int, colorVar = "--series-1", ramp = null, height = null } = opts;
+    const tip = makeTip(host);
+
+    const draw = (W) => {
+      const rowH = 32, barH = 14, labelH = 15;
+      const M = { t: 4, r: 4, b: 4, l: 0 };
+      const H = height || M.t + rows.length * rowH + M.b;
+      const maxV = Math.max(...rows.map((r) => r.value), 1);
+      const valW = 58;
+      const iw = Math.max(40, W - valW - 4);
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+
+      rows.forEach((r, i) => {
+        const top = M.t + i * rowH;
+        const name = el("text", { x: 0, y: top + 10, class: "bar-name" });
+        name.textContent = r.label;
+        svg.appendChild(name);
+
+        const w = Math.max(2, (r.value / maxV) * iw);
+        const color = ramp ? css(ramp[Math.min(i, ramp.length - 1)]) : css(r.colorVar || colorVar);
+        svg.appendChild(el("path", { d: barPath(0, top + labelH, w, barH, 4), fill: color }));
+
+        const v = el("text", { x: w + 8, y: top + labelH + barH - 2.5, class: "dlabel" });
+        v.textContent = format(r.value);
+        svg.appendChild(v);
+
+        const hit = el("rect", { x: 0, y: top, width: W, height: rowH, fill: "transparent" });
+        hit.addEventListener("mouseenter", () => {
+          tip.show(Math.min(w, iw * .8), top + labelH,
+            `<div class="tip-title">${r.label}</div>` +
+            tipRows([{ color, label: opts.seriesName || "Value", value: format(r.value) }]) +
+            (r.note ? `<div class="tip-note">${r.note}</div>` : ""));
+        });
+        svg.appendChild(hit);
+      });
+      svg.addEventListener("mouseleave", () => tip.hide());
+      return svg;
+    };
+    return mount(host, draw);
+  }
+
+  /* =========================================================================
+     SPARKLINE — 12 points, de-emphasised, current period accented.
+     ====================================================================== */
+  function sparkline(host, values, opts = {}) {
+    const draw = (W) => {
+      const H = opts.height || 40, P = 6;
+      const lo = Math.min(...values), hi = Math.max(...values);
+      const X = (i) => P + (i * (W - P * 2 - 8)) / (values.length - 1);
+      const Y = (v) => H - P - ((v - lo) / (hi - lo || 1)) * (H - P * 2);
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-hidden": "true" });
+      const d = values.map((v, i) => `${i ? "L" : "M"}${X(i)},${Y(v)}`).join(" ");
+      const area = `${d} L${X(values.length - 1)},${H - P} L${X(0)},${H - P} Z`;
+      svg.appendChild(el("path", { d: area, fill: css("--series-1"), opacity: .10 }));
+      svg.appendChild(el("path", {
+        d, fill: "none", stroke: css("--series-1"), "stroke-width": 2,
+        "stroke-linejoin": "round", "stroke-linecap": "round", opacity: .55
+      }));
+      svg.appendChild(el("circle", {
+        cx: X(values.length - 1), cy: Y(values[values.length - 1]), r: 4,
+        fill: css("--series-1"), stroke: css("--chart-bg"), "stroke-width": 2
+      }));
+      return svg;
+    };
+    return mount(host, draw);
+  }
+
+  return { line, columns, bars, sparkline, fmt, ticks };
+})();
+
+
+/* =============================================================================
+   Amazing Kids PPEC — Operations Board
+   Renders every card from window.AKP_DATA. No data is defined in this file.
+   ========================================================================== */
+
+(() => {
+  "use strict";
+  const D = window.AKP_DATA;
+  const F = Charts.fmt;
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  const AS_OF = new Date("2026-08-31T00:00:00");
+  const ACTUALS = D.months.filter((m) => !m.projected);
+  const PROJECTED = D.months.filter((m) => m.projected);
+  const CUR = ACTUALS[ACTUALS.length - 1];
+  const PREV = ACTUALS[ACTUALS.length - 2];
+  const margin = (m) => (m.revenue - m.expenses) / m.revenue;
+
+  const FMT = {
+    int: F.int, dec1: F.dec1, pct0: F.pct0, pct1: F.pct1, usd: F.usd, usdk: F.usdk
+  };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const chip = (text, state = "", plain = false) =>
+    `<span class="chip ${state}${plain ? " plain" : ""}">${esc(text)}</span>`;
+  const signed = (v, digits = 1) => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(digits);
+  const shortDate = (iso) =>
+    new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+
+  /* -- table twin ---------------------------------------------------------- */
+  function twin(node, headers, rows) {
+    $$(".table-wrap", node).forEach((n) => n.remove());
+    const wrap = document.createElement("div");
+    wrap.className = "table-wrap";
+    wrap.innerHTML =
+      `<table class="data"><thead><tr>${headers
+        .map((h, i) => `<th${i ? ' class="n"' : ""}>${esc(h)}</th>`).join("")}</tr></thead>` +
+      `<tbody>${rows.map((r) => `<tr>${r
+        .map((c, i) => `<td${i ? ' class="n"' : ""}>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    node.appendChild(wrap);
+  }
+
+  /* =======================================================================
+     Lead band
+     ==================================================================== */
+  function renderLead() {
+    const lead = $("#lead");
+    const h = D.hero;
+    lead.innerHTML =
+      `<article class="card hero-card">
+         <div class="card-head"><div class="titles">
+           <div class="eyebrow">Month to date</div>
+           <h3>${esc(h.label)}</h3>
+         </div></div>
+         <div class="hero-figure">${h.value.toFixed(1)}<span class="unit">${esc(h.unit)}</span></div>
+         <div class="hero-row">
+           <span class="delta ${h.delta >= 0 === h.deltaGood ? "up" : "down"}">${signed(h.delta)} ${esc(h.deltaLabel)}</span>
+           ${chip("Target " + h.target, "", true)}
+         </div>
+         <div class="chart" id="hero-spark" style="margin:-4px 0 -2px"></div>
+         <p class="card-note">${esc(h.note)}. Twelve-month trend above.</p>
+       </article>` +
+      D.kpis.map((k) => {
+        const val = FMT[k.format](k.value);
+        const good = /^[+−-]?0/.test(k.delta) ? "flat" : k.deltaGood ? "up" : "down";
+        return `<article class="card tile" data-state="${k.state}">
+          <div class="eyebrow">${esc(k.label)}</div>
+          <div class="tile-value">${esc(val)}</div>
+          <div class="tile-sub">${esc(k.sub)}</div>
+          <div class="tile-foot">
+            <span class="delta ${good}">${esc(k.delta)}</span>
+            ${k.target !== "—" ? chip("Target " + k.target, "", true) : ""}
+          </div>
+        </article>`;
+      }).join("");
+    Charts.sparkline($("#hero-spark"), ACTUALS.map((m) => m.adc), { height: 44 });
+  }
+
+  /* =======================================================================
+     Targets
+     ==================================================================== */
+  function renderTargets() {
+    let onTarget = 0;
+    $("#meters").innerHTML = D.targets.map((t) => {
+      const ratio = t.direction === "up" ? t.actual / t.target : t.target / t.actual;
+      if (ratio >= 1) onTarget++;
+      const state = ratio >= 1 ? "good" : ratio >= 0.92 ? "warning" : ratio >= 0.6 ? "serious" : "critical";
+      const pct = Math.max(3, Math.min(100, ratio * 100));
+      const f = FMT[t.format];
+      const aim = t.direction === "up" ? "≥" : "≤";
+      return `<div class="meter-row">
+        <div class="meter-head">
+          <span class="name">${esc(t.name)}</span>
+          <span class="who">${esc(t.owner)} · ${esc(t.horizon)}</span>
+          <span class="vals"><span class="actual">${esc(f(t.actual))}</span> / ${esc(aim + f(t.target))}</span>
+        </div>
+        <div class="meter-track" role="img" aria-label="${esc(t.name)}: ${esc(f(t.actual))} against a target of ${esc(aim + f(t.target))}">
+          <div class="meter-fill ${state}" style="width:${pct.toFixed(1)}%"></div>
+        </div>
+      </div>`;
+    }).join("");
+    const el = $("#targets-summary");
+    el.textContent = `${onTarget} of ${D.targets.length} on target`;
+    el.className = "chip " + (onTarget >= D.targets.length * 0.75 ? "good" : onTarget >= D.targets.length / 2 ? "warning" : "serious");
+  }
+
+  /* =======================================================================
+     Trend charts (scoped by the control bar)
+     ==================================================================== */
+  const state = { range: 12, projection: true };
+
+  function slice() {
+    const a = ACTUALS.slice(-state.range);
+    const rows = state.projection ? a.concat(PROJECTED) : a;
+    return { rows, projectFrom: state.projection ? a.length : null };
+  }
+
+  function legend(node, keys, withProjection) {
+    node.innerHTML = keys.map((k) =>
+      `<span class="key"><span class="swatch" style="background:var(${k.varName})"></span>${esc(k.name)}</span>`).join("") +
+      (withProjection ? `<span class="key"><span class="swatch dashed"></span>Projected</span>` : "");
+  }
+
+  function renderTrends() {
+    const { rows, projectFrom } = slice();
+    const full = rows.map((m) => m.full);
+    const labels = rows.map((m, i) => {
+      const yr = m.full.slice(-2);
+      return i === 0 || m.label === "Jan" ? `${m.label} '${yr}` : m.label;
+    });
+
+    // Census & enrollment — two counts of children, one axis.
+    legend($("#legend-census"), [
+      { name: "Enrolled", varName: "--series-1" },
+      { name: "Average daily census", varName: "--series-2" }
+    ], state.projection);
+    Charts.line($("#chart-census"), {
+      labels,
+      series: [
+        { name: "Enrolled", colorVar: "--series-1", values: rows.map((m) => m.enrolled) },
+        { name: "Avg daily census", colorVar: "--series-2", values: rows.map((m) => m.adc), endFormat: F.dec1, tipFormat: F.dec1 }
+      ],
+      format: F.int,
+      projectFrom,
+      target: { value: 45, label: "CENSUS TARGET 45" },
+      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
+      tipNote: (i) => "Attendance " + F.pct1(rows[i].adc / rows[i].enrolled)
+    });
+    twin($("#twin-census"), ["Month", "Enrolled", "Avg daily census", "Attendance"],
+      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.int(m.enrolled), F.dec1(m.adc), F.pct1(m.adc / m.enrolled)]));
+    $("#census-gap").textContent = `${55 - CUR.enrolled} seats to the December target`;
+
+    // Revenue & expenses — both dollars, one axis.
+    legend($("#legend-finance"), [
+      { name: "Revenue", varName: "--series-1" },
+      { name: "Operating expenses", varName: "--series-2" }
+    ], state.projection);
+    Charts.line($("#chart-finance"), {
+      labels,
+      series: [
+        { name: "Revenue", colorVar: "--series-1", values: rows.map((m) => m.revenue), endFormat: F.usdk, tipFormat: F.usd },
+        { name: "Operating expenses", colorVar: "--series-2", values: rows.map((m) => m.expenses), endFormat: F.usdk, tipFormat: F.usd }
+      ],
+      format: F.usdk,
+      yZero: true,
+      projectFrom,
+      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
+      tipNote: (i) => "Net " + F.usd(rows[i].revenue - rows[i].expenses) + " · " + F.pct1(margin(rows[i]))
+    });
+    twin($("#twin-finance"), ["Month", "Revenue", "Expenses", "Net", "Margin"],
+      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.usd(m.revenue), F.usd(m.expenses),
+        F.usd(m.revenue - m.expenses), F.pct1(margin(m))]));
+    $("#finance-note").textContent =
+      `${CUR.full}: ${F.usdk(CUR.revenue)} in, ${F.usdk(CUR.revenue - CUR.expenses)} net`;
+
+    // Net margin — a single series, so no legend box.
+    Charts.line($("#chart-margin"), {
+      labels,
+      series: [{ name: "Net margin", colorVar: "--series-1", values: rows.map(margin), endFormat: F.pct1, tipFormat: F.pct1 }],
+      format: F.pct0,
+      height: 196,
+      projectFrom,
+      target: { value: 0.15, label: "TARGET 15%" },
+      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
+      tipNote: (i) => F.usd(rows[i].revenue - rows[i].expenses) + " on " + F.usd(rows[i].revenue)
+    });
+    twin($("#twin-margin"), ["Month", "Net", "Margin"],
+      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.usd(m.revenue - m.expenses), F.pct1(margin(m))]));
+  }
+
+  /* =======================================================================
+     Projection table
+     ==================================================================== */
+  function renderProjection() {
+    $("#tbl-projection tbody").innerHTML = PROJECTED.map((m) =>
+      `<tr><td>${esc(m.full)}</td><td class="n">${F.int(m.enrolled)}</td><td class="n">${F.dec1(m.adc)}</td>
+       <td class="n">${esc(F.usdk(m.revenue))}</td><td class="n">${esc(F.pct1(margin(m)))}</td></tr>`).join("");
+    $("#assumptions").innerHTML = D.projectionAssumptions.map((a) => `<li>${esc(a)}</li>`).join("");
+
+    const m = margin(CUR), pm = margin(PREV);
+    const mc = $("#margin-chip");
+    mc.textContent = `${F.pct1(m)} MTD · ${signed((m - pm) * 100)} pts vs. ${PREV.label}`;
+    mc.className = "chip " + (m >= 0.15 ? "good" : m >= 0.12 ? "warning" : "serious");
+  }
+
+  /* =======================================================================
+     Budget, expense mix, upcoming expenses
+     ==================================================================== */
+  function renderMoney() {
+    const b = D.budget;
+    const tb = b.categories.reduce((a, c) => a + c.budget, 0);
+    const ta = b.categories.reduce((a, c) => a + c.actual, 0);
+    $("#budget-title").textContent = `Budget vs. actual — ${b.month}`;
+
+    $("#budget-stats").innerHTML = [
+      { k: "Revenue budget", v: F.usdk(b.revenueBudget) },
+      { k: "Revenue actual", v: F.usdk(b.revenueActual) },
+      { k: "Expense budget", v: F.usdk(tb) },
+      { k: "Expense actual", v: F.usdk(ta) },
+      { k: "Net result", v: F.usdk(b.revenueActual - ta) }
+    ].map((s) => `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
+
+    $("#tbl-budget tbody").innerHTML = b.categories.map((c) => {
+      const varr = c.budget - c.actual;          // positive = under budget
+      const over = varr < 0;
+      const sev = !over ? "" : Math.abs(varr) / c.budget > 0.08 ? "critical" : "serious";
+      return `<tr>
+        <td>${esc(c.name)}</td>
+        <td class="n">${esc(F.usd(c.budget))}</td>
+        <td class="n">${esc(F.usd(c.actual))}</td>
+        <td class="n">${chip((over ? "over " : "under ") + F.usd(Math.abs(varr)), sev, !over)}</td>
+        <td class="n">${esc(F.pct0(c.actual / c.budget))}</td>
+      </tr>`;
+    }).join("");
+    $("#tbl-budget tfoot").innerHTML =
+      `<tr><td>Total operating expense</td><td class="n">${esc(F.usd(tb))}</td><td class="n">${esc(F.usd(ta))}</td>
+       <td class="n">${chip("under " + F.usd(tb - ta), "", true)}</td><td class="n">${esc(F.pct1(ta / tb))}</td></tr>`;
+    const bc = $("#budget-chip");
+    bc.textContent = `${F.pct1(ta / tb)} of budget used`;
+    bc.className = "chip " + (ta <= tb ? "good" : "serious");
+
+    // Expense mix — nominal categories, one color.
+    Charts.bars($("#chart-expense-mix"), {
+      rows: b.categories.slice().sort((x, y) => y.actual - x.actual)
+        .map((c) => ({ label: c.name, value: c.actual / ta, note: F.usd(c.actual) })),
+      format: F.pct0,
+      seriesName: "Share of spend"
+    });
+
+    // Upcoming major expenses, soonest first.
+    const parse = (w) => new Date(w.replace(/^(\w+)\s+(\d{4})$/, "$1 1, $2")).getTime();
+    const up = D.upcomingExpenses.slice().sort((a, z) => parse(a.when) - parse(z.when));
+    const total = up.reduce((a, e) => a + e.amount, 0);
+    $("#tbl-upcoming tbody").innerHTML = up.map((e) => {
+      const st = e.status === "Board approved" ? "good"
+        : e.status === "Budgeted" ? "good"
+        : e.status === "Quote pending" ? "warning" : "";
+      return `<tr>
+        <td>${esc(e.item)}<span class="sub">${esc(e.category)} · ${esc(e.note)}</span></td>
+        <td class="mono">${esc(e.when)}</td>
+        <td>${chip(e.status, st, !st)}</td>
+        <td class="n">${esc(F.usd(e.amount))}</td>
+      </tr>`;
+    }).join("");
+    $("#tbl-upcoming tfoot").innerHTML =
+      `<tr><td colspan="3">Committed and planned over the next six months</td><td class="n">${esc(F.usd(total))}</td></tr>`;
+    const rc = $("#reserve-chip");
+    const cover = D.capitalReserve - total;
+    rc.textContent = `${F.usdk(D.capitalReserve)} reserve · ${F.usdk(cover)} left after`;
+    rc.className = "chip " + (cover > total * 0.25 ? "good" : cover > 0 ? "warning" : "critical");
+    if (cover <= 0) $("#card-upcoming").dataset.state = "critical";
+    else if (cover < total * 0.25) $("#card-upcoming").dataset.state = "warning";
+    else delete $("#card-upcoming").dataset.state;
+  }
+
+  /* =======================================================================
+     Attendance
+     ==================================================================== */
+  function renderAttendance() {
+    const a = D.attendanceDaily;
+    const rates = a.map((d) => d.present / d.enrolled);
+    const mtd = D.kpis.find((k) => k.key === "attendance").value;
+    Charts.columns($("#chart-attendance"), {
+      labels: a.map((d) => d.date.replace("Aug ", "")),
+      sublabels: a.map((d) => d.dow),
+      values: rates,
+      format: F.pct1,
+      yFormat: F.pct0,
+      height: 214,
+      target: { value: D.attendanceTargetRate, label: "TARGET 85%" },
+      seriesName: "Attendance",
+      tipTitle: (i) => a[i].date + " · " + a[i].dow,
+      tipNote: (i) => `${a[i].present} of ${a[i].enrolled} children present`
+    });
+    twin($("#twin-attendance"), ["Day", "Present", "Enrolled", "Rate"],
+      a.map((d) => [`${d.date} (${d.dow})`, F.int(d.present), F.int(d.enrolled), F.pct1(d.present / d.enrolled)]));
+
+    const hit = rates.filter((r) => r >= D.attendanceTargetRate).length;
+    const ac = $("#attendance-chip");
+    ac.textContent = `${F.pct1(mtd)} MTD · ${hit} of ${a.length} days at target`;
+    ac.className = "chip " + (mtd >= D.attendanceTargetRate ? "good" : mtd >= 0.8 ? "warning" : "serious");
+    if (mtd < D.attendanceTargetRate) $("#card-attendance").dataset.state = "warning";
+    else delete $("#card-attendance").dataset.state;
+
+    $("#tbl-absence tbody").innerHTML = D.absenceReasons.map((r) =>
+      `<tr><td>${esc(r.reason)}<span class="sub">${esc(r.note)}</span></td>
+       <td class="n">${esc(F.pct0(r.share))}</td></tr>`).join("");
+  }
+
+  /* =======================================================================
+     Pipeline & removals
+     ==================================================================== */
+  function renderFlow() {
+    const p = D.pipeline;
+    const total = p.stages.reduce((a, s) => a + s.count, 0);
+    Charts.bars($("#chart-pipeline"), {
+      rows: p.stages.map((s) => ({ label: s.name, value: s.count, note: s.note })),
+      format: F.int,
+      ramp: ["--ord-1", "--ord-2", "--ord-3", "--ord-4", "--ord-5"],
+      seriesName: "Children"
+    });
+    $("#pipeline-chip").textContent = `${total} pending`;
+    $("#pipeline-stats").innerHTML = [
+      { v: F.int(p.referrals30), k: "Referrals, last 30 days" },
+      { v: F.pct0(p.conversion), k: "Referral to start" },
+      { v: F.int(p.avgDaysToStart) + " d", k: "Avg. days to start" },
+      { v: F.int(p.stalled), k: "Stalled over 45 days" }
+    ].map((s) => `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
+
+    const r = D.removals;
+    Charts.bars($("#chart-removals"), {
+      rows: r.reasons90.map((x) => ({ label: x.reason, value: x.count })),
+      format: F.int,
+      colorVar: "--series-2",
+      seriesName: "Children"
+    });
+    const n90 = r.reasons90.reduce((a, x) => a + x.count, 0);
+    const rc = $("#removals-chip");
+    rc.textContent = `${n90} in 90 days · ${r.ytd} YTD`;
+    rc.className = "chip";
+
+    $("#tbl-removals tbody").innerHTML = r.recent.map((x) =>
+      `<tr><td class="mono">${esc(x.date)}</td><td class="mono">${esc(x.record)}</td>
+       <td>${esc(x.reason)}</td>
+       <td>${chip(x.seat, x.seat.startsWith("Filled") ? "good" : x.seat === "Open" ? "serious" : "warning")}</td></tr>`).join("");
+  }
+
+  /* =======================================================================
+     People
+     ==================================================================== */
+  function renderPeople() {
+    const s = D.staffing;
+    const total = s.roles.reduce((a, r) => a + r.count, 0);
+    const open = s.roles.reduce((a, r) => a + r.open, 0);
+    Charts.bars($("#chart-staff"), {
+      rows: s.roles.map((r) => ({ label: r.role, value: r.count, note: r.open ? `${r.open} open` : "fully staffed" })),
+      format: F.int,
+      seriesName: "On payroll"
+    });
+    twin($("#twin-staff"), ["Role", "On payroll", "Open"],
+      s.roles.map((r) => [r.role, F.int(r.count), r.open ? F.int(r.open) : "—"]));
+    const sc = $("#staff-chip");
+    sc.textContent = `${total} on payroll · ${open} open`;
+    sc.className = "chip " + (open === 0 ? "good" : open <= 2 ? "warning" : "serious");
+
+    const st = s.stats;
+    $("#staff-stats").innerHTML = [
+      { v: F.int(st.overtimeHours), k: `Overtime hours (target ${st.overtimeTarget})` },
+      { v: F.int(st.agencyShifts), k: "Agency shifts filled" },
+      { v: F.pct1(st.calloutRate), k: "Call-out rate" },
+      { v: F.pct0(st.turnover12mo), k: "Turnover, 12 months" },
+      { v: st.nurseToChild, k: "Nurse to child ratio" }
+    ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
+
+    $("#tbl-credentials tbody").innerHTML = s.credentials.map((c) =>
+      `<tr><td>${esc(c.who)}</td><td>${esc(c.item)}</td>
+       <td class="n">${chip(c.due, c.state)}</td></tr>`).join("");
+    const urgent = s.credentials.filter((c) => c.state === "critical").length;
+    const cc = $("#cred-chip");
+    cc.textContent = urgent ? `${urgent} expiring within days` : "none urgent";
+    cc.className = "chip " + (urgent ? "critical" : "good");
+  }
+
+  /* =======================================================================
+     Marketing
+     ==================================================================== */
+  function renderMarketing() {
+    const m = D.marketing;
+    const total = m.sources90.reduce((a, s) => a + s.count, 0);
+    Charts.bars($("#chart-sources"), {
+      rows: m.sources90.map((s) => ({ label: s.source, value: s.count, note: F.pct0(s.count / total) + " of referrals" })),
+      format: F.int,
+      seriesName: "Referrals"
+    });
+    twin($("#twin-sources"), ["Source", "Referrals", "Share"],
+      m.sources90.map((s) => [s.source, F.int(s.count), F.pct0(s.count / total)]));
+    $("#sources-chip").textContent = `${total} referrals`;
+
+    $("#tour-stats").innerHTML = [
+      { v: F.int(m.tours.booked), k: "Tours booked" },
+      { v: F.int(m.tours.completed), k: "Tours completed" },
+      { v: F.int(m.tours.converted), k: "Converted to start" },
+      { v: F.pct0(m.tours.converted / m.tours.completed), k: "Tour conversion" },
+      { v: F.usdk(m.spend90), k: "Spend, last 90 days" },
+      { v: F.usd(m.costPerStart), k: "Cost per start" }
+    ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
+
+    $("#marketing-feed").innerHTML = m.updates.map((u) =>
+      `<div class="feed-item">
+         <div class="when">${esc(u.date)}</div>
+         <div class="body">
+           <div class="t">${esc(u.title)}</div>
+           <div class="d">${esc(u.detail)}</div>
+           <div>${chip(u.tag, u.state === "pending" ? "accent" : u.state)}</div>
+         </div>
+       </div>`).join("");
+  }
+
+  /* =======================================================================
+     Task board
+     ==================================================================== */
+  const DONE_KEY = "akp.tasks.done";
+  const readDone = () => {
+    try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); }
+    catch { return new Set(); }
+  };
+  const writeDone = (set) => {
+    try { localStorage.setItem(DONE_KEY, JSON.stringify(Array.from(set))); } catch { /* private mode */ }
+  };
+  let taskFilter = "open";
+
+  function isDone(t, done) { return t.status === "Done" || done.has(t.id); }
+  function isOverdue(t, done) { return !isDone(t, done) && new Date(t.due + "T00:00:00") < AS_OF; }
+
+  function renderTasks() {
+    const done = readDone();
+    const all = D.tasks.slice().sort((a, b) => a.due.localeCompare(b.due));
+    const view = all.filter((t) => {
+      if (taskFilter === "all") return true;
+      if (taskFilter === "open") return !isDone(t, done);
+      if (taskFilter === "blocked") return t.status === "Blocked";
+      if (taskFilter === "overdue") return isOverdue(t, done);
+      return true;
+    });
+
+    $("#tbl-tasks tbody").innerHTML = view.map((t) => {
+      const d = isDone(t, done);
+      const over = isOverdue(t, done);
+      const statusState = d ? "good" : t.status === "Blocked" ? "critical" : t.status === "In progress" ? "accent" : "";
+      return `<tr class="${d ? "is-done" : ""}">
+        <td class="check"><input type="checkbox" data-task="${esc(t.id)}" ${d ? "checked" : ""}
+             ${t.status === "Done" ? "disabled" : ""} aria-label="Mark ${esc(t.id)} complete"></td>
+        <td class="title">${esc(t.title)}${t.note ? `<span class="note">${esc(t.note)}</span>` : ""}</td>
+        <td>${esc(t.area)}</td>
+        <td>${esc(t.owner)}</td>
+        <td><span class="pri ${esc(t.priority)}">${esc(t.priority)}</span></td>
+        <td class="n">${esc(shortDate(t.due))}${over ? ` ${chip("overdue", "critical")}` : ""}</td>
+        <td>${chip(d ? "Done" : t.status, statusState, !statusState)}</td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="7" style="color:var(--ink-3);padding:14px 0">Nothing in this view.</td></tr>`;
+
+    const openCount = all.filter((t) => !isDone(t, done)).length;
+    const overdue = all.filter((t) => isOverdue(t, done)).length;
+    const blocked = all.filter((t) => t.status === "Blocked").length;
+    $("#task-count").textContent = `${view.length} shown · ${openCount} open · ${overdue} overdue · ${blocked} blocked`;
+    const tc = $("#tasks-chip");
+    tc.textContent = overdue ? `${overdue} overdue, ${blocked} blocked` : `${openCount} open`;
+    tc.className = "chip " + (overdue ? "critical" : blocked ? "warning" : "good");
+    if (overdue) $("#card-tasks").dataset.state = "critical";
+    else if (blocked) $("#card-tasks").dataset.state = "warning";
+    else delete $("#card-tasks").dataset.state;
+
+    $$("#tbl-tasks input[type=checkbox]").forEach((box) => {
+      box.addEventListener("change", () => {
+        const set = readDone();
+        box.checked ? set.add(box.dataset.task) : set.delete(box.dataset.task);
+        writeDone(set);
+        renderTasks();
+      });
+    });
+  }
+
+  /* =======================================================================
+     Chrome: header, controls, theme
+     ==================================================================== */
+  function renderChrome() {
+    $("#facility-name").textContent = D.meta.facility;
+    $("#foot-facility").textContent = D.meta.facility;
+    $("#board-name").textContent = D.meta.boardName;
+    $("#as-of").textContent = D.meta.asOf;
+    $("#period-label").textContent = D.meta.period;
+    if (D.meta.sampleData) $("#demo-chip").hidden = false;
+    $("#foot-note").innerHTML = D.meta.sampleData
+      ? "Figures on this board are <strong>illustrative sample data</strong> for a " +
+        D.meta.licensedCapacity + "-seat PPEC, not the center's records. Replace them before anyone makes a decision from this page."
+      : "";
+
+    $$(".segmented button[data-range]").forEach((b) => {
+      b.addEventListener("click", () => {
+        state.range = Number(b.dataset.range);
+        $$(".segmented button[data-range]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        renderTrends();
+      });
+    });
+    const pt = $("#proj-toggle");
+    pt.addEventListener("click", () => {
+      state.projection = !state.projection;
+      pt.setAttribute("aria-pressed", String(state.projection));
+      renderTrends();
+    });
+    $$("[data-task-filter]").forEach((b) => {
+      b.addEventListener("click", () => {
+        taskFilter = b.dataset.taskFilter;
+        $$("[data-task-filter]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        renderTasks();
+      });
+    });
+
+    const root = document.documentElement;
+    try {
+      const saved = localStorage.getItem("akp.theme");
+      if (saved) root.setAttribute("data-theme", saved);
+    } catch { /* private mode */ }
+    $("#theme-toggle").addEventListener("click", () => {
+      const dark = root.getAttribute("data-theme") === "dark" ||
+        (!root.hasAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      const next = dark ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("akp.theme", next); } catch { /* private mode */ }
+      document.dispatchEvent(new Event("akp:theme"));
+    });
+  }
+
+  function boot() {
+    renderChrome();
+    renderLead();
+    renderTargets();
+    renderTrends();
+    renderProjection();
+    renderMoney();
+    renderAttendance();
+    renderFlow();
+    renderPeople();
+    renderMarketing();
+    renderTasks();
+    // Web fonts change text metrics; re-lay the charts once they land.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => document.dispatchEvent(new Event("akp:theme")));
+    }
+  }
+
+  document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", boot) : boot();
+})();
+
+</script>
