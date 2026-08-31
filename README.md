@@ -15,7 +15,12 @@ system fonts without it.
 | Census, attendance, rooms, roster movement | "Monthly Student Attendance: Amazing Kids PPEC" (Drive) | Jan–Aug 2026 |
 | Revenue, operating cost, margin, cash position | "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026 | Jan–Jul 2026 |
 | Targets | "Amazing Kids PPEC - Growth Plan" | 20 children in Q1; $60–65K monthly budget |
-| Task board | August operations discussion list (Drive) | 12 items |
+| Task board | "Amazing Kids PPEC - Task Board" sheet (Drive) | 12 items |
+
+Two attendance exports exist in Drive. The authoritative one is the Jan–Aug 2026
+export (`17wAFP-TfpzM9ZXLyaJlB8ZbGTwvWIH2RZnaQMFSImIs`); an older Jan–May export
+disagrees on some May figures and is not used. The file ids for every source are
+recorded at the top of `data.js`.
 
 Still unsourced, so those cards stay hidden: staffing headcount, referral
 pipeline, removal reasons, campaign results, and a per-category budget.
@@ -54,9 +59,38 @@ A few rules the file expects:
   months the management report covers. Months without money are simply left out
   of the financial charts.
 - Task `due` dates are ISO (`2026-09-30`) or `null` for unscheduled work.
-  "Overdue" is computed against `meta.asOf`, so keep that current.
+  "Overdue" is computed against `meta.asOf`, so keep that current. Do not edit
+  the task list by hand — see below.
 - `rooms.list` should add up to the latest month's census and enrollment; the
   board does not check this for you.
+
+## The task board is maintained in a sheet
+
+Owners and due dates live in the **"Amazing Kids PPEC - Task Board"** sheet in
+Drive, not in this repo. Fill in the blanks there, then:
+
+```sh
+# Sheet → File → Download → Comma-separated values (.csv)
+node tools/import-tasks.js ~/Downloads/tasks.csv
+node build.js
+```
+
+The importer rewrites everything between the `TASKS:BEGIN` / `TASKS:END` markers
+in `data.js`. Columns it reads: **ID, Task, Area, Owner, Due date, Priority,
+Status, Note** — in any order, extra columns ignored.
+
+| Column | What it accepts |
+|---|---|
+| ID | Anything unique (`T-01`). Required, and the key the board tracks. |
+| Due date | `2026-09-30` or `9/30/2026`. Leave blank for unscheduled work. |
+| Priority | `Critical`, `High`, `Medium`, `Low`. Blank becomes `Medium`. |
+| Status | `Not started`, `In progress`, `Blocked`, `Done`. Blank becomes `Not started`. |
+| Owner | Any name. Blank becomes `Unassigned`. |
+
+Add rows for new work and delete rows for work that is gone — the sheet is the
+list, and the import replaces the board wholesale. If any row is malformed the
+importer prints the line numbers and **writes nothing**, so a bad export cannot
+land half-parsed data on the board.
 
 ### Sections hide themselves when there is no data
 
@@ -87,6 +121,7 @@ assets/js/data.js        ALL data — the only file you normally edit
 assets/js/charts.js      SVG chart primitives (line, column, bar, sparkline)
 assets/js/app.js         renders the cards from data.js
 build.js                 inlines everything into dist/dashboard.html
+tools/import-tasks.js    pulls the task board in from the task sheet's CSV
 dist/dashboard.html      one self-contained file, for sharing or publishing
 ```
 

@@ -1060,17 +1060,28 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
    SINGLE SOURCE OF TRUTH FOR EVERY NUMBER ON THE BOARD.
    Edit this file to update the dashboard. Nothing else needs to change.
 
-   SOURCES
+   SOURCES — file ids given because two attendance exports exist and only one
+   of them is authoritative.
      • Census, attendance, rooms, roster movement
-         Drive → "Monthly Student Attendance: Amazing Kids PPEC" (Jan–Aug 2026)
+         "Monthly Student Attendance: Amazing Kids PPEC", Jan–Aug 2026
+         17wAFP-TfpzM9ZXLyaJlB8ZbGTwvWIH2RZnaQMFSImIs  ← THE ONE TO USE
+         An older export (1po06YEzox_wHUPulB8OpWsCRgHtTUC-K6EqZzrzqyXc) covers
+         Jan–May only and disagrees on some May figures. Ignore it.
          Aggregated per month. Child-level rows are deliberately NOT stored here.
      • Revenue, cost, margin, cash position
          "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026,
-         prepared 8/28/2026. Cash basis.
+         prepared 8/28/2026. Cash basis. August is not published yet, so the
+         August row below carries census only and the money charts stop at July.
      • Targets
-         Drive → "Amazing Kids PPEC - Growth Plan": 20 kids in Q1, $60–65K budget.
+         "Amazing Kids PPEC - Growth Plan": 20 kids in Q1, $60–65K budget.
+         15jqBuvEtEQ75yp3g-_rDxsuo0LbROgcydpaK05xDoaU
      • Task board
-         Drive → the operations discussion list (Aug 2026).
+         "Amazing Kids PPEC - Task Board" (owners and due dates live there)
+         1pF-bVz0iMmPji9RTBhIlO7EH5bVhCp5ArkfumYKcwjU
+         Seeded from the August operations discussion list
+         186Td_8En4t52zyVAcgqMEpNemzwCX12MC446jyJIB5E
+     • Partner school count
+         1bKX9PH-WdZ6UgVb5BRSRYoAlAZqpoKRcs9zJ-wTnRTM
 
    STILL UNSOURCED — null, so those cards stay hidden: staffing headcount,
    referral pipeline, removal reasons, campaign updates, per-category budget.
@@ -1236,6 +1247,8 @@ window.AKP_DATA = {
   },
 
   /* ---- Task board -------------------------------------------------------- */
+  /* TASKS:BEGIN — `node tools/import-tasks.js <file.csv>` rewrites everything
+     between these two markers from the task sheet. Edit the sheet, not this. */
   tasks: [
     { id: "T-01", title: "Generator servicing", owner: "Unassigned", due: "2026-09-30",
       status: "Not started", priority: "High", area: "Facilities",
@@ -1264,9 +1277,11 @@ window.AKP_DATA = {
     { id: "T-12", title: "Run more marketing campaigns, including video footage and local exposure",
       owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Marketing" }
   ],
-  tasksNote: "Taken from the August operations discussion list. None of them carry an owner or a " +
-    "due date yet except the generator service — add those to data.js and the board will start " +
-    "flagging what is overdue.",
+  /* TASKS:END */
+  tasksNote: "Owners and due dates are maintained in the \u201cAmazing Kids PPEC - Task Board\u201d " +
+    "sheet in Drive, not in this file. Fill them in there, download the sheet as CSV, and run the " +
+    "importer in tools/ — the board picks up the dates and starts flagging what is overdue. " +
+    "Until a task has a date it counts as unscheduled, never as late.",
 
   /* ---- Waiting on a source ----------------------------------------------- */
   budget: null,
