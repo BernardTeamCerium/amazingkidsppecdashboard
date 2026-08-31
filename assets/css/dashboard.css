@@ -142,6 +142,9 @@
 /* ---- Base ---------------------------------------------------------------- */
 * { box-sizing: border-box; }
 
+/* Cards and sections are flex/grid, so hidden needs to win over display. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--plane);

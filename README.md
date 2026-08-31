@@ -34,6 +34,23 @@ board, with a comment over each block.
 | Referral sources, tours, campaign updates | `marketing` |
 | Task board | `tasks` |
 
+### Sections hide themselves when there is no data
+
+Set any top-level block to `null` (or delete it) and the board drops it cleanly:
+the card hides, a section whose cards have all hidden takes its heading with it,
+and the footer lists what is still waiting. Nothing renders half-empty and no
+number is invented to fill a gap.
+
+```js
+attendanceDaily: null,   // Attendance section disappears until the log is wired up
+marketing: null,         // so does Marketing & referrals
+```
+
+The same works one level down for `staffing.credentials`, `staffing.stats`,
+`marketing.tours`, `marketing.updates`, `removals.recent`, and
+`projectionAssumptions` — each hides only its own card. Individual KPI tiles are
+entries in the `kpis` array, so drop the ones you cannot source yet.
+
 A few rules the file expects:
 
 - `months` holds actuals followed by projected months; a month is projected when

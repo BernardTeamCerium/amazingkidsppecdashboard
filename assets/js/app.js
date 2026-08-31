@@ -10,9 +10,31 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
+  /* --- Data availability ---------------------------------------------------
+     Any block in data.js may be null or omitted while its source is still being
+     wired up. A card whose data is missing hides itself, a section whose cards
+     all hid drops out, and the footer lists what is waiting. Nothing is faked
+     and nothing renders half-empty. */
+  const have = (v) => {
+    if (v === null || v === undefined) return false;
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === "object") return Object.keys(v).length > 0;
+    if (typeof v === "string") return v.trim() !== "";
+    return true;
+  };
+  const AWAITING = [];
+  function need(cardId, label, ...values) {
+    if (values.every(have)) return true;
+    const card = document.getElementById(cardId);
+    if (card) card.hidden = true;
+    if (label && !AWAITING.includes(label)) AWAITING.push(label);
+    return false;
+  }
+
   const AS_OF = new Date("2026-08-31T00:00:00");
-  const ACTUALS = D.months.filter((m) => !m.projected);
-  const PROJECTED = D.months.filter((m) => m.projected);
+  const MONTHS = have(D.months) ? D.months : [];
+  const ACTUALS = MONTHS.filter((m) => !m.projected);
+  const PROJECTED = MONTHS.filter((m) => m.projected);
   const CUR = ACTUALS[ACTUALS.length - 1];
   const PREV = ACTUALS[ACTUALS.length - 2];
   const margin = (m) => (m.revenue - m.expenses) / m.revenue;
@@ -46,7 +68,8 @@
   function renderLead() {
     const lead = $("#lead");
     const h = D.hero;
-    lead.innerHTML =
+    if (!have(h) && !have(D.kpis)) { lead.hidden = true; AWAITING.push("Headline numbers"); return; }
+    lead.innerHTML = (!have(h) ? "" :
       `<article class="card hero-card">
          <div class="card-head"><div class="titles">
            <div class="eyebrow">Month to date</div>
@@ -58,9 +81,9 @@
            ${chip("Target " + h.target, "", true)}
          </div>
          <div class="chart" id="hero-spark" style="margin:-4px 0 -2px"></div>
-         <p class="card-note">${esc(h.note)}. Twelve-month trend above.</p>
-       </article>` +
-      D.kpis.map((k) => {
+         <p class="card-note">${esc(h.note)}${ACTUALS.length ? ". Twelve-month trend above" : ""}.</p>
+       </article>`) +
+      (D.kpis || []).map((k) => {
         const val = FMT[k.format](k.value);
         const good = /^[+−-]?0/.test(k.delta) ? "flat" : k.deltaGood ? "up" : "down";
         return `<article class="card tile" data-state="${k.state}">
@@ -73,13 +96,18 @@
           </div>
         </article>`;
       }).join("");
-    Charts.sparkline($("#hero-spark"), ACTUALS.map((m) => m.adc), { height: 44 });
+    if (have(h) && ACTUALS.length > 1) {
+      Charts.sparkline($("#hero-spark"), ACTUALS.map((m) => m.adc), { height: 44 });
+    } else if (have(h)) {
+      $("#hero-spark").hidden = true;
+    }
   }
 
   /* =======================================================================
      Targets
      ==================================================================== */
   function renderTargets() {
+    if (!need("card-targets", "Targets", D.targets)) return;
     let onTarget = 0;
     $("#meters").innerHTML = D.targets.map((t) => {
       const ratio = t.direction === "up" ? t.actual / t.target : t.target / t.actual;
@@ -122,6 +150,19 @@
   }
 
   function renderTrends() {
+    const hasMonths = need("card-census", "Census and financial trends", ACTUALS);
+    if (!hasMonths) {
+      ["card-finance", "card-margin", "card-projection"].forEach((id) => {
+        const n = document.getElementById(id); if (n) n.hidden = true;
+      });
+      const ctl = $("#controls"); if (ctl) ctl.hidden = true;
+      return;
+    }
+    if (!PROJECTED.length) {
+      const pg = $("#proj-group"); if (pg) pg.hidden = true;
+      const pc = document.getElementById("card-projection"); if (pc) pc.hidden = true;
+      state.projection = false;
+    }
     const { rows, projectFrom } = slice();
     const full = rows.map((m) => m.full);
     const labels = rows.map((m, i) => {
@@ -192,21 +233,28 @@
      Projection table
      ==================================================================== */
   function renderProjection() {
+    if (have(CUR) && have(PREV)) {
+      const m = margin(CUR), pm = margin(PREV);
+      const mc = $("#margin-chip");
+      mc.textContent = `${F.pct1(m)} MTD · ${signed((m - pm) * 100)} pts vs. ${PREV.label}`;
+      mc.className = "chip " + (m >= 0.15 ? "good" : m >= 0.12 ? "warning" : "serious");
+    }
+    if (!need("card-projection", null, PROJECTED)) return;
     $("#tbl-projection tbody").innerHTML = PROJECTED.map((m) =>
       `<tr><td>${esc(m.full)}</td><td class="n">${F.int(m.enrolled)}</td><td class="n">${F.dec1(m.adc)}</td>
        <td class="n">${esc(F.usdk(m.revenue))}</td><td class="n">${esc(F.pct1(margin(m)))}</td></tr>`).join("");
-    $("#assumptions").innerHTML = D.projectionAssumptions.map((a) => `<li>${esc(a)}</li>`).join("");
-
-    const m = margin(CUR), pm = margin(PREV);
-    const mc = $("#margin-chip");
-    mc.textContent = `${F.pct1(m)} MTD · ${signed((m - pm) * 100)} pts vs. ${PREV.label}`;
-    mc.className = "chip " + (m >= 0.15 ? "good" : m >= 0.12 ? "warning" : "serious");
+    $("#assumptions").innerHTML = (D.projectionAssumptions || []).map((a) => `<li>${esc(a)}</li>`).join("");
   }
 
   /* =======================================================================
      Budget, expense mix, upcoming expenses
      ==================================================================== */
   function renderMoney() {
+    renderUpcoming();
+    if (!need("card-budget", "Operating budget", D.budget, D.budget && D.budget.categories)) {
+      const mix = document.getElementById("card-expense-mix"); if (mix) mix.hidden = true;
+      return;
+    }
     const b = D.budget;
     const tb = b.categories.reduce((a, c) => a + c.budget, 0);
     const ta = b.categories.reduce((a, c) => a + c.actual, 0);
@@ -247,7 +295,11 @@
       seriesName: "Share of spend"
     });
 
-    // Upcoming major expenses, soonest first.
+  }
+
+  function renderUpcoming() {
+    if (!need("card-upcoming", "Upcoming major expenses", D.upcomingExpenses)) return;
+    // Soonest first.
     const parse = (w) => new Date(w.replace(/^(\w+)\s+(\d{4})$/, "$1 1, $2")).getTime();
     const up = D.upcomingExpenses.slice().sort((a, z) => parse(a.when) - parse(z.when));
     const total = up.reduce((a, e) => a + e.amount, 0);
@@ -277,9 +329,17 @@
      Attendance
      ==================================================================== */
   function renderAttendance() {
+    if (!need("card-absence", null, D.absenceReasons)) { /* card hidden */ }
+    else {
+      $("#tbl-absence tbody").innerHTML = D.absenceReasons.map((r) =>
+        `<tr><td>${esc(r.reason)}${r.note ? `<span class="sub">${esc(r.note)}</span>` : ""}</td>
+         <td class="n">${esc(F.pct0(r.share))}</td></tr>`).join("");
+    }
+    if (!need("card-attendance", "Attendance", D.attendanceDaily)) return;
     const a = D.attendanceDaily;
     const rates = a.map((d) => d.present / d.enrolled);
-    const mtd = D.kpis.find((k) => k.key === "attendance").value;
+    const kpi = (D.kpis || []).find((k) => k.key === "attendance");
+    const mtd = kpi ? kpi.value : a.reduce((s, d) => s + d.present / d.enrolled, 0) / a.length;
     Charts.columns($("#chart-attendance"), {
       labels: a.map((d) => d.date.replace("Aug ", "")),
       sublabels: a.map((d) => d.dow),
@@ -302,15 +362,14 @@
     if (mtd < D.attendanceTargetRate) $("#card-attendance").dataset.state = "warning";
     else delete $("#card-attendance").dataset.state;
 
-    $("#tbl-absence tbody").innerHTML = D.absenceReasons.map((r) =>
-      `<tr><td>${esc(r.reason)}<span class="sub">${esc(r.note)}</span></td>
-       <td class="n">${esc(F.pct0(r.share))}</td></tr>`).join("");
   }
 
   /* =======================================================================
      Pipeline & removals
      ==================================================================== */
   function renderFlow() {
+    renderRemovals();
+    if (!need("card-pipeline", "Enrollment pipeline", D.pipeline, D.pipeline && D.pipeline.stages)) return;
     const p = D.pipeline;
     const total = p.stages.reduce((a, s) => a + s.count, 0);
     Charts.bars($("#chart-pipeline"), {
@@ -327,18 +386,26 @@
       { v: F.int(p.stalled), k: "Stalled over 45 days" }
     ].map((s) => `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
 
+  }
+
+  function renderRemovals() {
     const r = D.removals;
-    Charts.bars($("#chart-removals"), {
+    if (!need("card-removal-reasons", "Removals", r, r && r.reasons90)) {
+      if (!need("card-removals", null, r, r && r.recent)) return;
+    }
+    if (have(r) && have(r.reasons90)) Charts.bars($("#chart-removals"), {
       rows: r.reasons90.map((x) => ({ label: x.reason, value: x.count })),
       format: F.int,
       colorVar: "--series-2",
       seriesName: "Children"
     });
-    const n90 = r.reasons90.reduce((a, x) => a + x.count, 0);
-    const rc = $("#removals-chip");
-    rc.textContent = `${n90} in 90 days · ${r.ytd} YTD`;
-    rc.className = "chip";
-
+    if (have(r) && have(r.reasons90)) {
+      const n90 = r.reasons90.reduce((a, x) => a + x.count, 0);
+      const rc = $("#removals-chip");
+      rc.textContent = `${n90} in 90 days${r.ytd ? ` · ${r.ytd} YTD` : ""}`;
+      rc.className = "chip";
+    }
+    if (!need("card-removals", null, r, r && r.recent)) return;
     $("#tbl-removals tbody").innerHTML = r.recent.map((x) =>
       `<tr><td class="mono">${esc(x.date)}</td><td class="mono">${esc(x.record)}</td>
        <td>${esc(x.reason)}</td>
@@ -349,7 +416,10 @@
      People
      ==================================================================== */
   function renderPeople() {
-    const s = D.staffing;
+    const s = D.staffing || {};
+    if (!need("card-workforce", null, s.stats)) { /* hidden */ }
+    if (!need("card-credentials", null, s.credentials)) { /* hidden */ }
+    if (!need("card-staff", "Staffing", s.roles)) { renderStaffExtras(s); return; }
     const total = s.roles.reduce((a, r) => a + r.count, 0);
     const open = s.roles.reduce((a, r) => a + r.open, 0);
     Charts.bars($("#chart-staff"), {
@@ -363,6 +433,11 @@
     sc.textContent = `${total} on payroll · ${open} open`;
     sc.className = "chip " + (open === 0 ? "good" : open <= 2 ? "warning" : "serious");
 
+    renderStaffExtras(s);
+  }
+
+  function renderStaffExtras(s) {
+    if (have(s.stats)) {
     const st = s.stats;
     $("#staff-stats").innerHTML = [
       { v: F.int(st.overtimeHours), k: `Overtime hours (target ${st.overtimeTarget})` },
@@ -371,7 +446,8 @@
       { v: F.pct0(st.turnover12mo), k: "Turnover, 12 months" },
       { v: st.nurseToChild, k: "Nurse to child ratio" }
     ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
-
+    }
+    if (!have(s.credentials)) return;
     $("#tbl-credentials tbody").innerHTML = s.credentials.map((c) =>
       `<tr><td>${esc(c.who)}</td><td>${esc(c.item)}</td>
        <td class="n">${chip(c.due, c.state)}</td></tr>`).join("");
@@ -385,7 +461,10 @@
      Marketing
      ==================================================================== */
   function renderMarketing() {
-    const m = D.marketing;
+    const m = D.marketing || {};
+    if (!need("card-tours", null, m.tours)) { /* hidden */ }
+    if (!need("card-marketing", null, m.updates)) { /* hidden */ }
+    if (!need("card-sources", "Marketing", m.sources90)) { renderMarketingExtras(m); return; }
     const total = m.sources90.reduce((a, s) => a + s.count, 0);
     Charts.bars($("#chart-sources"), {
       rows: m.sources90.map((s) => ({ label: s.source, value: s.count, note: F.pct0(s.count / total) + " of referrals" })),
@@ -395,16 +474,19 @@
     twin($("#twin-sources"), ["Source", "Referrals", "Share"],
       m.sources90.map((s) => [s.source, F.int(s.count), F.pct0(s.count / total)]));
     $("#sources-chip").textContent = `${total} referrals`;
+    renderMarketingExtras(m);
+  }
 
-    $("#tour-stats").innerHTML = [
+  function renderMarketingExtras(m) {
+    if (have(m.tours)) $("#tour-stats").innerHTML = [
       { v: F.int(m.tours.booked), k: "Tours booked" },
       { v: F.int(m.tours.completed), k: "Tours completed" },
       { v: F.int(m.tours.converted), k: "Converted to start" },
-      { v: F.pct0(m.tours.converted / m.tours.completed), k: "Tour conversion" },
+      { v: m.tours.completed ? F.pct0(m.tours.converted / m.tours.completed) : "—", k: "Tour conversion" },
       { v: F.usdk(m.spend90), k: "Spend, last 90 days" },
       { v: F.usd(m.costPerStart), k: "Cost per start" }
     ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
-
+    if (!have(m.updates)) return;
     $("#marketing-feed").innerHTML = m.updates.map((u) =>
       `<div class="feed-item">
          <div class="when">${esc(u.date)}</div>
@@ -433,6 +515,7 @@
   function isOverdue(t, done) { return !isDone(t, done) && new Date(t.due + "T00:00:00") < AS_OF; }
 
   function renderTasks() {
+    if (!need("card-tasks", "Task board", D.tasks)) return;
     const done = readDone();
     const all = D.tasks.slice().sort((a, b) => a.due.localeCompare(b.due));
     const view = all.filter((t) => {
@@ -531,6 +614,19 @@
     });
   }
 
+  // A section with nothing left in it takes its heading with it.
+  function pruneEmptySections() {
+    $$("section.section").forEach((sec) => {
+      const cards = $$(".card", sec);
+      if (cards.length && cards.every((c) => c.hidden)) sec.hidden = true;
+    });
+    const note = $("#coverage-note");
+    if (!note) return;
+    if (!AWAITING.length) { note.hidden = true; return; }
+    note.innerHTML = "Waiting on data: <strong>" + AWAITING.map(esc).join("</strong>, <strong>") +
+      "</strong>. Those sections stay hidden until their numbers land in <code>data.js</code>.";
+  }
+
   function boot() {
     renderChrome();
     renderLead();
@@ -543,6 +639,7 @@
     renderPeople();
     renderMarketing();
     renderTasks();
+    pruneEmptySections();
     // Web fonts change text metrics; re-lay the charts once they land.
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => document.dispatchEvent(new Event("akp:theme")));

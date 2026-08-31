@@ -29,13 +29,13 @@
   </div>
 </header>
 
-<div class="controls">
+<div class="controls" id="controls">
   <span class="eyebrow">Trend window</span>
   <div class="segmented" role="group" aria-label="Trend window">
     <button type="button" data-range="6"  aria-pressed="false">6 months</button>
     <button type="button" data-range="12" aria-pressed="true">12 months</button>
   </div>
-  <div class="segmented" role="group" aria-label="Projection">
+  <div class="segmented" role="group" aria-label="Projection" id="proj-group">
     <button type="button" id="proj-toggle" aria-pressed="true">Projection to Dec</button>
   </div>
   <span class="hint">Scopes the three trend charts below. Everything else is month-to-date.</span>
@@ -49,7 +49,7 @@
   </section>
 
   <!-- ================= TARGETS & PROJECTIONS ================= -->
-  <section class="section">
+  <section class="section" id="section-targets">
     <div class="section-head">
       <h2>Targets &amp; projections</h2>
       <span class="section-note">Where the operation stands against what it committed to</span>
@@ -68,7 +68,7 @@
         <p class="card-note">A filled bar is the current value against target. Bars past 100% are capped; the numbers to the right are exact.</p>
       </article>
 
-      <article class="card col-7">
+      <article class="card col-7" id="card-census">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Census</div>
@@ -81,7 +81,7 @@
         <details class="twin" id="twin-census"><summary>Table view</summary></details>
       </article>
 
-      <article class="card col-5">
+      <article class="card col-5" id="card-projection">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Outlook</div>
@@ -98,7 +98,7 @@
         <ul class="assumptions" id="assumptions"></ul>
       </article>
 
-      <article class="card col-7">
+      <article class="card col-7" id="card-finance">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Financials</div>
@@ -115,14 +115,14 @@
   </section>
 
   <!-- ================= MONEY ================= -->
-  <section class="section">
+  <section class="section" id="section-money">
     <div class="section-head">
       <h2>Budget &amp; margin</h2>
       <span class="section-note">Month-to-date actuals against the approved operating budget</span>
     </div>
     <div class="grid">
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-margin">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Profitability</div>
@@ -134,7 +134,7 @@
         <details class="twin" id="twin-margin"><summary>Table view</summary></details>
       </article>
 
-      <article class="card col-8">
+      <article class="card col-8" id="card-budget">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Operating budget</div>
@@ -152,7 +152,7 @@
         </div>
       </article>
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-expense-mix">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Composition</div>
@@ -184,7 +184,7 @@
   </section>
 
   <!-- ================= ATTENDANCE ================= -->
-  <section class="section">
+  <section class="section" id="section-attendance">
     <div class="section-head">
       <h2>Attendance</h2>
       <span class="section-note">Enrollment is authorization; attendance is revenue</span>
@@ -202,7 +202,7 @@
         <details class="twin" id="twin-attendance"><summary>Table view</summary></details>
       </article>
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-absence">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Month to date</div>
@@ -221,14 +221,14 @@
   </section>
 
   <!-- ================= ENROLLMENT FLOW ================= -->
-  <section class="section">
+  <section class="section" id="section-flow">
     <div class="section-head">
       <h2>Enrollment, pending &amp; removals</h2>
       <span class="section-note">Seats coming in, seats going out</span>
     </div>
     <div class="grid">
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-pipeline">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Pipeline</div>
@@ -241,7 +241,7 @@
         <p class="card-note">Stages run in order from first contact to a confirmed start date. Every pending child sits in exactly one of them.</p>
       </article>
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-removal-reasons">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Last 90 days</div>
@@ -253,7 +253,7 @@
         <p class="card-note">Aging out is predictable and should be backfilled months ahead; eligibility and attendance losses are recoverable.</p>
       </article>
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-removals">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Recent</div>
@@ -273,14 +273,14 @@
   </section>
 
   <!-- ================= PEOPLE ================= -->
-  <section class="section">
+  <section class="section" id="section-people">
     <div class="section-head">
       <h2>People</h2>
       <span class="section-note">Headcount, load and credentials</span>
     </div>
     <div class="grid">
 
-      <article class="card col-5">
+      <article class="card col-5" id="card-staff">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Headcount</div>
@@ -292,7 +292,7 @@
         <details class="twin" id="twin-staff"><summary>Table view</summary></details>
       </article>
 
-      <article class="card col-3">
+      <article class="card col-3" id="card-workforce">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Load</div>
@@ -303,7 +303,7 @@
         <p class="card-note">Overtime and agency shifts are what vacancies cost before they show up as turnover.</p>
       </article>
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-credentials">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Compliance</div>
@@ -324,14 +324,14 @@
   </section>
 
   <!-- ================= MARKETING ================= -->
-  <section class="section">
+  <section class="section" id="section-marketing">
     <div class="section-head">
       <h2>Marketing &amp; referrals</h2>
       <span class="section-note">What is actually filling the pipeline</span>
     </div>
     <div class="grid">
 
-      <article class="card col-4">
+      <article class="card col-4" id="card-sources">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Last 90 days</div>
@@ -343,7 +343,7 @@
         <details class="twin" id="twin-sources"><summary>Table view</summary></details>
       </article>
 
-      <article class="card col-3">
+      <article class="card col-3" id="card-tours">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Conversion</div>
@@ -354,7 +354,7 @@
         <p class="card-note">Two clinical sources — discharge planners and pediatric practices — bring more than half of all referrals. Spend follows them.</p>
       </article>
 
-      <article class="card col-5">
+      <article class="card col-5" id="card-marketing">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Updates</div>
@@ -368,7 +368,7 @@
   </section>
 
   <!-- ================= TASKS ================= -->
-  <section class="section">
+  <section class="section" id="section-tasks">
     <div class="section-head">
       <h2>Task board</h2>
       <span class="section-note">Owner and due date on every line</span>
@@ -413,6 +413,7 @@
       Every figure comes from <code>assets/js/data.js</code> — edit that one file and the whole board updates.
     </div>
     <div class="grow" id="foot-note"></div>
+    <div class="grow" id="coverage-note" hidden></div>
   </footer>
 
 </main>
