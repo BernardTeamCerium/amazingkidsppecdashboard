@@ -166,9 +166,12 @@
           F.int(m.opDays), F.int(m.childDays), F.dec1(m.adc)]));
       const gap = $("#census-gap");
       if (have(D.censusTarget)) {
-        const short = D.censusTarget - CUR.enrolled;
-        gap.textContent = short > 0 ? `${short} short of ${D.censusTarget} enrolled`
-                                    : `enrolled target of ${D.censusTarget} met`;
+        // Measure the gap against today's roster, not the month's attendance count.
+        const now = have(D.roster) ? D.roster.enrolled : CUR.enrolled;
+        const short = D.censusTarget - now;
+        gap.textContent = short > 0
+          ? `${now} enrolled today · ${short} short of ${D.censusTarget}`
+          : `${now} enrolled today · target of ${D.censusTarget} met`;
       } else gap.hidden = true;
     }
 
@@ -219,6 +222,55 @@
     mc.textContent = `${F.pct1(mv)} in ${CUR_MONEY.label}` +
       (pv === null ? "" : ` · ${signed((mv - pv) * 100)} pts vs. ${PREV_MONEY.label}`);
     mc.className = "chip " + (mv >= 0.15 ? "good" : mv >= 0.05 ? "warning" : mv >= 0 ? "serious" : "critical");
+  }
+
+  /* ======================= Projection =================================== */
+  function renderProjection() {
+    if (!need("card-projection", "Projection", D.projection, D.projection && D.projection.months)) {
+      const a = document.getElementById("card-assumptions"); if (a) a.hidden = true;
+      return;
+    }
+    const p = D.projection, m = p.months;
+
+    Charts.columns($("#chart-projection"), {
+      labels: m.map((x) => x.label),
+      sublabels: m.map((x) => x.full.slice(-4)),
+      values: m.map((x) => x.revenue),
+      format: F.usd,
+      yFormat: F.usdk,
+      height: 186,
+      seriesName: "Projected revenue",
+      tipTitle: (i) => m[i].full,
+      tipNote: (i) => `${F.dec1(m[i].adc)} children/day × ${m[i].opDays} days × ${F.usd(p.perDiem)}`
+    });
+
+    $("#tbl-projection tbody").innerHTML = m.map((x) =>
+      `<tr>
+        <td>${esc(x.full)}<span class="sub">${esc(x.closureNote)}</span></td>
+        <td class="n">${x.weekdays}</td>
+        <td class="n">${x.closures || "—"}</td>
+        <td class="n">${x.opDays}</td>
+        <td class="n">${x.enrolled}</td>
+        <td class="n">${esc(F.dec1(x.adc))}</td>
+        <td class="n">${esc(F.usd(x.revenue))}</td>
+      </tr>`).join("");
+    $("#tbl-projection tfoot").innerHTML =
+      `<tr><td>Total, September to December</td>
+       <td class="n">${p.totalWeekdays}</td><td class="n">${p.totalWeekdays - p.totalOpDays}</td>
+       <td class="n">${p.totalOpDays}</td><td class="n"></td><td class="n"></td>
+       <td class="n">${esc(F.usd(p.totalRevenue))}</td></tr>`;
+    $("#projection-chip").textContent =
+      `${F.usdk(p.totalRevenue)} over ${p.totalOpDays} operating days`;
+
+    if (!need("card-assumptions", null, p.assumptions)) return;
+    $("#projection-stats").innerHTML = stats([
+      { v: F.pct0(p.attendanceRate), k: "Attendance assumed" },
+      { v: "$" + p.perDiem.toFixed(2), k: "Per child-day" },
+      { v: F.usdk(p.perChildPerMonth), k: "Per child, per month" },
+      { v: F.usdk(p.pendingValue), k: "The 4 pending, Oct–Dec" }
+    ]);
+    $("#assumptions").innerHTML = p.assumptions.map((a) => `<li>${esc(a)}</li>`).join("");
+    if (have(p.caveat)) $("#projection-caveat").textContent = p.caveat;
   }
 
   /* ======================= Cost structure & mix ========================= */
@@ -553,6 +605,7 @@
     renderLead();
     renderTargets();
     renderTrends();
+    renderProjection();
     renderCosts();
     renderCash();
     renderAttendance();

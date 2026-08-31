@@ -25,11 +25,16 @@ recorded at the top of `data.js`.
 Still unsourced, so those cards stay hidden: staffing headcount, referral
 pipeline, removal reasons, campaign results, and a per-category budget.
 
-### Two definitions worth knowing
+### Three definitions worth knowing
 
 - **Enrolled** means a child who attended at least one day that month. Children
   carried on the attendance report with zero days are counted separately as
   *records with no attendance* — twelve of them in January, four in August.
+- **The projection is a model, not a forecast from history.** It multiplies
+  enrollment by an assumed 80% attendance, by operating days (weekdays less
+  named closures), by the $281.68 day rate. Every input is visible on the card
+  and editable in `projection`. Note the realization gap: year to date the
+  centre has collected $238.65 per child-day, 85% of the posted rate.
 - **Financials are cash basis.** Income lands when the payment arrives, not when
   the care was delivered, so a heavy claims batch inflates one month and starves
   the next. Compare months with that in mind; the per-child-day figure in the
@@ -45,6 +50,8 @@ board, with a comment over each block.
 |---|---|
 | Hero figure and KPI tiles | `hero`, `kpis` |
 | Targets scorecard | `targets`, `censusTarget`, `costTarget` |
+| Roster tiles (enrolled / Medicaid / pending) | `roster` |
+| Projection to year end | `projection` |
 | Census, revenue, cost and margin charts | `months` |
 | Cost structure and composition | `costLines` |
 | Cash and obligations | `cash` |
@@ -63,6 +70,10 @@ A few rules the file expects:
   the task list by hand — see below.
 - `rooms.list` should add up to the latest month's census and enrollment; the
   board does not check this for you.
+- `projection.months` rows are precomputed, not derived at render time. Each row
+  must satisfy `opDays = weekdays − closures`, `adc = enrolled × attendanceRate`
+  and `revenue = adc × opDays × perDiem`. Change an input and recompute the row,
+  or the table will disagree with itself.
 
 ## The task board is maintained in a sheet
 

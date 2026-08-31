@@ -66,17 +66,23 @@ window.AKP_DATA = {
     deltaLabel: "vs. July",
     delta: 0.18,
     deltaGood: true,
-    target: 20,
+    target: 25,
     note: "327 child-days across 20 operating days. 20 children attended at least once; 4 more sit on the report with no attendance"
   },
 
   kpis: [
-    { key: "enrolled", label: "Children enrolled", value: 20, format: "int",
-      sub: "attended at least one day in August", delta: "same as July", deltaGood: true,
-      target: "20 in Q1", state: "good" },
+    { key: "enrolled", label: "Enrolled now", value: 19, format: "int",
+      sub: "current roster · 20 attended in August", delta: "−1 vs. August", deltaGood: false,
+      target: "25 by Q4", state: "warning" },
+    { key: "medicaid", label: "Medicaid approved", value: 16, format: "int",
+      sub: "of 19 enrolled · 3 awaiting approval", delta: "84% of the roster", deltaGood: false,
+      target: "—", state: "warning" },
+    { key: "pending", label: "Pending enrollment", value: 4, format: "int",
+      sub: "assumed to start in October", delta: "+$55.9K if all four start", deltaGood: true,
+      target: "—", state: "good" },
     { key: "attendance", label: "Attendance rate", value: 0.818, format: "pct1",
-      sub: "daily census ÷ enrolled", delta: "+0.9 pts vs. July", deltaGood: true,
-      target: "—", state: "" },
+      sub: "August · daily census ÷ enrolled", delta: "+0.9 pts vs. July", deltaGood: true,
+      target: "80% assumed", state: "" },
     { key: "childdays", label: "Child-days delivered", value: 327, format: "int",
       sub: "August · the billable unit", delta: "−45 vs. July", deltaGood: false,
       target: "—", state: "warning" },
@@ -91,19 +97,34 @@ window.AKP_DATA = {
       target: "—", state: "warning" },
     { key: "cash", label: "Cash in bank", value: 71116, format: "usd0",
       sub: "as of Jul 31", delta: "+$62.1K vs. a year ago", deltaGood: true,
+      target: "—", state: "good" },
+    { key: "opdays", label: "Operating days left", value: 83, format: "int",
+      sub: "Sep–Dec, after assumed closures", delta: "of 88 weekdays", deltaGood: true,
+      target: "—", state: "" },
+    { key: "projrev", label: "Projected revenue", value: 411253, format: "usd0",
+      sub: "Sep–Dec at 80% attendance", delta: "$281.68 per child-day", deltaGood: true,
       target: "—", state: "good" }
   ],
 
   /* ---- Targets ----------------------------------------------------------- */
   targets: [
-    { name: "Children enrolled", actual: 20, target: 20, format: "int",
-      owner: "Growth plan", horizon: "Quarter 1", direction: "up" },
+    { name: "Children enrolled", actual: 19, target: 25, format: "int",
+      owner: "Growth plan", horizon: "Q3–Q4 2026", direction: "up" },
     { name: "Monthly operating cost", actual: 83920, target: 65000, format: "usd0",
       owner: "Growth plan", horizon: "Monthly", direction: "down" }
   ],
-  targetsNote: "The growth plan sets two goals: 20 children and a $60–65K monthly budget. " +
-    "Enrollment reached 20 in June and has held. Operating cost has cleared $65K in three of " +
-    "seven months, and July's $83.9K was almost entirely wages — $57.4K against a $38K run rate.",
+  targetsNote: "The enrolment goal is 25 children through Q3 and Q4. The roster stands at 19, " +
+    "with 4 more pending — so even with every pending child starting, the centre lands at 23 and " +
+    "needs two more beyond the current pipeline. Operating cost has cleared the $65K budget in " +
+    "three of seven months; July's $83.9K was almost entirely wages, $57.4K against a $38K run rate.",
+
+  /* ---- Roster today ------------------------------------------------------ */
+  roster: {
+    asOf: "September 1, 2026",
+    enrolled: 19,
+    medicaidApproved: 16,
+    pending: 4
+  },
 
   /* ---- Monthly census + financials --------------------------------------- */
   /* revenue/cost are null for months the management report does not cover. */
@@ -117,8 +138,47 @@ window.AKP_DATA = {
     { label: "Jul", full: "Jul 2026", enrolled: 20, onReport: 25, dormant:  5, adc: 16.17, opDays: 23, childDays: 372, started: 2, stopped: 2, revenue: 90629.63,  cost: 83919.86, projected: false },
     { label: "Aug", full: "Aug 2026", enrolled: 20, onReport: 24, dormant:  4, adc: 16.35, opDays: 20, childDays: 327, started: 1, stopped: 1, revenue: null,       cost: null,     projected: false }
   ],
-  censusTarget: 20,
+  censusTarget: 25,
   costTarget: 65000,
+  /* ---- Projection to year end -------------------------------------------
+     Operating days are the weekdays in each month less the closures named
+     below. The closure pattern follows the attendance report: this centre
+     closes for major holidays only — it stayed open on Jul 3, and lost a day
+     around New Year, Memorial Day and in August.
+     Revenue = enrolled × 80% attendance × operating days × the $281.68 rate. */
+  projection: {
+    perDiem: 281.68,
+    attendanceRate: 0.80,
+    pendingStart: "October 2026",
+    realizedPerChildDay: 238.65,
+    months: [
+      { label: "Sep", full: "Sep 2026", weekdays: 22, closures: 1, opDays: 21, enrolled: 19, adc: 15.2, revenue: 89912.26,
+        closureNote: "Labor Day, Mon Sep 7" },
+      { label: "Oct", full: "Oct 2026", weekdays: 22, closures: 0, opDays: 22, enrolled: 23, adc: 18.4, revenue: 114024.06,
+        closureNote: "no closure assumed" },
+      { label: "Nov", full: "Nov 2026", weekdays: 21, closures: 2, opDays: 19, enrolled: 23, adc: 18.4, revenue: 98475.33,
+        closureNote: "Thanksgiving, Thu Nov 26 and Fri Nov 27" },
+      { label: "Dec", full: "Dec 2026", weekdays: 23, closures: 2, opDays: 21, enrolled: 23, adc: 18.4, revenue: 108841.15,
+        closureNote: "Christmas Eve and Christmas Day, Thu Dec 24 and Fri Dec 25" }
+    ],
+    totalOpDays: 83,
+    totalWeekdays: 88,
+    totalRevenue: 411252.80,
+    perChildPerMonth: 4732.22,
+    pendingValue: 55885.31,
+    atRealizedRate: 348422.31,
+    assumptions: [
+      "19 children enrolled today, and the 4 pending children all start in October — 23 from October on.",
+      "80% attendance, applied to enrolment. August ran 81.8%, so this is close to the recent run rate.",
+      "$281.68 per child-day, billed for every day a child attends.",
+      "Operating days are weekdays less the closures named in the table. Adjust them there if the calendar differs.",
+      "No stops, no rate change, and no cost projection — the management report gives no basis for forecasting cost."
+    ],
+    caveat: "Year to date the centre has realized $238.65 per child-day — 85% of the $281.68 posted rate. " +
+      "If that gap is denials, partial days or billing lag rather than a recent rate increase, the same " +
+      "projection lands at $348.4K instead of $411.3K. Worth settling before this number is used for planning."
+  },
+
   projectionAssumptions: null,
 
   financeNote: "Cash basis: income lands when the payment arrives, not when the care was " +
