@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Amazing Kids PPEC Operations Board</title>
-<meta name="description" content="Operating picture for Amazing Kids PPEC: census, attendance, staffing, budget, margin, enrollment pipeline, removals, marketing and the open task list.">
+<meta name="description" content="Operating picture for Amazing Kids PPEC: census and attendance through August 2026, revenue, cost and cash through July, room mix, roster movement, marketing spend and the open task list.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -32,31 +32,30 @@
 <div class="controls" id="controls">
   <span class="eyebrow">Trend window</span>
   <div class="segmented" role="group" aria-label="Trend window">
-    <button type="button" data-range="6"  aria-pressed="false">6 months</button>
-    <button type="button" data-range="12" aria-pressed="true">12 months</button>
+    <button type="button" data-range="6"  aria-pressed="false">Last 6 months</button>
+    <button type="button" data-range="99" aria-pressed="true">All of 2026</button>
   </div>
   <div class="segmented" role="group" aria-label="Projection" id="proj-group">
-    <button type="button" id="proj-toggle" aria-pressed="true">Projection to Dec</button>
+    <button type="button" id="proj-toggle" aria-pressed="true">Projection</button>
   </div>
-  <span class="hint">Scopes the three trend charts below. Everything else is month-to-date.</span>
+  <span class="hint">Scopes the census, revenue and margin charts. Everything else is the latest closed period.</span>
 </div>
 
 <main class="board">
 
-  <!-- ================= LEAD BAND ================= -->
   <section class="section" aria-label="Headline numbers">
     <div class="lead" id="lead"></div>
   </section>
 
-  <!-- ================= TARGETS & PROJECTIONS ================= -->
-  <section class="section" id="section-targets">
+  <!-- ================= TARGETS & CENSUS ================= -->
+  <section class="section" id="section-census">
     <div class="section-head">
-      <h2>Targets &amp; projections</h2>
-      <span class="section-note">Where the operation stands against what it committed to</span>
+      <h2>Targets &amp; census</h2>
+      <span class="section-note">Where the operation stands against the growth plan</span>
     </div>
     <div class="grid">
 
-      <article class="card col-5" id="card-targets">
+      <article class="card col-4" id="card-targets">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Scorecard</div>
@@ -65,50 +64,23 @@
           <div class="card-meta"><span class="chip" id="targets-summary">—</span></div>
         </div>
         <div class="meters" id="meters"></div>
-        <p class="card-note" id="targets-note">A filled bar is the current value against target. Bars past 100% are capped; the numbers to the right are exact.</p>
+        <p class="card-note" id="targets-note"></p>
       </article>
 
-      <article class="card col-7" id="card-census">
+      <article class="card col-8" id="card-census">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Census</div>
-            <h3>Enrollment and average daily census</h3>
+            <h3>Children enrolled and average daily census</h3>
           </div>
           <div class="card-meta"><span class="chip plain" id="census-gap">—</span></div>
         </div>
         <div class="legend" id="legend-census"></div>
         <div class="chart" id="chart-census"></div>
         <details class="twin" id="twin-census"><summary>Table view</summary></details>
-      </article>
-
-      <article class="card col-5" id="card-projection">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Outlook</div>
-            <h3>Projection to year end</h3>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="data" id="tbl-projection">
-            <thead><tr><th>Month</th><th class="n">Enrolled</th><th class="n">ADC</th><th class="n">Revenue</th><th class="n">Margin</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="eyebrow" style="margin-top:2px">What this assumes</div>
-        <ul class="assumptions" id="assumptions"></ul>
-      </article>
-
-      <article class="card col-7" id="card-finance">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Financials</div>
-            <h3>Revenue and operating expenses</h3>
-          </div>
-          <div class="card-meta"><span class="chip plain" id="finance-note">—</span></div>
-        </div>
-        <div class="legend" id="legend-finance"></div>
-        <div class="chart" id="chart-finance"></div>
-        <details class="twin" id="twin-finance"><summary>Table view</summary></details>
+        <p class="card-note">Enrolled counts children who attended at least one day that month.
+          Average daily census is child-days divided by operating days — the number the building
+          is actually staffed for, and the number the growth plan's goal has to clear.</p>
       </article>
 
     </div>
@@ -117,10 +89,24 @@
   <!-- ================= MONEY ================= -->
   <section class="section" id="section-money">
     <div class="section-head">
-      <h2>Budget &amp; margin</h2>
-      <span class="section-note">Month-to-date actuals against the approved operating budget</span>
+      <h2>Revenue, cost &amp; cash</h2>
+      <span class="section-note">Management report, cash basis, through July 2026</span>
     </div>
     <div class="grid">
+
+      <article class="card col-8" id="card-finance">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Financials</div>
+            <h3>Revenue and operating cost</h3>
+          </div>
+          <div class="card-meta"><span class="chip plain" id="finance-note">—</span></div>
+        </div>
+        <div class="legend" id="legend-finance"></div>
+        <div class="chart" id="chart-finance"></div>
+        <details class="twin" id="twin-finance"><summary>Table view</summary></details>
+        <p class="card-note" id="finance-caveat"></p>
+      </article>
 
       <article class="card col-4" id="card-margin">
         <div class="card-head">
@@ -134,50 +120,52 @@
         <details class="twin" id="twin-margin"><summary>Table view</summary></details>
       </article>
 
-      <article class="card col-8" id="card-budget">
+      <article class="card col-7" id="card-costs">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Operating budget</div>
-            <h3 id="budget-title">Budget vs. actual</h3>
+            <div class="eyebrow">Cost structure</div>
+            <h3 id="costs-title">Where the cost went</h3>
           </div>
-          <div class="card-meta"><span class="chip" id="budget-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="costs-chip">—</span></div>
         </div>
-        <div class="stat-strip" id="budget-stats"></div>
         <div class="table-wrap">
-          <table class="data" id="tbl-budget">
-            <thead><tr><th>Category</th><th class="n">Budget</th><th class="n">Actual</th><th class="n">Variance</th><th class="n">Used</th></tr></thead>
+          <table class="data" id="tbl-costs">
+            <thead><tr><th>Line</th><th class="n" id="th-prior">Prior</th><th class="n" id="th-current">Current</th><th class="n">Change</th></tr></thead>
             <tbody></tbody>
             <tfoot></tfoot>
           </table>
         </div>
       </article>
 
-      <article class="card col-4" id="card-expense-mix">
+      <article class="card col-5" id="card-mix">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Composition</div>
-            <h3>Where the money goes</h3>
+            <h3 id="mix-title">Share of operating cost</h3>
           </div>
         </div>
-        <div class="chart" id="chart-expense-mix"></div>
-        <p class="card-note">Share of this month's operating spend. Payroll is the only lever big enough to move margin, and it is also the one that moves ratios.</p>
+        <div class="chart" id="chart-mix"></div>
+        <p class="card-note">Payroll is nearly three quarters of the cost base, so it is the only
+          line big enough to move the margin — and the one that also moves ratios and coverage.</p>
       </article>
 
-      <article class="card col-8" id="card-upcoming">
+      <article class="card col-12" id="card-cash">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Cash planning</div>
-            <h3>Upcoming major expenses</h3>
+            <div class="eyebrow">Cash position</div>
+            <h3 id="cash-title">Cash and obligations</h3>
           </div>
-          <div class="card-meta"><span class="chip" id="reserve-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="cash-chip">—</span></div>
         </div>
+        <div class="stat-strip" id="cash-stats"></div>
         <div class="table-wrap">
-          <table class="data" id="tbl-upcoming">
-            <thead><tr><th>Item</th><th>When</th><th>Status</th><th class="n">Amount</th></tr></thead>
+          <table class="data" id="tbl-cash">
+            <thead><tr><th>Line</th><th class="n">Balance</th><th>Note</th></tr></thead>
             <tbody></tbody>
             <tfoot></tfoot>
           </table>
         </div>
+        <p class="card-note" id="cash-note"></p>
       </article>
 
     </div>
@@ -190,6 +178,7 @@
       <span class="section-note">Enrollment is authorization; attendance is revenue</span>
     </div>
     <div class="grid">
+
       <article class="card col-8" id="card-attendance">
         <div class="card-head">
           <div class="titles">
@@ -200,127 +189,66 @@
         </div>
         <div class="chart" id="chart-attendance"></div>
         <details class="twin" id="twin-attendance"><summary>Table view</summary></details>
-        <p class="card-note">Daily census divided by the children on that month's roster. The
-          table view also carries the rate against only the children who attended at least once,
-          which is the higher of the two and the one that reflects scheduling rather than roster hygiene.</p>
+        <p class="card-note">Daily census divided by the children who attended at least once that
+          month. February and May look strong because few children were enrolled; the rate is worth
+          reading next to the enrolled count, not on its own.</p>
       </article>
 
-      <article class="card col-4" id="card-absence">
+      <article class="card col-4" id="card-rooms">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Month to date</div>
-            <h3>Why children are absent</h3>
+            <div class="eyebrow" id="rooms-eyebrow">By room</div>
+            <h3>Where the children are</h3>
           </div>
         </div>
-        <div class="table-wrap">
-          <table class="data" id="tbl-absence">
-            <thead><tr><th>Reason</th><th class="n">Share</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <p class="card-note">Transport and unexcused absences are the two the center controls directly — together about a quarter of lost days.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- ================= ENROLLMENT FLOW ================= -->
-  <section class="section" id="section-flow">
-    <div class="section-head">
-      <h2>Enrollment, pending &amp; removals</h2>
-      <span class="section-note">Seats coming in, seats going out</span>
-    </div>
-    <div class="grid">
-
-      <article class="card col-4" id="card-pipeline">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Pipeline</div>
-            <h3>Pending enrollments by stage</h3>
-          </div>
-          <div class="card-meta"><span class="chip accent" id="pipeline-chip">—</span></div>
-        </div>
-        <div class="chart" id="chart-pipeline"></div>
-        <div class="stat-strip" id="pipeline-stats"></div>
-        <p class="card-note">Stages run in order from first contact to a confirmed start date. Every pending child sits in exactly one of them.</p>
-      </article>
-
-      <article class="card col-4" id="card-removal-reasons">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Last 90 days</div>
-            <h3>Why seats opened</h3>
-          </div>
-          <div class="card-meta"><span class="chip" id="removals-chip">—</span></div>
-        </div>
-        <div class="chart" id="chart-removals"></div>
-        <p class="card-note">Aging out is predictable and should be backfilled months ahead; eligibility and attendance losses are recoverable.</p>
-      </article>
-
-      <article class="card col-4" id="card-removals">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Recent</div>
-            <h3>Removals and seat status</h3>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="data" id="tbl-removals">
-            <thead><tr><th>Date</th><th>Record</th><th>Reason</th><th>Seat</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <p class="card-note">Records are referenced by internal ID only. No names or clinical detail belong on an operations board.</p>
+        <div class="chart" id="chart-rooms"></div>
+        <div class="stat-strip" id="rooms-stats"></div>
+        <p class="card-note" id="rooms-note"></p>
       </article>
 
     </div>
   </section>
 
-  <!-- ================= PEOPLE ================= -->
-  <section class="section" id="section-people">
+  <!-- ================= ROSTER MOVEMENT ================= -->
+  <section class="section" id="section-roster">
     <div class="section-head">
-      <h2>People</h2>
-      <span class="section-note">Headcount, load and credentials</span>
+      <h2>Roster movement</h2>
+      <span class="section-note">Who started, who stopped, and who is on the report but not attending</span>
     </div>
     <div class="grid">
 
-      <article class="card col-5" id="card-staff">
+      <article class="card col-5" id="card-dormant">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Headcount</div>
-            <h3>Staff by role</h3>
+            <div class="eyebrow">Roster hygiene</div>
+            <h3>Records with no attendance</h3>
           </div>
-          <div class="card-meta"><span class="chip" id="staff-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="dormant-chip">—</span></div>
         </div>
-        <div class="chart" id="chart-staff"></div>
-        <details class="twin" id="twin-staff"><summary>Table view</summary></details>
+        <div class="chart" id="chart-dormant"></div>
+        <p class="card-note">Children carried on the attendance report who did not attend a single
+          day that month. Twelve in January, four in August. Each one is either a child to win back
+          or a record to close.</p>
       </article>
 
-      <article class="card col-3" id="card-workforce">
+      <article class="card col-7" id="card-movement">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Load</div>
-            <h3>Workforce pressure</h3>
+            <div class="eyebrow">Starts &amp; stops</div>
+            <h3>Month-to-month movement</h3>
           </div>
-        </div>
-        <div class="stat-strip no-rule" id="staff-stats" style="grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px"></div>
-        <p class="card-note">Overtime and agency shifts are what vacancies cost before they show up as turnover.</p>
-      </article>
-
-      <article class="card col-4" id="card-credentials">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Compliance</div>
-            <h3>Credentials expiring</h3>
-          </div>
-          <div class="card-meta"><span class="chip" id="cred-chip">—</span></div>
+          <div class="card-meta"><span class="chip plain" id="movement-chip">—</span></div>
         </div>
         <div class="table-wrap">
-          <table class="data" id="tbl-credentials">
-            <thead><tr><th>Who</th><th>Item</th><th class="n">Due</th></tr></thead>
+          <table class="data" id="tbl-movement">
+            <thead><tr><th>Month</th><th class="n">Started</th><th class="n">Stopped</th><th class="n">Net</th><th class="n">Enrolled</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <p class="card-note">A lapsed competency pulls a nurse off the floor the same day it expires. Treat these as staffing, not paperwork.</p>
+        <p class="card-note">Derived from the attendance report: a child counts as started in the
+          first month they attend and stopped when a month of attendance is followed by none. A long
+          hospitalization looks the same as a discharge here, so treat stops as a prompt to check,
+          not as a removal record.</p>
       </article>
 
     </div>
@@ -329,44 +257,22 @@
   <!-- ================= MARKETING ================= -->
   <section class="section" id="section-marketing">
     <div class="section-head">
-      <h2>Marketing &amp; referrals</h2>
-      <span class="section-note">What is actually filling the pipeline</span>
+      <h2>Marketing</h2>
+      <span class="section-note">What is being spent — what it produced is not tracked anywhere yet</span>
     </div>
     <div class="grid">
-
-      <article class="card col-4" id="card-sources">
+      <article class="card col-6" id="card-adspend">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Last 90 days</div>
-            <h3>Referral sources</h3>
+            <div class="eyebrow">Advertising &amp; promotion</div>
+            <h3>Marketing spend by month</h3>
           </div>
-          <div class="card-meta"><span class="chip plain" id="sources-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="adspend-chip">—</span></div>
         </div>
-        <div class="chart" id="chart-sources"></div>
-        <details class="twin" id="twin-sources"><summary>Table view</summary></details>
+        <div class="chart" id="chart-adspend"></div>
+        <div class="stat-strip" id="adspend-stats"></div>
+        <p class="card-note" id="adspend-note"></p>
       </article>
-
-      <article class="card col-3" id="card-tours">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Conversion</div>
-            <h3>Tours and cost</h3>
-          </div>
-        </div>
-        <div class="stat-strip no-rule" id="tour-stats" style="grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px"></div>
-        <p class="card-note">Two clinical sources — discharge planners and pediatric practices — bring more than half of all referrals. Spend follows them.</p>
-      </article>
-
-      <article class="card col-5" id="card-marketing">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Updates</div>
-            <h3>Campaigns and outreach</h3>
-          </div>
-        </div>
-        <div class="feed" id="marketing-feed"></div>
-      </article>
-
     </div>
   </section>
 
@@ -374,7 +280,7 @@
   <section class="section" id="section-tasks">
     <div class="section-head">
       <h2>Task board</h2>
-      <span class="section-note">Owner and due date on every line</span>
+      <span class="section-note">From the August operations discussion list</span>
     </div>
     <div class="grid">
       <article class="card col-12" id="card-tasks">
@@ -405,7 +311,7 @@
             <tbody></tbody>
           </table>
         </div>
-        <p class="card-note">Ticking a box marks the task complete in your browser only — it is a personal working view, not a shared record. The task list itself lives in <code>assets/js/data.js</code>.</p>
+        <p class="card-note" id="tasks-note"></p>
       </article>
     </div>
   </section>
@@ -415,8 +321,8 @@
       <strong id="foot-facility">Amazing Kids PPEC</strong> operations board.
       Every figure comes from <code>assets/js/data.js</code> — edit that one file and the whole board updates.
     </div>
-    <div class="grow" id="foot-note"></div>
     <div class="grow" id="foot-source"></div>
+    <div class="grow" id="foot-note"></div>
     <div class="grow" id="coverage-note" hidden></div>
   </footer>
 

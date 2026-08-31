@@ -1,5 +1,5 @@
 <title>Amazing Kids PPEC Operations Board</title>
-<meta name="description" content="Operating picture for Amazing Kids PPEC: census, attendance, staffing, budget, margin, enrollment pipeline, removals, marketing and the open task list.">
+<meta name="description" content="Operating picture for Amazing Kids PPEC: census and attendance through August 2026, revenue, cost and cash through July, room mix, roster movement, marketing spend and the open task list.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -758,31 +758,30 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
 <div class="controls" id="controls">
   <span class="eyebrow">Trend window</span>
   <div class="segmented" role="group" aria-label="Trend window">
-    <button type="button" data-range="6"  aria-pressed="false">6 months</button>
-    <button type="button" data-range="12" aria-pressed="true">12 months</button>
+    <button type="button" data-range="6"  aria-pressed="false">Last 6 months</button>
+    <button type="button" data-range="99" aria-pressed="true">All of 2026</button>
   </div>
   <div class="segmented" role="group" aria-label="Projection" id="proj-group">
-    <button type="button" id="proj-toggle" aria-pressed="true">Projection to Dec</button>
+    <button type="button" id="proj-toggle" aria-pressed="true">Projection</button>
   </div>
-  <span class="hint">Scopes the three trend charts below. Everything else is month-to-date.</span>
+  <span class="hint">Scopes the census, revenue and margin charts. Everything else is the latest closed period.</span>
 </div>
 
 <main class="board">
 
-  <!-- ================= LEAD BAND ================= -->
   <section class="section" aria-label="Headline numbers">
     <div class="lead" id="lead"></div>
   </section>
 
-  <!-- ================= TARGETS & PROJECTIONS ================= -->
-  <section class="section" id="section-targets">
+  <!-- ================= TARGETS & CENSUS ================= -->
+  <section class="section" id="section-census">
     <div class="section-head">
-      <h2>Targets &amp; projections</h2>
-      <span class="section-note">Where the operation stands against what it committed to</span>
+      <h2>Targets &amp; census</h2>
+      <span class="section-note">Where the operation stands against the growth plan</span>
     </div>
     <div class="grid">
 
-      <article class="card col-5" id="card-targets">
+      <article class="card col-4" id="card-targets">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Scorecard</div>
@@ -791,50 +790,23 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
           <div class="card-meta"><span class="chip" id="targets-summary">—</span></div>
         </div>
         <div class="meters" id="meters"></div>
-        <p class="card-note" id="targets-note">A filled bar is the current value against target. Bars past 100% are capped; the numbers to the right are exact.</p>
+        <p class="card-note" id="targets-note"></p>
       </article>
 
-      <article class="card col-7" id="card-census">
+      <article class="card col-8" id="card-census">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Census</div>
-            <h3>Enrollment and average daily census</h3>
+            <h3>Children enrolled and average daily census</h3>
           </div>
           <div class="card-meta"><span class="chip plain" id="census-gap">—</span></div>
         </div>
         <div class="legend" id="legend-census"></div>
         <div class="chart" id="chart-census"></div>
         <details class="twin" id="twin-census"><summary>Table view</summary></details>
-      </article>
-
-      <article class="card col-5" id="card-projection">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Outlook</div>
-            <h3>Projection to year end</h3>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="data" id="tbl-projection">
-            <thead><tr><th>Month</th><th class="n">Enrolled</th><th class="n">ADC</th><th class="n">Revenue</th><th class="n">Margin</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="eyebrow" style="margin-top:2px">What this assumes</div>
-        <ul class="assumptions" id="assumptions"></ul>
-      </article>
-
-      <article class="card col-7" id="card-finance">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Financials</div>
-            <h3>Revenue and operating expenses</h3>
-          </div>
-          <div class="card-meta"><span class="chip plain" id="finance-note">—</span></div>
-        </div>
-        <div class="legend" id="legend-finance"></div>
-        <div class="chart" id="chart-finance"></div>
-        <details class="twin" id="twin-finance"><summary>Table view</summary></details>
+        <p class="card-note">Enrolled counts children who attended at least one day that month.
+          Average daily census is child-days divided by operating days — the number the building
+          is actually staffed for, and the number the growth plan's goal has to clear.</p>
       </article>
 
     </div>
@@ -843,10 +815,24 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
   <!-- ================= MONEY ================= -->
   <section class="section" id="section-money">
     <div class="section-head">
-      <h2>Budget &amp; margin</h2>
-      <span class="section-note">Month-to-date actuals against the approved operating budget</span>
+      <h2>Revenue, cost &amp; cash</h2>
+      <span class="section-note">Management report, cash basis, through July 2026</span>
     </div>
     <div class="grid">
+
+      <article class="card col-8" id="card-finance">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Financials</div>
+            <h3>Revenue and operating cost</h3>
+          </div>
+          <div class="card-meta"><span class="chip plain" id="finance-note">—</span></div>
+        </div>
+        <div class="legend" id="legend-finance"></div>
+        <div class="chart" id="chart-finance"></div>
+        <details class="twin" id="twin-finance"><summary>Table view</summary></details>
+        <p class="card-note" id="finance-caveat"></p>
+      </article>
 
       <article class="card col-4" id="card-margin">
         <div class="card-head">
@@ -860,50 +846,52 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
         <details class="twin" id="twin-margin"><summary>Table view</summary></details>
       </article>
 
-      <article class="card col-8" id="card-budget">
+      <article class="card col-7" id="card-costs">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Operating budget</div>
-            <h3 id="budget-title">Budget vs. actual</h3>
+            <div class="eyebrow">Cost structure</div>
+            <h3 id="costs-title">Where the cost went</h3>
           </div>
-          <div class="card-meta"><span class="chip" id="budget-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="costs-chip">—</span></div>
         </div>
-        <div class="stat-strip" id="budget-stats"></div>
         <div class="table-wrap">
-          <table class="data" id="tbl-budget">
-            <thead><tr><th>Category</th><th class="n">Budget</th><th class="n">Actual</th><th class="n">Variance</th><th class="n">Used</th></tr></thead>
+          <table class="data" id="tbl-costs">
+            <thead><tr><th>Line</th><th class="n" id="th-prior">Prior</th><th class="n" id="th-current">Current</th><th class="n">Change</th></tr></thead>
             <tbody></tbody>
             <tfoot></tfoot>
           </table>
         </div>
       </article>
 
-      <article class="card col-4" id="card-expense-mix">
+      <article class="card col-5" id="card-mix">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Composition</div>
-            <h3>Where the money goes</h3>
+            <h3 id="mix-title">Share of operating cost</h3>
           </div>
         </div>
-        <div class="chart" id="chart-expense-mix"></div>
-        <p class="card-note">Share of this month's operating spend. Payroll is the only lever big enough to move margin, and it is also the one that moves ratios.</p>
+        <div class="chart" id="chart-mix"></div>
+        <p class="card-note">Payroll is nearly three quarters of the cost base, so it is the only
+          line big enough to move the margin — and the one that also moves ratios and coverage.</p>
       </article>
 
-      <article class="card col-8" id="card-upcoming">
+      <article class="card col-12" id="card-cash">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Cash planning</div>
-            <h3>Upcoming major expenses</h3>
+            <div class="eyebrow">Cash position</div>
+            <h3 id="cash-title">Cash and obligations</h3>
           </div>
-          <div class="card-meta"><span class="chip" id="reserve-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="cash-chip">—</span></div>
         </div>
+        <div class="stat-strip" id="cash-stats"></div>
         <div class="table-wrap">
-          <table class="data" id="tbl-upcoming">
-            <thead><tr><th>Item</th><th>When</th><th>Status</th><th class="n">Amount</th></tr></thead>
+          <table class="data" id="tbl-cash">
+            <thead><tr><th>Line</th><th class="n">Balance</th><th>Note</th></tr></thead>
             <tbody></tbody>
             <tfoot></tfoot>
           </table>
         </div>
+        <p class="card-note" id="cash-note"></p>
       </article>
 
     </div>
@@ -916,6 +904,7 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
       <span class="section-note">Enrollment is authorization; attendance is revenue</span>
     </div>
     <div class="grid">
+
       <article class="card col-8" id="card-attendance">
         <div class="card-head">
           <div class="titles">
@@ -926,127 +915,66 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
         </div>
         <div class="chart" id="chart-attendance"></div>
         <details class="twin" id="twin-attendance"><summary>Table view</summary></details>
-        <p class="card-note">Daily census divided by the children on that month's roster. The
-          table view also carries the rate against only the children who attended at least once,
-          which is the higher of the two and the one that reflects scheduling rather than roster hygiene.</p>
+        <p class="card-note">Daily census divided by the children who attended at least once that
+          month. February and May look strong because few children were enrolled; the rate is worth
+          reading next to the enrolled count, not on its own.</p>
       </article>
 
-      <article class="card col-4" id="card-absence">
+      <article class="card col-4" id="card-rooms">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Month to date</div>
-            <h3>Why children are absent</h3>
+            <div class="eyebrow" id="rooms-eyebrow">By room</div>
+            <h3>Where the children are</h3>
           </div>
         </div>
-        <div class="table-wrap">
-          <table class="data" id="tbl-absence">
-            <thead><tr><th>Reason</th><th class="n">Share</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <p class="card-note">Transport and unexcused absences are the two the center controls directly — together about a quarter of lost days.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- ================= ENROLLMENT FLOW ================= -->
-  <section class="section" id="section-flow">
-    <div class="section-head">
-      <h2>Enrollment, pending &amp; removals</h2>
-      <span class="section-note">Seats coming in, seats going out</span>
-    </div>
-    <div class="grid">
-
-      <article class="card col-4" id="card-pipeline">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Pipeline</div>
-            <h3>Pending enrollments by stage</h3>
-          </div>
-          <div class="card-meta"><span class="chip accent" id="pipeline-chip">—</span></div>
-        </div>
-        <div class="chart" id="chart-pipeline"></div>
-        <div class="stat-strip" id="pipeline-stats"></div>
-        <p class="card-note">Stages run in order from first contact to a confirmed start date. Every pending child sits in exactly one of them.</p>
-      </article>
-
-      <article class="card col-4" id="card-removal-reasons">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Last 90 days</div>
-            <h3>Why seats opened</h3>
-          </div>
-          <div class="card-meta"><span class="chip" id="removals-chip">—</span></div>
-        </div>
-        <div class="chart" id="chart-removals"></div>
-        <p class="card-note">Aging out is predictable and should be backfilled months ahead; eligibility and attendance losses are recoverable.</p>
-      </article>
-
-      <article class="card col-4" id="card-removals">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Recent</div>
-            <h3>Removals and seat status</h3>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="data" id="tbl-removals">
-            <thead><tr><th>Date</th><th>Record</th><th>Reason</th><th>Seat</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <p class="card-note">Records are referenced by internal ID only. No names or clinical detail belong on an operations board.</p>
+        <div class="chart" id="chart-rooms"></div>
+        <div class="stat-strip" id="rooms-stats"></div>
+        <p class="card-note" id="rooms-note"></p>
       </article>
 
     </div>
   </section>
 
-  <!-- ================= PEOPLE ================= -->
-  <section class="section" id="section-people">
+  <!-- ================= ROSTER MOVEMENT ================= -->
+  <section class="section" id="section-roster">
     <div class="section-head">
-      <h2>People</h2>
-      <span class="section-note">Headcount, load and credentials</span>
+      <h2>Roster movement</h2>
+      <span class="section-note">Who started, who stopped, and who is on the report but not attending</span>
     </div>
     <div class="grid">
 
-      <article class="card col-5" id="card-staff">
+      <article class="card col-5" id="card-dormant">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Headcount</div>
-            <h3>Staff by role</h3>
+            <div class="eyebrow">Roster hygiene</div>
+            <h3>Records with no attendance</h3>
           </div>
-          <div class="card-meta"><span class="chip" id="staff-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="dormant-chip">—</span></div>
         </div>
-        <div class="chart" id="chart-staff"></div>
-        <details class="twin" id="twin-staff"><summary>Table view</summary></details>
+        <div class="chart" id="chart-dormant"></div>
+        <p class="card-note">Children carried on the attendance report who did not attend a single
+          day that month. Twelve in January, four in August. Each one is either a child to win back
+          or a record to close.</p>
       </article>
 
-      <article class="card col-3" id="card-workforce">
+      <article class="card col-7" id="card-movement">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Load</div>
-            <h3>Workforce pressure</h3>
+            <div class="eyebrow">Starts &amp; stops</div>
+            <h3>Month-to-month movement</h3>
           </div>
-        </div>
-        <div class="stat-strip no-rule" id="staff-stats" style="grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px"></div>
-        <p class="card-note">Overtime and agency shifts are what vacancies cost before they show up as turnover.</p>
-      </article>
-
-      <article class="card col-4" id="card-credentials">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Compliance</div>
-            <h3>Credentials expiring</h3>
-          </div>
-          <div class="card-meta"><span class="chip" id="cred-chip">—</span></div>
+          <div class="card-meta"><span class="chip plain" id="movement-chip">—</span></div>
         </div>
         <div class="table-wrap">
-          <table class="data" id="tbl-credentials">
-            <thead><tr><th>Who</th><th>Item</th><th class="n">Due</th></tr></thead>
+          <table class="data" id="tbl-movement">
+            <thead><tr><th>Month</th><th class="n">Started</th><th class="n">Stopped</th><th class="n">Net</th><th class="n">Enrolled</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <p class="card-note">A lapsed competency pulls a nurse off the floor the same day it expires. Treat these as staffing, not paperwork.</p>
+        <p class="card-note">Derived from the attendance report: a child counts as started in the
+          first month they attend and stopped when a month of attendance is followed by none. A long
+          hospitalization looks the same as a discharge here, so treat stops as a prompt to check,
+          not as a removal record.</p>
       </article>
 
     </div>
@@ -1055,44 +983,22 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
   <!-- ================= MARKETING ================= -->
   <section class="section" id="section-marketing">
     <div class="section-head">
-      <h2>Marketing &amp; referrals</h2>
-      <span class="section-note">What is actually filling the pipeline</span>
+      <h2>Marketing</h2>
+      <span class="section-note">What is being spent — what it produced is not tracked anywhere yet</span>
     </div>
     <div class="grid">
-
-      <article class="card col-4" id="card-sources">
+      <article class="card col-6" id="card-adspend">
         <div class="card-head">
           <div class="titles">
-            <div class="eyebrow">Last 90 days</div>
-            <h3>Referral sources</h3>
+            <div class="eyebrow">Advertising &amp; promotion</div>
+            <h3>Marketing spend by month</h3>
           </div>
-          <div class="card-meta"><span class="chip plain" id="sources-chip">—</span></div>
+          <div class="card-meta"><span class="chip" id="adspend-chip">—</span></div>
         </div>
-        <div class="chart" id="chart-sources"></div>
-        <details class="twin" id="twin-sources"><summary>Table view</summary></details>
+        <div class="chart" id="chart-adspend"></div>
+        <div class="stat-strip" id="adspend-stats"></div>
+        <p class="card-note" id="adspend-note"></p>
       </article>
-
-      <article class="card col-3" id="card-tours">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Conversion</div>
-            <h3>Tours and cost</h3>
-          </div>
-        </div>
-        <div class="stat-strip no-rule" id="tour-stats" style="grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px"></div>
-        <p class="card-note">Two clinical sources — discharge planners and pediatric practices — bring more than half of all referrals. Spend follows them.</p>
-      </article>
-
-      <article class="card col-5" id="card-marketing">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Updates</div>
-            <h3>Campaigns and outreach</h3>
-          </div>
-        </div>
-        <div class="feed" id="marketing-feed"></div>
-      </article>
-
     </div>
   </section>
 
@@ -1100,7 +1006,7 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
   <section class="section" id="section-tasks">
     <div class="section-head">
       <h2>Task board</h2>
-      <span class="section-note">Owner and due date on every line</span>
+      <span class="section-note">From the August operations discussion list</span>
     </div>
     <div class="grid">
       <article class="card col-12" id="card-tasks">
@@ -1131,7 +1037,7 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
             <tbody></tbody>
           </table>
         </div>
-        <p class="card-note">Ticking a box marks the task complete in your browser only — it is a personal working view, not a shared record. The task list itself lives in <code>assets/js/data.js</code>.</p>
+        <p class="card-note" id="tasks-note"></p>
       </article>
     </div>
   </section>
@@ -1141,8 +1047,8 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
       <strong id="foot-facility">Amazing Kids PPEC</strong> operations board.
       Every figure comes from <code>assets/js/data.js</code> — edit that one file and the whole board updates.
     </div>
-    <div class="grow" id="foot-note"></div>
     <div class="grow" id="foot-source"></div>
+    <div class="grow" id="foot-note"></div>
     <div class="grow" id="coverage-note" hidden></div>
   </footer>
 
@@ -1154,100 +1060,215 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
    SINGLE SOURCE OF TRUTH FOR EVERY NUMBER ON THE BOARD.
    Edit this file to update the dashboard. Nothing else needs to change.
 
-   SOURCES WIRED UP SO FAR
-     • Census, attendance and roster counts
-         Drive → "Amazing Kids PPEC - Monthly Attendance Report" (Jan–May 2026)
+   SOURCES
+     • Census, attendance, rooms, roster movement
+         Drive → "Monthly Student Attendance: Amazing Kids PPEC" (Jan–Aug 2026)
          Aggregated per month. Child-level rows are deliberately NOT stored here.
+     • Revenue, cost, margin, cash position
+         "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026,
+         prepared 8/28/2026. Cash basis.
      • Targets
-         Drive → "Amazing Kids PPEC - Growth Plan" ("20 Kids - Quarter 1")
+         Drive → "Amazing Kids PPEC - Growth Plan": 20 kids in Q1, $60–65K budget.
+     • Task board
+         Drive → the operations discussion list (Aug 2026).
 
-   STILL UNSOURCED — set to null, so those cards and sections stay hidden:
-     financials, operating budget, upcoming expenses, enrollment pipeline,
-     removals, staffing, marketing, task board.
+   STILL UNSOURCED — null, so those cards stay hidden: staffing headcount,
+   referral pipeline, removal reasons, campaign updates, per-category budget.
 
-   PRIVACY: the attendance report names every child. Nothing at child level
-   belongs in this file — it is a static page, and everything here ships to
-   anyone who can open it. Aggregate first, then paste the aggregates.
+   ENROLLED means a child who attended at least one day that month. Children
+   listed on the attendance report with zero days are counted separately as
+   dormant records, not as enrollment.
+
+   PRIVACY: the attendance report and the school list name every child, and the
+   balance sheet names every member. None of that belongs in this file — it is a
+   static page, and everything here ships to anyone who can open it.
    ========================================================================== */
 
 window.AKP_DATA = {
   meta: {
     facility: "Amazing Kids PPEC",
     boardName: "Operations Board",
-    asOf: "May 31, 2026",
-    period: "May 2026 · monthly attendance close",
+    asOf: "August 31, 2026",
+    period: "Census through Aug · financials through Jul",
     sampleData: false,
-    sourceNote: "Census and attendance are aggregated from the Monthly Attendance Report " +
-      "in Drive (Jan–May 2026); targets come from the Growth Plan. No child-level detail is " +
-      "stored on this page. Sections without a wired-up source stay hidden."
+    sourceNote: "Census and attendance are aggregated from the monthly attendance report " +
+      "(Jan–Aug 2026). Revenue, cost and cash come from the management report for the period " +
+      "ended 7/31/2026, prepared 8/28/2026, on a cash basis. Targets come from the growth plan. " +
+      "No child-level or member-level detail is stored on this page."
   },
 
   /* ---- Lead band --------------------------------------------------------- */
   hero: {
-    eyebrow: "May 2026 close",
+    eyebrow: "August 2026",
     label: "Average daily census",
-    value: 16.1,
+    value: 16.35,
     unit: "children/day",
-    deltaLabel: "vs. April",
-    delta: 1.2,
+    deltaLabel: "vs. July",
+    delta: 0.18,
     deltaGood: true,
     target: 20,
-    note: "322 child-days across 20 operating days; 18 of the 19 children on the roster attended at least once"
+    note: "327 child-days across 20 operating days. 20 children attended at least once; 4 more sit on the report with no attendance"
   },
 
   kpis: [
-    { key: "roster", label: "Children on roster", value: 19, format: "int",
-      sub: "on the May attendance report", delta: "−7 vs. January", deltaGood: false,
-      target: "20 in Q1", state: "warning" },
-    { key: "attending", label: "Children attending", value: 18, format: "int",
-      sub: "attended at least one day in May", delta: "+1 vs. April", deltaGood: true,
-      target: "—", state: "good" },
-    { key: "attendance", label: "Attendance rate", value: 0.847, format: "pct1",
-      sub: "daily census ÷ roster", delta: "+6.5 pts vs. April", deltaGood: true,
-      target: "—", state: "good" },
-    { key: "childdays", label: "Child-days delivered", value: 322, format: "int",
-      sub: "the billable unit", delta: "−5 vs. April", deltaGood: false,
+    { key: "enrolled", label: "Children enrolled", value: 20, format: "int",
+      sub: "attended at least one day in August", delta: "same as July", deltaGood: true,
+      target: "20 in Q1", state: "good" },
+    { key: "attendance", label: "Attendance rate", value: 0.818, format: "pct1",
+      sub: "daily census ÷ enrolled", delta: "+0.9 pts vs. July", deltaGood: true,
+      target: "—", state: "" },
+    { key: "childdays", label: "Child-days delivered", value: 327, format: "int",
+      sub: "August · the billable unit", delta: "−45 vs. July", deltaGood: false,
       target: "—", state: "warning" },
-    { key: "opdays", label: "Operating days", value: 20, format: "int",
-      sub: "in May", delta: "−2 vs. April", deltaGood: false,
-      target: "—", state: "" }
+    { key: "revenue", label: "Revenue", value: 90630, format: "usd0",
+      sub: "July · cash basis", delta: "+19% vs. June", deltaGood: true,
+      target: "—", state: "" },
+    { key: "cost", label: "Operating cost", value: 83920, format: "usd0",
+      sub: "July · wages ran $57.4K", delta: "+30% vs. June", deltaGood: false,
+      target: "≤ $65K", state: "critical" },
+    { key: "net", label: "Net income", value: 6710, format: "usd0",
+      sub: "July · 7.4% margin", delta: "−42% vs. June", deltaGood: false,
+      target: "—", state: "warning" },
+    { key: "cash", label: "Cash in bank", value: 71116, format: "usd0",
+      sub: "as of Jul 31", delta: "+$62.1K vs. a year ago", deltaGood: true,
+      target: "—", state: "good" }
   ],
 
   /* ---- Targets ----------------------------------------------------------- */
   targets: [
-    { name: "Children on roster", actual: 19, target: 20, format: "int",
+    { name: "Children enrolled", actual: 20, target: 20, format: "int",
       owner: "Growth plan", horizon: "Quarter 1", direction: "up" },
-    { name: "Average daily census", actual: 16.1, target: 20, format: "dec1",
-      owner: "Growth plan", horizon: "Quarter 1", direction: "up" }
+    { name: "Monthly operating cost", actual: 83920, target: 65000, format: "usd0",
+      owner: "Growth plan", horizon: "Monthly", direction: "down" }
   ],
-  targetsNote: "The growth plan states one goal — \"20 Kids, Quarter 1\". It is shown against " +
-    "both the roster and the daily census, because the two differ by about three children. " +
-    "Confirm which one the goal means and the other row comes out. The plan's $60–65K budget " +
-    "target needs actual spend before it can be tracked here.",
+  targetsNote: "The growth plan sets two goals: 20 children and a $60–65K monthly budget. " +
+    "Enrollment reached 20 in June and has held. Operating cost has cleared $65K in three of " +
+    "seven months, and July's $83.9K was almost entirely wages — $57.4K against a $38K run rate.",
 
-  /* ---- Monthly census ---------------------------------------------------- */
+  /* ---- Monthly census + financials --------------------------------------- */
+  /* revenue/cost are null for months the management report does not cover. */
   months: [
-    { label: "Jan", full: "Jan 2026", enrolled: 26, attending: 19, adc: 13.9, opDays: 20, childDays: 278, revenue: null, expenses: null, projected: false },
-    { label: "Feb", full: "Feb 2026", enrolled: 22, attending: 16, adc: 14.2, opDays: 20, childDays: 284, revenue: null, expenses: null, projected: false },
-    { label: "Mar", full: "Mar 2026", enrolled: 22, attending: 19, adc: 13.7, opDays: 22, childDays: 302, revenue: null, expenses: null, projected: false },
-    { label: "Apr", full: "Apr 2026", enrolled: 19, attending: 17, adc: 14.9, opDays: 22, childDays: 327, revenue: null, expenses: null, projected: false },
-    { label: "May", full: "May 2026", enrolled: 19, attending: 18, adc: 16.1, opDays: 20, childDays: 322, revenue: null, expenses: null, projected: false }
+    { label: "Jan", full: "Jan 2026", enrolled: 19, onReport: 31, dormant: 12, adc: 13.90, opDays: 20, childDays: 278, started: null, stopped: null, revenue: 59997.84,  cost: 82893.64, projected: false },
+    { label: "Feb", full: "Feb 2026", enrolled: 16, onReport: 28, dormant: 12, adc: 14.20, opDays: 20, childDays: 284, started: 0, stopped: 3, revenue: 66239.53,  cost: 65676.48, projected: false },
+    { label: "Mar", full: "Mar 2026", enrolled: 19, onReport: 28, dormant:  9, adc: 13.73, opDays: 22, childDays: 302, started: 3, stopped: 0, revenue: 73420.75,  cost: 64117.55, projected: false },
+    { label: "Apr", full: "Apr 2026", enrolled: 17, onReport: 25, dormant:  8, adc: 14.86, opDays: 22, childDays: 327, started: 1, stopped: 3, revenue: 70211.97,  cost: 61677.26, projected: false },
+    { label: "May", full: "May 2026", enrolled: 18, onReport: 25, dormant:  7, adc: 16.20, opDays: 20, childDays: 324, started: 1, stopped: 0, revenue: 96294.66,  cost: 59424.22, projected: false },
+    { label: "Jun", full: "Jun 2026", enrolled: 20, onReport: 25, dormant:  5, adc: 15.73, opDays: 22, childDays: 346, started: 2, stopped: 0, revenue: 76100.84,  cost: 64527.16, projected: false },
+    { label: "Jul", full: "Jul 2026", enrolled: 20, onReport: 25, dormant:  5, adc: 16.17, opDays: 23, childDays: 372, started: 2, stopped: 2, revenue: 90629.63,  cost: 83919.86, projected: false },
+    { label: "Aug", full: "Aug 2026", enrolled: 20, onReport: 24, dormant:  4, adc: 16.35, opDays: 20, childDays: 327, started: 1, stopped: 1, revenue: null,       cost: null,     projected: false }
   ],
   censusTarget: 20,
+  costTarget: 65000,
   projectionAssumptions: null,
 
-  /* ---- Attendance by month ---------------------------------------------- */
-  attendanceTargetRate: null,
-  attendancePeriods: [
-    { label: "Jan", sub: "2026", adc: 13.9, roster: 26, attending: 19, opDays: 20, childDays: 278 },
-    { label: "Feb", sub: "2026", adc: 14.2, roster: 22, attending: 16, opDays: 20, childDays: 284 },
-    { label: "Mar", sub: "2026", adc: 13.7, roster: 22, attending: 19, opDays: 22, childDays: 302 },
-    { label: "Apr", sub: "2026", adc: 14.9, roster: 19, attending: 17, opDays: 22, childDays: 327 },
-    { label: "May", sub: "2026", adc: 16.1, roster: 19, attending: 18, opDays: 20, childDays: 322 }
-  ],
-  absenceReasons: null,
+  financeNote: "Cash basis: income lands when the payment arrives, not when the care was " +
+    "delivered, so a heavy claims batch inflates one month and starves the next. May's $96.3K " +
+    "and January's $60.0K are the same operation. Year to date, revenue works out to $239 per " +
+    "child-day across 2,233 child-days.",
 
-  /* ---- Everything below is waiting on a source --------------------------- */
+  /* ---- Rooms (latest month) ---------------------------------------------- */
+  rooms: {
+    month: "August 2026",
+    list: [
+      { name: "Main Room",       attending: 13, onReport: 15, adc: 10.95 },
+      { name: "Total Care Room", attending:  5, onReport:  5, adc:  3.55 },
+      { name: "Infant Room",     attending:  2, onReport:  4, adc:  1.85 }
+    ],
+    partnerSchool: { name: "Sunflower Christian Academy", children: 14 }
+  },
+
+  /* ---- Cost structure ---------------------------------------------------- */
+  costLines: {
+    current: "July 2026",
+    prior: "June 2026",
+    lines: [
+      { name: "Payroll, taxes & benefits",     prior: 40952.03, current: 61613.44 },
+      { name: "Rent",                          prior: 11767.09, current: 11767.09 },
+      { name: "Contract labor & supplies",     prior:  2809.60, current:  4128.71 },
+      { name: "Dues & subscriptions",          prior:  1075.60, current:  1075.60 },
+      { name: "Bank service charges",          prior:   811.94, current:   788.00 },
+      { name: "Internet & telephone",          prior:  1250.58, current:   764.32 },
+      { name: "Direct care supplies",          prior:   729.56, current:   762.61 },
+      { name: "Advertising & promotion",       prior:   537.92, current:   689.46 },
+      { name: "Licenses & permits",            prior:     0.00, current:   663.59 },
+      { name: "Electricity",                   prior:   572.95, current:   560.76 },
+      { name: "Insurance",                     prior:   426.33, current:   445.70 },
+      { name: "Meals & entertainment",         prior:  1288.95, current:   365.63 },
+      { name: "Repairs & maintenance",         prior:  2014.21, current:   160.00 },
+      { name: "Office expenses",               prior:   105.42, current:   104.96 },
+      { name: "Janitorial",                    prior:    59.98, current:    29.99 },
+      { name: "Professional fees",             prior:   125.00, current:     0.00 }
+    ]
+  },
+
+  /* ---- Cash position ----------------------------------------------------- */
+  cash: {
+    asOf: "July 31, 2026",
+    priorLabel: "a year earlier",
+    lines: [
+      { name: "Cash in bank",           value:  71116.36, prior: 8998.70, good: true },
+      { name: "Accounts payable",       value:  -1091.51, prior: null, good: false },
+      { name: "Credit card balance",    value: -19172.01, prior: null, good: false },
+      { name: "Line of credit drawn",   value: -33962.98, prior: null, good: false }
+    ],
+    ytdNet: 50659.05,
+    ytdNetPrior: -242951.91,
+    totalAssets: 373325.57,
+    totalEquity: 319099.07,
+    note: "Cash net of every current obligation is $16,890. The year-to-date swing is the " +
+      "headline: $50.7K of net income against a $243.0K loss over the same seven months last year."
+  },
+
+  /* ---- Marketing --------------------------------------------------------- */
+  adSpend: {
+    months: [
+      { label: "Jan", value: 1749.00 }, { label: "Feb", value: 2129.00 },
+      { label: "Mar", value:  386.41 }, { label: "Apr", value:  566.17 },
+      { label: "May", value:  856.45 }, { label: "Jun", value:  537.92 },
+      { label: "Jul", value:  689.46 }
+    ],
+    ytd: 6914.41,
+    ytdPrior: 20795.07,
+    note: "Advertising and promotion is running at about a quarter of last year's pace — " +
+      "$6.9K year to date against $20.8K — while enrollment climbed from 19 to 20 and dormant " +
+      "records fell from 12 to 4. Referral sources and campaign results are not tracked in any " +
+      "file shared yet, so what is working is not visible here."
+  },
+
+  /* ---- Task board -------------------------------------------------------- */
+  tasks: [
+    { id: "T-01", title: "Generator servicing", owner: "Unassigned", due: "2026-09-30",
+      status: "Not started", priority: "High", area: "Facilities",
+      note: "Scheduled for September 2026" },
+    { id: "T-02", title: "Hire a respiratory therapist or an RN with vent experience",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Staffing" },
+    { id: "T-03", title: "Hire EMTs for the transportation routes",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Staffing" },
+    { id: "T-04", title: "Add teaching staff for the total care room",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Staffing",
+      note: "For the children with higher support needs" },
+    { id: "T-05", title: "Move to the new accounting arrangement",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Finance" },
+    { id: "T-06", title: "Settle member distributions",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Finance" },
+    { id: "T-07", title: "Spring cleaning — clear unused items and repaint the walls",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-08", title: "Mock up the indoor playground and section off the floor areas",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-09", title: "Finish the fence and the outside area",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-10", title: "Install blinds in the second total care room",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-11", title: "Order branded promo material — blankets, onesies and the rest",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Low", area: "Marketing" },
+    { id: "T-12", title: "Run more marketing campaigns, including video footage and local exposure",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Marketing" }
+  ],
+  tasksNote: "Taken from the August operations discussion list. None of them carry an owner or a " +
+    "due date yet except the generator service — add those to data.js and the board will start " +
+    "flagging what is overdue.",
+
+  /* ---- Waiting on a source ----------------------------------------------- */
   budget: null,
   upcomingExpenses: null,
   capitalReserve: null,
@@ -1255,7 +1276,8 @@ window.AKP_DATA = {
   removals: null,
   staffing: null,
   marketing: null,
-  tasks: null
+  absenceReasons: null,
+  attendanceTargetRate: null
 };
 
 
@@ -1280,11 +1302,15 @@ const Charts = (() => {
   const fmt = {
     int:   (v) => Math.round(v).toLocaleString("en-US"),
     dec1:  (v) => v.toFixed(1),
+    dec2:  (v) => v.toFixed(2),
     pct0:  (v) => Math.round(v * 100) + "%",
     pct1:  (v) => (v * 100).toFixed(1) + "%",
-    usd:   (v) => "$" + Math.round(v).toLocaleString("en-US"),
-    usdk:  (v) => (Math.abs(v) >= 1000 ? "$" + (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + "K" : "$" + Math.round(v)),
-    usdk0: (v) => "$" + Math.round(v / 1000) + "K"
+    usd:   (v) => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US"),
+    usdk:  (v) => {
+      const s = v < 0 ? "−$" : "$", a = Math.abs(v);
+      return a >= 1000 ? s + (a / 1000).toFixed(a % 1000 === 0 ? 0 : 1) + "K" : s + Math.round(a);
+    },
+    usdk0: (v) => (v < 0 ? "−$" : "$") + Math.round(Math.abs(v) / 1000) + "K"
   };
 
   /* -- rounded data-end paths --------------------------------------------- */
@@ -1311,6 +1337,20 @@ const Charts = (() => {
     const out = [];
     for (let v = lo; v <= hi + step / 1000; v += step) out.push(Math.round(v * 1e6) / 1e6);
     return out;
+  }
+
+  // Text sits on top of lines and gridlines; a surface-colored halo keeps it
+  // readable without adding a box. Width is estimated from the mono metrics.
+  function haloText(svg, x, y, text, cls, anchor) {
+    const w = text.length * 6.1 + 8;
+    const left = anchor === "end" ? x - w + 4 : x - 4;
+    svg.appendChild(el("rect", {
+      x: left, y: y - 9.5, width: w, height: 13, rx: 2,
+      fill: css("--chart-bg"), opacity: .88
+    }));
+    const t = el("text", { x, y, class: cls, "text-anchor": anchor === "end" ? "end" : "start" });
+    t.textContent = text;
+    svg.appendChild(t);
   }
 
   /* -- tooltip ------------------------------------------------------------- */
@@ -1391,6 +1431,7 @@ const Charts = (() => {
       const Y = (v) => M.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
 
       const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+      let drawTargetLabel = null;
 
       // projected region wash + label
       if (projectFrom !== null && projectFrom < labels.length) {
@@ -1416,9 +1457,9 @@ const Charts = (() => {
       // target reference
       if (target) {
         svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(target.value), y2: Y(target.value), class: "ref-line" }));
-        const t = el("text", { x: M.l + iw, y: Y(target.value) - 5, class: "ref-label", "text-anchor": "end" });
-        t.textContent = target.label;
-        svg.appendChild(t);
+        // The rule stays under the data; its label is drawn after the series
+        // so a line never runs through the text.
+        drawTargetLabel = () => haloText(svg, M.l + 6, Y(target.value) - 6, target.label, "ref-label");
       }
 
       // x labels — thinned so they never collide
@@ -1435,6 +1476,7 @@ const Charts = (() => {
       });
 
       // series
+      const ends = [];
       series.forEach((s) => {
         const color = css(s.colorVar);
         const solidEnd = projectFrom === null ? s.values.length : Math.min(projectFrom, s.values.length);
@@ -1457,13 +1499,34 @@ const Charts = (() => {
           cx: X(last), cy: Y(s.values[last]), r: 4.5,
           fill: color, stroke: surface, "stroke-width": 2
         }));
-        // one direct label per series, at the end
-        const lab = el("text", {
-          x: X(last) + 9, y: Y(s.values[last]) + 4, class: "dlabel"
-        });
-        lab.textContent = (s.endFormat || format)(s.values[last]);
+        ends.push({ x: X(last), y: Y(s.values[last]), text: (s.endFormat || format)(s.values[last]) });
+      });
+
+      // Direct end labels. Where two series land close together, separate the
+      // labels and run a leader line back to the mark rather than stacking them.
+      ends.sort((a, b) => a.y - b.y);
+      const MIN_GAP = 13;
+      for (let i = 1; i < ends.length; i++) {
+        const gap = (ends[i].ly ?? ends[i].y) - (ends[i - 1].ly ?? ends[i - 1].y);
+        if (gap < MIN_GAP) {
+          const push = (MIN_GAP - gap) / 2;
+          ends[i - 1].ly = (ends[i - 1].ly ?? ends[i - 1].y) - push;
+          ends[i].ly = (ends[i].ly ?? ends[i].y) + push;
+        }
+      }
+      ends.forEach((e) => {
+        const ly = e.ly ?? e.y;
+        if (Math.abs(ly - e.y) > 1) {
+          svg.appendChild(el("path", {
+            d: `M${e.x + 5.5},${e.y} L${e.x + 7.5},${ly - 3.5}`,
+            stroke: css("--axis"), "stroke-width": 1, fill: "none"
+          }));
+        }
+        const lab = el("text", { x: e.x + 9, y: ly + 4, class: "dlabel" });
+        lab.textContent = e.text;
         svg.appendChild(lab);
       });
+      if (drawTargetLabel) drawTargetLabel();
 
       // hover layer
       const cross = el("line", { x1: 0, x2: 0, y1: M.t, y2: M.t + ih, class: "ref-line", opacity: 0 });
@@ -1541,11 +1604,10 @@ const Charts = (() => {
       });
       svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: "axis-line" }));
 
+      let drawTargetLabel = null;
       if (target) {
         svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(target.value), y2: Y(target.value), class: "ref-line" }));
-        const t = el("text", { x: M.l + iw, y: Y(target.value) - 5, class: "ref-label", "text-anchor": "end" });
-        t.textContent = target.label;
-        svg.appendChild(t);
+        drawTargetLabel = () => haloText(svg, M.l + iw, Y(target.value) - 5, target.label, "ref-label", "end");
       }
 
       values.forEach((v, i) => {
@@ -1563,6 +1625,7 @@ const Charts = (() => {
         svg.appendChild(hit);
       });
       svg.addEventListener("mouseleave", () => tip.hide());
+      if (drawTargetLabel) drawTargetLabel();
 
       const every = Math.ceil((labels.length * 40) / iw);
       labels.forEach((l, i) => {
@@ -1660,6 +1723,10 @@ const Charts = (() => {
 /* =============================================================================
    Amazing Kids PPEC — Operations Board
    Renders every card from window.AKP_DATA. No data is defined in this file.
+
+   Any block in data.js may be null while its source is still being wired up:
+   the card hides, a section whose cards all hid drops out, and the footer says
+   what is waiting. Nothing renders half-empty and nothing is invented.
    ========================================================================== */
 
 (() => {
@@ -1669,11 +1736,6 @@ const Charts = (() => {
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  /* --- Data availability ---------------------------------------------------
-     Any block in data.js may be null or omitted while its source is still being
-     wired up. A card whose data is missing hides itself, a section whose cards
-     all hid drops out, and the footer lists what is waiting. Nothing is faked
-     and nothing renders half-empty. */
   const have = (v) => {
     if (v === null || v === undefined) return false;
     if (Array.isArray(v)) return v.length > 0;
@@ -1692,23 +1754,24 @@ const Charts = (() => {
 
   const AS_OF = new Date("2026-08-31T00:00:00");
   const MONTHS = have(D.months) ? D.months : [];
-  const ACTUALS = MONTHS.filter((m) => !m.projected);
-  const PROJECTED = MONTHS.filter((m) => m.projected);
-  const CUR = ACTUALS[ACTUALS.length - 1];
-  const PREV = ACTUALS[ACTUALS.length - 2];
-  const margin = (m) => (m.revenue - m.expenses) / m.revenue;
+  const MONEY = MONTHS.filter((m) => m.revenue != null && m.cost != null);
+  const CUR = MONTHS[MONTHS.length - 1];
+  const CUR_MONEY = MONEY[MONEY.length - 1];
+  const PREV_MONEY = MONEY[MONEY.length - 2];
+  const margin = (m) => (m.revenue - m.cost) / m.revenue;
 
-  const FMT = {
-    int: F.int, dec1: F.dec1, pct0: F.pct0, pct1: F.pct1, usd: F.usd, usdk: F.usdk
-  };
+  const FMT = { int: F.int, dec1: F.dec1, dec2: F.dec2, pct0: F.pct0, pct1: F.pct1,
+                usd: F.usd, usd0: F.usd, usdk: F.usdk };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const chip = (text, state = "", plain = false) =>
     `<span class="chip ${state}${plain ? " plain" : ""}">${esc(text)}</span>`;
   const signed = (v, digits = 1) => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(digits);
+  const signedUsd = (v) => (v >= 0 ? "+" : "−") + F.usd(Math.abs(v));
   const shortDate = (iso) =>
     new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+  const stats = (items) => items.map((s) =>
+    `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
 
-  /* -- table twin ---------------------------------------------------------- */
   function twin(node, headers, rows) {
     $$(".table-wrap", node).forEach((n) => n.remove());
     const wrap = document.createElement("div");
@@ -1721,33 +1784,30 @@ const Charts = (() => {
     node.appendChild(wrap);
   }
 
-  /* =======================================================================
-     Lead band
-     ==================================================================== */
+  /* ======================= Lead band ==================================== */
   function renderLead() {
     const lead = $("#lead");
     const h = D.hero;
-    if (!have(h) && !have(D.kpis)) { lead.hidden = true; AWAITING.push("Headline numbers"); return; }
+    if (!have(h) && !have(D.kpis)) { lead.hidden = true; return; }
     lead.innerHTML = (!have(h) ? "" :
       `<article class="card hero-card">
          <div class="card-head"><div class="titles">
-           <div class="eyebrow">${esc(h.eyebrow || "Month to date")}</div>
+           <div class="eyebrow">${esc(h.eyebrow || "Latest close")}</div>
            <h3>${esc(h.label)}</h3>
          </div></div>
          <div class="hero-figure">${h.value.toFixed(1)}<span class="unit">${esc(h.unit)}</span></div>
          <div class="hero-row">
-           <span class="delta ${h.delta >= 0 === h.deltaGood ? "up" : "down"}">${signed(h.delta)} ${esc(h.deltaLabel)}</span>
+           <span class="delta ${h.delta >= 0 === h.deltaGood ? "up" : "down"}">${signed(h.delta, 2)} ${esc(h.deltaLabel)}</span>
            ${chip("Target " + h.target, "", true)}
          </div>
          <div class="chart" id="hero-spark" style="margin:-4px 0 -2px"></div>
-         <p class="card-note">${esc(h.note)}${ACTUALS.length > 1 ? `. ${ACTUALS.length}-month trend above` : ""}.</p>
+         <p class="card-note">${esc(h.note)}.</p>
        </article>`) +
       (D.kpis || []).map((k) => {
-        const val = FMT[k.format](k.value);
-        const good = /^[+−-]?0/.test(k.delta) ? "flat" : k.deltaGood ? "up" : "down";
-        return `<article class="card tile" data-state="${k.state}">
+        const good = /^same/.test(k.delta) ? "flat" : k.deltaGood ? "up" : "down";
+        return `<article class="card tile"${k.state ? ` data-state="${k.state}"` : ""}>
           <div class="eyebrow">${esc(k.label)}</div>
-          <div class="tile-value">${esc(val)}</div>
+          <div class="tile-value">${esc(FMT[k.format](k.value))}</div>
           <div class="tile-sub">${esc(k.sub)}</div>
           <div class="tile-foot">
             <span class="delta ${good}">${esc(k.delta)}</span>
@@ -1755,16 +1815,11 @@ const Charts = (() => {
           </div>
         </article>`;
       }).join("");
-    if (have(h) && ACTUALS.length > 1) {
-      Charts.sparkline($("#hero-spark"), ACTUALS.map((m) => m.adc), { height: 44 });
-    } else if (have(h)) {
-      $("#hero-spark").hidden = true;
-    }
+    if (have(h) && MONTHS.length > 1) Charts.sparkline($("#hero-spark"), MONTHS.map((m) => m.adc), { height: 44 });
+    else if (have(h)) $("#hero-spark").hidden = true;
   }
 
-  /* =======================================================================
-     Targets
-     ==================================================================== */
+  /* ======================= Targets ====================================== */
   function renderTargets() {
     if (!need("card-targets", "Targets", D.targets)) return;
     let onTarget = 0;
@@ -1773,8 +1828,7 @@ const Charts = (() => {
       if (ratio >= 1) onTarget++;
       const state = ratio >= 1 ? "good" : ratio >= 0.92 ? "warning" : ratio >= 0.6 ? "serious" : "critical";
       const pct = Math.max(3, Math.min(100, ratio * 100));
-      const f = FMT[t.format];
-      const aim = t.direction === "up" ? "≥" : "≤";
+      const f = FMT[t.format], aim = t.direction === "up" ? "≥" : "≤";
       return `<div class="meter-row">
         <div class="meter-head">
           <span class="name">${esc(t.name)}</span>
@@ -1786,240 +1840,197 @@ const Charts = (() => {
         </div>
       </div>`;
     }).join("");
-    const note = $("#targets-note");
-    if (note && have(D.targetsNote)) note.textContent = D.targetsNote;
+    if (have(D.targetsNote)) $("#targets-note").textContent = D.targetsNote;
     const el = $("#targets-summary");
     el.textContent = `${onTarget} of ${D.targets.length} on target`;
-    el.className = "chip " + (onTarget >= D.targets.length * 0.75 ? "good" : onTarget >= D.targets.length / 2 ? "warning" : "serious");
+    el.className = "chip " + (onTarget === D.targets.length ? "good" : onTarget ? "warning" : "serious");
   }
 
-  /* =======================================================================
-     Trend charts (scoped by the control bar)
-     ==================================================================== */
-  const state = { range: 12, projection: true };
+  /* ======================= Trend charts ================================= */
+  const state = { range: 99 };
+  const slice = (rows) => (state.range >= rows.length ? rows : rows.slice(-state.range));
+  const yearLabels = (rows) => rows.map((m, i) => {
+    const yr = m.full.slice(-2);
+    return i === 0 || m.label === "Jan" ? `${m.label} '${yr}` : m.label;
+  });
 
-  function slice() {
-    const a = ACTUALS.slice(-state.range);
-    const rows = state.projection ? a.concat(PROJECTED) : a;
-    return { rows, projectFrom: state.projection ? a.length : null };
-  }
-
-  function legend(node, keys, withProjection) {
+  function legend(node, keys) {
     node.innerHTML = keys.map((k) =>
-      `<span class="key"><span class="swatch" style="background:var(${k.varName})"></span>${esc(k.name)}</span>`).join("") +
-      (withProjection ? `<span class="key"><span class="swatch dashed"></span>Projected</span>` : "");
+      `<span class="key"><span class="swatch" style="background:var(${k.varName})"></span>${esc(k.name)}</span>`).join("");
   }
 
   function renderTrends() {
-    const hasMonths = need("card-census", "Census and financial trends", ACTUALS);
-    if (!hasMonths) {
-      ["card-finance", "card-margin", "card-projection"].forEach((id) => {
-        const n = document.getElementById(id); if (n) n.hidden = true;
+    // The projection control has nothing to project against — no forecast in the data.
+    const pg = $("#proj-group"); if (pg) pg.hidden = true;
+    if (MONTHS.length <= 6) { const c = $("#controls"); if (c) c.hidden = true; }
+
+    if (need("card-census", "Census", MONTHS)) {
+      const rows = slice(MONTHS), labels = yearLabels(rows), full = rows.map((m) => m.full);
+      legend($("#legend-census"), [
+        { name: "Children enrolled", varName: "--series-1" },
+        { name: "Average daily census", varName: "--series-2" }
+      ]);
+      Charts.line($("#chart-census"), {
+        labels,
+        series: [
+          { name: "Enrolled", colorVar: "--series-1", values: rows.map((m) => m.enrolled) },
+          { name: "Avg daily census", colorVar: "--series-2", values: rows.map((m) => m.adc),
+            endFormat: F.dec1, tipFormat: F.dec1 }
+        ],
+        format: F.int,
+        target: have(D.censusTarget) ? { value: D.censusTarget, label: `TARGET ${D.censusTarget}` } : null,
+        tipTitle: (i) => full[i],
+        tipNote: (i) => `${F.pct1(rows[i].adc / rows[i].enrolled)} attendance · ` +
+          `${rows[i].childDays} child-days over ${rows[i].opDays} days`
       });
-      const ctl = $("#controls"); if (ctl) ctl.hidden = true;
+      twin($("#twin-census"), ["Month", "Enrolled", "On report", "No attendance", "Operating days", "Child-days", "Daily census"],
+        rows.map((m) => [m.full, F.int(m.enrolled), F.int(m.onReport), F.int(m.dormant),
+          F.int(m.opDays), F.int(m.childDays), F.dec1(m.adc)]));
+      const gap = $("#census-gap");
+      if (have(D.censusTarget)) {
+        const short = D.censusTarget - CUR.enrolled;
+        gap.textContent = short > 0 ? `${short} short of ${D.censusTarget} enrolled`
+                                    : `enrolled target of ${D.censusTarget} met`;
+      } else gap.hidden = true;
+    }
+
+    if (!need("card-finance", "Revenue and cost", MONEY)) {
+      const m = document.getElementById("card-margin"); if (m) m.hidden = true;
       return;
     }
-    const hasMoney = ACTUALS.some((m) => m.revenue != null && m.expenses != null);
-    if (!hasMoney) {
-      ["card-finance", "card-margin", "card-projection"].forEach((id) => {
-        const n = document.getElementById(id); if (n) n.hidden = true;
-      });
-      if (!AWAITING.includes("Revenue, expenses and margin")) AWAITING.push("Revenue, expenses and margin");
-    }
-    if (ACTUALS.length <= 6 && !PROJECTED.length) {
-      const ctl = $("#controls"); if (ctl) ctl.hidden = true;
-    }
-    if (!PROJECTED.length) {
-      const pg = $("#proj-group"); if (pg) pg.hidden = true;
-      const pc = document.getElementById("card-projection"); if (pc) pc.hidden = true;
-      state.projection = false;
-    }
-    const { rows, projectFrom } = slice();
-    const full = rows.map((m) => m.full);
-    const labels = rows.map((m, i) => {
-      const yr = m.full.slice(-2);
-      return i === 0 || m.label === "Jan" ? `${m.label} '${yr}` : m.label;
-    });
+    const rows = slice(MONEY), labels = yearLabels(rows), full = rows.map((m) => m.full);
 
-    // Census & enrollment — two counts of children, one axis.
-    legend($("#legend-census"), [
-      { name: "Enrolled", varName: "--series-1" },
-      { name: "Average daily census", varName: "--series-2" }
-    ], state.projection);
-    Charts.line($("#chart-census"), {
-      labels,
-      series: [
-        { name: "Enrolled", colorVar: "--series-1", values: rows.map((m) => m.enrolled) },
-        { name: "Avg daily census", colorVar: "--series-2", values: rows.map((m) => m.adc), endFormat: F.dec1, tipFormat: F.dec1 }
-      ],
-      format: F.int,
-      projectFrom,
-      target: have(D.censusTarget) ? { value: D.censusTarget, label: `TARGET ${D.censusTarget}` } : null,
-      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
-      tipNote: (i) => "Attendance " + F.pct1(rows[i].adc / rows[i].enrolled)
-    });
-    twin($("#twin-census"), ["Month", "Enrolled", "Avg daily census", "Attendance"],
-      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.int(m.enrolled), F.dec1(m.adc), F.pct1(m.adc / m.enrolled)]));
-    const gap = $("#census-gap");
-    if (have(D.censusTarget)) {
-      const short = D.censusTarget - CUR.enrolled;
-      gap.textContent = short > 0 ? `${short} short of the target of ${D.censusTarget}`
-                                  : `at or above the target of ${D.censusTarget}`;
-    } else { gap.hidden = true; }
-
-    if (!hasMoney) return;
-
-    // Revenue & expenses — both dollars, one axis.
     legend($("#legend-finance"), [
       { name: "Revenue", varName: "--series-1" },
-      { name: "Operating expenses", varName: "--series-2" }
-    ], state.projection);
+      { name: "Operating cost", varName: "--series-2" }
+    ]);
     Charts.line($("#chart-finance"), {
       labels,
       series: [
         { name: "Revenue", colorVar: "--series-1", values: rows.map((m) => m.revenue), endFormat: F.usdk, tipFormat: F.usd },
-        { name: "Operating expenses", colorVar: "--series-2", values: rows.map((m) => m.expenses), endFormat: F.usdk, tipFormat: F.usd }
+        { name: "Operating cost", colorVar: "--series-2", values: rows.map((m) => m.cost), endFormat: F.usdk, tipFormat: F.usd }
       ],
       format: F.usdk,
       yZero: true,
-      projectFrom,
-      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
-      tipNote: (i) => "Net " + F.usd(rows[i].revenue - rows[i].expenses) + " · " + F.pct1(margin(rows[i]))
+      target: have(D.costTarget) ? { value: D.costTarget, label: `COST TARGET ${F.usdk(D.costTarget)}` } : null,
+      tipTitle: (i) => full[i],
+      tipNote: (i) => `Net ${F.usd(rows[i].revenue - rows[i].cost)} · ${F.pct1(margin(rows[i]))} margin` +
+        (rows[i].childDays ? ` · ${F.usd(rows[i].revenue / rows[i].childDays)} per child-day` : "")
     });
-    twin($("#twin-finance"), ["Month", "Revenue", "Expenses", "Net", "Margin"],
-      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.usd(m.revenue), F.usd(m.expenses),
-        F.usd(m.revenue - m.expenses), F.pct1(margin(m))]));
+    twin($("#twin-finance"), ["Month", "Revenue", "Operating cost", "Net", "Margin", "Per child-day"],
+      rows.map((m) => [m.full, F.usd(m.revenue), F.usd(m.cost), F.usd(m.revenue - m.cost),
+        F.pct1(margin(m)), m.childDays ? F.usd(m.revenue / m.childDays) : "—"]));
     $("#finance-note").textContent =
-      `${CUR.full}: ${F.usdk(CUR.revenue)} in, ${F.usdk(CUR.revenue - CUR.expenses)} net`;
+      `${CUR_MONEY.full}: ${F.usdk(CUR_MONEY.revenue)} in, ${F.usdk(CUR_MONEY.revenue - CUR_MONEY.cost)} net`;
+    if (have(D.financeNote)) $("#finance-caveat").textContent = D.financeNote;
 
-    // Net margin — a single series, so no legend box.
     Charts.line($("#chart-margin"), {
       labels,
-      series: [{ name: "Net margin", colorVar: "--series-1", values: rows.map(margin), endFormat: F.pct1, tipFormat: F.pct1 }],
+      series: [{ name: "Net margin", colorVar: "--series-1", values: rows.map(margin),
+                 endFormat: F.pct1, tipFormat: F.pct1 }],
       format: F.pct0,
       height: 196,
-      projectFrom,
-      target: { value: 0.15, label: "TARGET 15%" },
-      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
-      tipNote: (i) => F.usd(rows[i].revenue - rows[i].expenses) + " on " + F.usd(rows[i].revenue)
+      tipTitle: (i) => full[i],
+      tipNote: (i) => `${F.usd(rows[i].revenue - rows[i].cost)} on ${F.usd(rows[i].revenue)}`
     });
     twin($("#twin-margin"), ["Month", "Net", "Margin"],
-      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.usd(m.revenue - m.expenses), F.pct1(margin(m))]));
+      rows.map((m) => [m.full, F.usd(m.revenue - m.cost), F.pct1(margin(m))]));
+
+    const mv = margin(CUR_MONEY), pv = PREV_MONEY ? margin(PREV_MONEY) : null;
+    const mc = $("#margin-chip");
+    mc.textContent = `${F.pct1(mv)} in ${CUR_MONEY.label}` +
+      (pv === null ? "" : ` · ${signed((mv - pv) * 100)} pts vs. ${PREV_MONEY.label}`);
+    mc.className = "chip " + (mv >= 0.15 ? "good" : mv >= 0.05 ? "warning" : mv >= 0 ? "serious" : "critical");
   }
 
-  /* =======================================================================
-     Projection table
-     ==================================================================== */
-  function renderProjection() {
-    if (have(CUR) && have(PREV) && CUR.revenue != null && PREV.revenue != null) {
-      const m = margin(CUR), pm = margin(PREV);
-      const mc = $("#margin-chip");
-      mc.textContent = `${F.pct1(m)} MTD · ${signed((m - pm) * 100)} pts vs. ${PREV.label}`;
-      mc.className = "chip " + (m >= 0.15 ? "good" : m >= 0.12 ? "warning" : "serious");
-    }
-    if (!need("card-projection", null, PROJECTED)) return;
-    $("#tbl-projection tbody").innerHTML = PROJECTED.map((m) =>
-      `<tr><td>${esc(m.full)}</td><td class="n">${F.int(m.enrolled)}</td><td class="n">${F.dec1(m.adc)}</td>
-       <td class="n">${esc(F.usdk(m.revenue))}</td><td class="n">${esc(F.pct1(margin(m)))}</td></tr>`).join("");
-    $("#assumptions").innerHTML = (D.projectionAssumptions || []).map((a) => `<li>${esc(a)}</li>`).join("");
-  }
-
-  /* =======================================================================
-     Budget, expense mix, upcoming expenses
-     ==================================================================== */
-  function renderMoney() {
-    renderUpcoming();
-    if (!need("card-budget", "Operating budget", D.budget, D.budget && D.budget.categories)) {
-      const mix = document.getElementById("card-expense-mix"); if (mix) mix.hidden = true;
+  /* ======================= Cost structure & mix ========================= */
+  function renderCosts() {
+    if (!need("card-costs", "Cost structure", D.costLines, D.costLines && D.costLines.lines)) {
+      const mix = document.getElementById("card-mix"); if (mix) mix.hidden = true;
       return;
     }
-    const b = D.budget;
-    const tb = b.categories.reduce((a, c) => a + c.budget, 0);
-    const ta = b.categories.reduce((a, c) => a + c.actual, 0);
-    $("#budget-title").textContent = `Budget vs. actual — ${b.month}`;
+    const c = D.costLines;
+    const lines = c.lines.slice().sort((a, b) => b.current - a.current);
+    const totC = lines.reduce((a, l) => a + l.current, 0);
+    const totP = lines.reduce((a, l) => a + l.prior, 0);
 
-    $("#budget-stats").innerHTML = [
-      { k: "Revenue budget", v: F.usdk(b.revenueBudget) },
-      { k: "Revenue actual", v: F.usdk(b.revenueActual) },
-      { k: "Expense budget", v: F.usdk(tb) },
-      { k: "Expense actual", v: F.usdk(ta) },
-      { k: "Net result", v: F.usdk(b.revenueActual - ta) }
-    ].map((s) => `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
-
-    $("#tbl-budget tbody").innerHTML = b.categories.map((c) => {
-      const varr = c.budget - c.actual;          // positive = under budget
-      const over = varr < 0;
-      const sev = !over ? "" : Math.abs(varr) / c.budget > 0.08 ? "critical" : "serious";
+    $("#costs-title").textContent = `Where the cost went — ${c.current}`;
+    $("#th-prior").textContent = c.prior;
+    $("#th-current").textContent = c.current;
+    $("#tbl-costs tbody").innerHTML = lines.map((l) => {
+      const d = l.current - l.prior;
+      const big = Math.abs(d) >= totC * 0.02;
+      const sev = !big ? "" : d > 0 ? "serious" : "good";
       return `<tr>
-        <td>${esc(c.name)}</td>
-        <td class="n">${esc(F.usd(c.budget))}</td>
-        <td class="n">${esc(F.usd(c.actual))}</td>
-        <td class="n">${chip((over ? "over " : "under ") + F.usd(Math.abs(varr)), sev, !over)}</td>
-        <td class="n">${esc(F.pct0(c.actual / c.budget))}</td>
+        <td>${esc(l.name)}</td>
+        <td class="n">${esc(F.usd(l.prior))}</td>
+        <td class="n">${esc(F.usd(l.current))}</td>
+        <td class="n">${Math.abs(d) < 1 ? chip("flat", "", true) : chip(signedUsd(d), sev, !big)}</td>
       </tr>`;
     }).join("");
-    $("#tbl-budget tfoot").innerHTML =
-      `<tr><td>Total operating expense</td><td class="n">${esc(F.usd(tb))}</td><td class="n">${esc(F.usd(ta))}</td>
-       <td class="n">${chip("under " + F.usd(tb - ta), "", true)}</td><td class="n">${esc(F.pct1(ta / tb))}</td></tr>`;
-    const bc = $("#budget-chip");
-    bc.textContent = `${F.pct1(ta / tb)} of budget used`;
-    bc.className = "chip " + (ta <= tb ? "good" : "serious");
+    const dt = totC - totP;
+    $("#tbl-costs tfoot").innerHTML =
+      `<tr><td>Total operating cost</td><td class="n">${esc(F.usd(totP))}</td>
+       <td class="n">${esc(F.usd(totC))}</td>
+       <td class="n">${chip(signedUsd(dt), dt > 0 ? "serious" : "good")}</td></tr>`;
+    const cc = $("#costs-chip");
+    const overBy = have(D.costTarget) ? totC - D.costTarget : null;
+    cc.textContent = overBy === null ? F.usd(totC)
+      : overBy > 0 ? `${F.usdk(overBy)} over the ${F.usdk(D.costTarget)} target`
+                   : `${F.usdk(-overBy)} under the ${F.usdk(D.costTarget)} target`;
+    cc.className = "chip " + (overBy === null ? "" : overBy > 0 ? "critical" : "good");
+    if (overBy !== null && overBy > 0) $("#card-costs").dataset.state = "critical";
 
-    // Expense mix — nominal categories, one color.
-    Charts.bars($("#chart-expense-mix"), {
-      rows: b.categories.slice().sort((x, y) => y.actual - x.actual)
-        .map((c) => ({ label: c.name, value: c.actual / ta, note: F.usd(c.actual) })),
+    // Composition — nominal lines, one color, small tail folded into Other.
+    const top = lines.slice(0, 8);
+    const rest = lines.slice(8).reduce((a, l) => a + l.current, 0);
+    $("#mix-title").textContent = `Share of ${c.current} cost`;
+    Charts.bars($("#chart-mix"), {
+      rows: top.map((l) => ({ label: l.name, value: l.current / totC, note: F.usd(l.current) }))
+        .concat(rest > 0 ? [{ label: "Everything else", value: rest / totC, note: F.usd(rest) }] : []),
       format: F.pct0,
-      seriesName: "Share of spend"
+      seriesName: "Share of cost"
     });
-
   }
 
-  function renderUpcoming() {
-    if (!need("card-upcoming", "Upcoming major expenses", D.upcomingExpenses)) return;
-    // Soonest first.
-    const parse = (w) => new Date(w.replace(/^(\w+)\s+(\d{4})$/, "$1 1, $2")).getTime();
-    const up = D.upcomingExpenses.slice().sort((a, z) => parse(a.when) - parse(z.when));
-    const total = up.reduce((a, e) => a + e.amount, 0);
-    $("#tbl-upcoming tbody").innerHTML = up.map((e) => {
-      const st = e.status === "Board approved" ? "good"
-        : e.status === "Budgeted" ? "good"
-        : e.status === "Quote pending" ? "warning" : "";
-      return `<tr>
-        <td>${esc(e.item)}<span class="sub">${esc(e.category)} · ${esc(e.note)}</span></td>
-        <td class="mono">${esc(e.when)}</td>
-        <td>${chip(e.status, st, !st)}</td>
-        <td class="n">${esc(F.usd(e.amount))}</td>
-      </tr>`;
-    }).join("");
-    $("#tbl-upcoming tfoot").innerHTML =
-      `<tr><td colspan="3">Committed and planned over the next six months</td><td class="n">${esc(F.usd(total))}</td></tr>`;
-    const rc = $("#reserve-chip");
-    const cover = D.capitalReserve - total;
-    rc.textContent = `${F.usdk(D.capitalReserve)} reserve · ${F.usdk(cover)} left after`;
-    rc.className = "chip " + (cover > total * 0.25 ? "good" : cover > 0 ? "warning" : "critical");
-    if (cover <= 0) $("#card-upcoming").dataset.state = "critical";
-    else if (cover < total * 0.25) $("#card-upcoming").dataset.state = "warning";
-    else delete $("#card-upcoming").dataset.state;
+  /* ======================= Cash ========================================= */
+  function renderCash() {
+    if (!need("card-cash", "Cash position", D.cash, D.cash && D.cash.lines)) return;
+    const c = D.cash;
+    $("#cash-title").textContent = `Cash and obligations — ${c.asOf}`;
+    const obligations = c.lines.filter((l) => l.value < 0).reduce((a, l) => a + l.value, 0);
+    const cashLine = c.lines.find((l) => l.value > 0);
+    const net = c.lines.reduce((a, l) => a + l.value, 0);
+
+    $("#cash-stats").innerHTML = stats([
+      { v: F.usdk(cashLine ? cashLine.value : 0), k: "Cash in bank" },
+      { v: F.usdk(-obligations), k: "Current obligations" },
+      { v: F.usdk(net), k: "Cash net of obligations" },
+      { v: F.usdk(c.ytdNet), k: "Net income, year to date" },
+      { v: F.usdk(c.ytdNetPrior), k: "Same period last year" },
+      { v: F.usdk(c.totalEquity), k: "Total equity" }
+    ]);
+    $("#tbl-cash tbody").innerHTML = c.lines.map((l) =>
+      `<tr><td>${esc(l.name)}</td>
+       <td class="n">${esc(F.usd(l.value))}</td>
+       <td>${l.prior != null ? chip(`${F.usd(l.prior)} ${esc(c.priorLabel)}`, "", true) : ""}</td></tr>`).join("");
+    $("#tbl-cash tfoot").innerHTML =
+      `<tr><td>Cash net of current obligations</td><td class="n">${esc(F.usd(net))}</td><td></td></tr>`;
+    const chipEl = $("#cash-chip");
+    chipEl.textContent = net > 0 ? `${F.usdk(net)} net of obligations` : `${F.usdk(net)} short of obligations`;
+    chipEl.className = "chip " + (net > 0 ? "good" : "critical");
+    if (have(c.note)) $("#cash-note").textContent = c.note;
   }
 
-  /* =======================================================================
-     Attendance
-     ==================================================================== */
+  /* ======================= Attendance & rooms =========================== */
   function renderAttendance() {
-    if (!need("card-absence", null, D.absenceReasons)) { /* card hidden */ }
-    else {
-      $("#tbl-absence tbody").innerHTML = D.absenceReasons.map((r) =>
-        `<tr><td>${esc(r.reason)}${r.note ? `<span class="sub">${esc(r.note)}</span>` : ""}</td>
-         <td class="n">${esc(F.pct0(r.share))}</td></tr>`).join("");
-    }
-    if (!need("card-attendance", "Attendance", D.attendancePeriods)) return;
-    const a = D.attendancePeriods;
-    const rate = (d) => d.adc / d.roster;
-
+    renderRooms();
+    if (!need("card-attendance", "Attendance", MONTHS)) return;
+    const a = MONTHS;
+    const rate = (m) => m.adc / m.enrolled;
     Charts.columns($("#chart-attendance"), {
-      labels: a.map((d) => d.label),
-      sublabels: a.map((d) => d.sub),
+      labels: a.map((m) => m.label),
+      sublabels: a.map((m) => m.full.slice(-4)),
       values: a.map(rate),
       format: F.pct1,
       yFormat: F.pct0,
@@ -2027,177 +2038,118 @@ const Charts = (() => {
       target: have(D.attendanceTargetRate)
         ? { value: D.attendanceTargetRate, label: "TARGET " + F.pct0(D.attendanceTargetRate) } : null,
       seriesName: "Attendance",
-      tipTitle: (i) => a[i].label + " " + a[i].sub,
-      tipNote: (i) => `${F.dec1(a[i].adc)} of ${a[i].roster} on the roster · ` +
-        `${F.pct0(a[i].adc / a[i].attending)} of the ${a[i].attending} who attended`
+      tipTitle: (i) => a[i].full,
+      tipNote: (i) => `${F.dec1(a[i].adc)} of ${a[i].enrolled} enrolled · ${a[i].childDays} child-days`
     });
-    twin($("#twin-attendance"),
-      ["Month", "Roster", "Attended", "Operating days", "Child-days", "Daily census", "Rate vs. roster", "Rate vs. attending"],
-      a.map((d) => [d.label + " " + d.sub, F.int(d.roster), F.int(d.attending), F.int(d.opDays),
-        F.int(d.childDays), F.dec1(d.adc), F.pct1(rate(d)), F.pct1(d.adc / d.attending)]));
+    twin($("#twin-attendance"), ["Month", "Enrolled", "Operating days", "Child-days", "Daily census", "Attendance rate"],
+      a.map((m) => [m.full, F.int(m.enrolled), F.int(m.opDays), F.int(m.childDays), F.dec1(m.adc), F.pct1(rate(m))]));
 
     const cur = a[a.length - 1], prev = a[a.length - 2];
     const ac = $("#attendance-chip");
-    const delta = prev ? signed((rate(cur) - rate(prev)) * 100) + " pts vs. " + prev.label : "";
-    ac.textContent = `${F.pct1(rate(cur))} in ${cur.label}${delta ? " · " + delta : ""}`;
+    ac.textContent = `${F.pct1(rate(cur))} in ${cur.label}` +
+      (prev ? ` · ${signed((rate(cur) - rate(prev)) * 100)} pts vs. ${prev.label}` : "");
     ac.className = "chip " + (rate(cur) >= 0.85 ? "good" : rate(cur) >= 0.75 ? "warning" : "serious");
-    delete $("#card-attendance").dataset.state;
   }
 
-  /* =======================================================================
-     Pipeline & removals
-     ==================================================================== */
-  function renderFlow() {
-    renderRemovals();
-    if (!need("card-pipeline", "Enrollment pipeline", D.pipeline, D.pipeline && D.pipeline.stages)) return;
-    const p = D.pipeline;
-    const total = p.stages.reduce((a, s) => a + s.count, 0);
-    Charts.bars($("#chart-pipeline"), {
-      rows: p.stages.map((s) => ({ label: s.name, value: s.count, note: s.note })),
-      format: F.int,
-      ramp: ["--ord-1", "--ord-2", "--ord-3", "--ord-4", "--ord-5"],
-      seriesName: "Children"
+  function renderRooms() {
+    if (!need("card-rooms", null, D.rooms, D.rooms && D.rooms.list)) return;
+    const r = D.rooms;
+    $("#rooms-eyebrow").textContent = r.month;
+    Charts.bars($("#chart-rooms"), {
+      rows: r.list.map((x) => ({ label: x.name, value: x.adc,
+        note: `${x.attending} attending of ${x.onReport} on the report` })),
+      format: F.dec1,
+      seriesName: "Daily census"
     });
-    $("#pipeline-chip").textContent = `${total} pending`;
-    $("#pipeline-stats").innerHTML = [
-      { v: F.int(p.referrals30), k: "Referrals, last 30 days" },
-      { v: F.pct0(p.conversion), k: "Referral to start" },
-      { v: F.int(p.avgDaysToStart) + " d", k: "Avg. days to start" },
-      { v: F.int(p.stalled), k: "Stalled over 45 days" }
-    ].map((s) => `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
-
-  }
-
-  function renderRemovals() {
-    const r = D.removals;
-    if (!need("card-removal-reasons", "Removals", r, r && r.reasons90)) {
-      if (!need("card-removals", null, r, r && r.recent)) return;
+    const totalAttending = r.list.reduce((a, x) => a + x.attending, 0);
+    $("#rooms-stats").innerHTML = stats([
+      { v: F.int(totalAttending), k: "Children attending" },
+      { v: F.int(r.list.length), k: "Rooms in use" }
+    ].concat(have(r.partnerSchool)
+      ? [{ v: F.int(r.partnerSchool.children), k: "At the partner school" }] : []));
+    if (have(r.partnerSchool)) {
+      $("#rooms-note").textContent =
+        `${r.partnerSchool.children} of the children are enrolled at ${r.partnerSchool.name}. ` +
+        `Bars are average daily census, so they add to the centre's ${F.dec1(CUR.adc)}.`;
     }
-    if (have(r) && have(r.reasons90)) Charts.bars($("#chart-removals"), {
-      rows: r.reasons90.map((x) => ({ label: x.reason, value: x.count })),
-      format: F.int,
-      colorVar: "--series-2",
-      seriesName: "Children"
-    });
-    if (have(r) && have(r.reasons90)) {
-      const n90 = r.reasons90.reduce((a, x) => a + x.count, 0);
-      const rc = $("#removals-chip");
-      rc.textContent = `${n90} in 90 days${r.ytd ? ` · ${r.ytd} YTD` : ""}`;
-      rc.className = "chip";
+  }
+
+  /* ======================= Roster movement ============================== */
+  function renderRoster() {
+    if (need("card-dormant", "Roster hygiene", MONTHS)) {
+      Charts.columns($("#chart-dormant"), {
+        labels: MONTHS.map((m) => m.label),
+        sublabels: MONTHS.map((m) => m.full.slice(-4)),
+        values: MONTHS.map((m) => m.dormant),
+        format: F.int,
+        height: 196,
+        seriesName: "No attendance",
+        tipTitle: (i) => MONTHS[i].full,
+        tipNote: (i) => `${MONTHS[i].onReport} on the report, ${MONTHS[i].enrolled} attended`
+      });
+      const dc = $("#dormant-chip");
+      dc.textContent = `${CUR.dormant} of ${CUR.onReport} on the report in ${CUR.label}`;
+      dc.className = "chip " + (CUR.dormant <= 2 ? "good" : CUR.dormant <= 5 ? "warning" : "serious");
     }
-    if (!need("card-removals", null, r, r && r.recent)) return;
-    $("#tbl-removals tbody").innerHTML = r.recent.map((x) =>
-      `<tr><td class="mono">${esc(x.date)}</td><td class="mono">${esc(x.record)}</td>
-       <td>${esc(x.reason)}</td>
-       <td>${chip(x.seat, x.seat.startsWith("Filled") ? "good" : x.seat === "Open" ? "serious" : "warning")}</td></tr>`).join("");
+
+    const moved = MONTHS.filter((m) => m.started != null);
+    if (!need("card-movement", null, moved)) return;
+    $("#tbl-movement tbody").innerHTML = moved.map((m) => {
+      const net = m.started - m.stopped;
+      return `<tr>
+        <td>${esc(m.full)}</td>
+        <td class="n">${m.started || "—"}</td>
+        <td class="n">${m.stopped || "—"}</td>
+        <td class="n">${net === 0 ? chip("flat", "", true) : chip(signed(net, 0), net > 0 ? "good" : "serious")}</td>
+        <td class="n">${F.int(m.enrolled)}</td>
+      </tr>`;
+    }).join("");
+    const started = moved.reduce((a, m) => a + m.started, 0);
+    const stopped = moved.reduce((a, m) => a + m.stopped, 0);
+    $("#movement-chip").textContent = `${started} started, ${stopped} stopped since ${moved[0].label}`;
   }
 
-  /* =======================================================================
-     People
-     ==================================================================== */
-  function renderPeople() {
-    const s = D.staffing || {};
-    if (!need("card-workforce", null, s.stats)) { /* hidden */ }
-    if (!need("card-credentials", null, s.credentials)) { /* hidden */ }
-    if (!need("card-staff", "Staffing", s.roles)) { renderStaffExtras(s); return; }
-    const total = s.roles.reduce((a, r) => a + r.count, 0);
-    const open = s.roles.reduce((a, r) => a + r.open, 0);
-    Charts.bars($("#chart-staff"), {
-      rows: s.roles.map((r) => ({ label: r.role, value: r.count, note: r.open ? `${r.open} open` : "fully staffed" })),
-      format: F.int,
-      seriesName: "On payroll"
-    });
-    twin($("#twin-staff"), ["Role", "On payroll", "Open"],
-      s.roles.map((r) => [r.role, F.int(r.count), r.open ? F.int(r.open) : "—"]));
-    const sc = $("#staff-chip");
-    sc.textContent = `${total} on payroll · ${open} open`;
-    sc.className = "chip " + (open === 0 ? "good" : open <= 2 ? "warning" : "serious");
-
-    renderStaffExtras(s);
-  }
-
-  function renderStaffExtras(s) {
-    if (have(s.stats)) {
-    const st = s.stats;
-    $("#staff-stats").innerHTML = [
-      { v: F.int(st.overtimeHours), k: `Overtime hours (target ${st.overtimeTarget})` },
-      { v: F.int(st.agencyShifts), k: "Agency shifts filled" },
-      { v: F.pct1(st.calloutRate), k: "Call-out rate" },
-      { v: F.pct0(st.turnover12mo), k: "Turnover, 12 months" },
-      { v: st.nurseToChild, k: "Nurse to child ratio" }
-    ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
-    }
-    if (!have(s.credentials)) return;
-    $("#tbl-credentials tbody").innerHTML = s.credentials.map((c) =>
-      `<tr><td>${esc(c.who)}</td><td>${esc(c.item)}</td>
-       <td class="n">${chip(c.due, c.state)}</td></tr>`).join("");
-    const urgent = s.credentials.filter((c) => c.state === "critical").length;
-    const cc = $("#cred-chip");
-    cc.textContent = urgent ? `${urgent} expiring within days` : "none urgent";
-    cc.className = "chip " + (urgent ? "critical" : "good");
-  }
-
-  /* =======================================================================
-     Marketing
-     ==================================================================== */
+  /* ======================= Marketing ==================================== */
   function renderMarketing() {
-    const m = D.marketing || {};
-    if (!need("card-tours", null, m.tours)) { /* hidden */ }
-    if (!need("card-marketing", null, m.updates)) { /* hidden */ }
-    if (!need("card-sources", "Marketing", m.sources90)) { renderMarketingExtras(m); return; }
-    const total = m.sources90.reduce((a, s) => a + s.count, 0);
-    Charts.bars($("#chart-sources"), {
-      rows: m.sources90.map((s) => ({ label: s.source, value: s.count, note: F.pct0(s.count / total) + " of referrals" })),
-      format: F.int,
-      seriesName: "Referrals"
+    if (!need("card-adspend", "Marketing", D.adSpend, D.adSpend && D.adSpend.months)) return;
+    const a = D.adSpend;
+    Charts.columns($("#chart-adspend"), {
+      labels: a.months.map((m) => m.label),
+      values: a.months.map((m) => m.value),
+      format: F.usd,
+      yFormat: F.usdk,
+      height: 190,
+      seriesName: "Spend",
+      tipTitle: (i) => a.months[i].label
     });
-    twin($("#twin-sources"), ["Source", "Referrals", "Share"],
-      m.sources90.map((s) => [s.source, F.int(s.count), F.pct0(s.count / total)]));
-    $("#sources-chip").textContent = `${total} referrals`;
-    renderMarketingExtras(m);
+    $("#adspend-stats").innerHTML = stats([
+      { v: F.usdk(a.ytd), k: "Year to date" },
+      { v: F.usdk(a.ytdPrior), k: "Same period last year" },
+      { v: F.usd(a.months[a.months.length - 1].value), k: "Latest month" }
+    ]);
+    const ch = $("#adspend-chip");
+    ch.textContent = `${F.pct0(a.ytd / a.ytdPrior)} of last year's spend`;
+    ch.className = "chip";
+    if (have(a.note)) $("#adspend-note").textContent = a.note;
   }
 
-  function renderMarketingExtras(m) {
-    if (have(m.tours)) $("#tour-stats").innerHTML = [
-      { v: F.int(m.tours.booked), k: "Tours booked" },
-      { v: F.int(m.tours.completed), k: "Tours completed" },
-      { v: F.int(m.tours.converted), k: "Converted to start" },
-      { v: m.tours.completed ? F.pct0(m.tours.converted / m.tours.completed) : "—", k: "Tour conversion" },
-      { v: F.usdk(m.spend90), k: "Spend, last 90 days" },
-      { v: F.usd(m.costPerStart), k: "Cost per start" }
-    ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
-    if (!have(m.updates)) return;
-    $("#marketing-feed").innerHTML = m.updates.map((u) =>
-      `<div class="feed-item">
-         <div class="when">${esc(u.date)}</div>
-         <div class="body">
-           <div class="t">${esc(u.title)}</div>
-           <div class="d">${esc(u.detail)}</div>
-           <div>${chip(u.tag, u.state === "pending" ? "accent" : u.state)}</div>
-         </div>
-       </div>`).join("");
-  }
-
-  /* =======================================================================
-     Task board
-     ==================================================================== */
+  /* ======================= Task board =================================== */
   const DONE_KEY = "akp.tasks.done";
   const readDone = () => {
-    try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); }
-    catch { return new Set(); }
+    try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); } catch { return new Set(); }
   };
   const writeDone = (set) => {
     try { localStorage.setItem(DONE_KEY, JSON.stringify(Array.from(set))); } catch { /* private mode */ }
   };
   let taskFilter = "open";
-
-  function isDone(t, done) { return t.status === "Done" || done.has(t.id); }
-  function isOverdue(t, done) { return !isDone(t, done) && new Date(t.due + "T00:00:00") < AS_OF; }
+  const isDone = (t, done) => t.status === "Done" || done.has(t.id);
+  const isOverdue = (t, done) => !!t.due && !isDone(t, done) && new Date(t.due + "T00:00:00") < AS_OF;
 
   function renderTasks() {
     if (!need("card-tasks", "Task board", D.tasks)) return;
     const done = readDone();
-    const all = D.tasks.slice().sort((a, b) => a.due.localeCompare(b.due));
+    // Undated work sorts last — it is not late, it is unscheduled.
+    const all = D.tasks.slice().sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999"));
     const view = all.filter((t) => {
       if (taskFilter === "all") return true;
       if (taskFilter === "open") return !isDone(t, done);
@@ -2207,8 +2159,7 @@ const Charts = (() => {
     });
 
     $("#tbl-tasks tbody").innerHTML = view.map((t) => {
-      const d = isDone(t, done);
-      const over = isOverdue(t, done);
+      const d = isDone(t, done), over = isOverdue(t, done);
       const statusState = d ? "good" : t.status === "Blocked" ? "critical" : t.status === "In progress" ? "accent" : "";
       return `<tr class="${d ? "is-done" : ""}">
         <td class="check"><input type="checkbox" data-task="${esc(t.id)}" ${d ? "checked" : ""}
@@ -2217,7 +2168,7 @@ const Charts = (() => {
         <td>${esc(t.area)}</td>
         <td>${esc(t.owner)}</td>
         <td><span class="pri ${esc(t.priority)}">${esc(t.priority)}</span></td>
-        <td class="n">${esc(shortDate(t.due))}${over ? ` ${chip("overdue", "critical")}` : ""}</td>
+        <td class="n">${t.due ? esc(shortDate(t.due)) : `<span class="chip plain">no date</span>`}${over ? ` ${chip("overdue", "critical")}` : ""}</td>
         <td>${chip(d ? "Done" : t.status, statusState, !statusState)}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="7" style="color:var(--ink-3);padding:14px 0">Nothing in this view.</td></tr>`;
@@ -2225,13 +2176,15 @@ const Charts = (() => {
     const openCount = all.filter((t) => !isDone(t, done)).length;
     const overdue = all.filter((t) => isOverdue(t, done)).length;
     const blocked = all.filter((t) => t.status === "Blocked").length;
-    $("#task-count").textContent = `${view.length} shown · ${openCount} open · ${overdue} overdue · ${blocked} blocked`;
+    const undated = all.filter((t) => !t.due && !isDone(t, done)).length;
+    $("#task-count").textContent =
+      `${view.length} shown · ${openCount} open · ${overdue} overdue · ${undated} with no date`;
     const tc = $("#tasks-chip");
-    tc.textContent = overdue ? `${overdue} overdue, ${blocked} blocked` : `${openCount} open`;
-    tc.className = "chip " + (overdue ? "critical" : blocked ? "warning" : "good");
+    tc.textContent = overdue ? `${overdue} overdue` : blocked ? `${blocked} blocked` : `${openCount} open`;
+    tc.className = "chip " + (overdue ? "critical" : blocked ? "warning" : undated ? "warning" : "good");
     if (overdue) $("#card-tasks").dataset.state = "critical";
-    else if (blocked) $("#card-tasks").dataset.state = "warning";
     else delete $("#card-tasks").dataset.state;
+    if (have(D.tasksNote)) $("#tasks-note").textContent = D.tasksNote;
 
     $$("#tbl-tasks input[type=checkbox]").forEach((box) => {
       box.addEventListener("change", () => {
@@ -2243,9 +2196,7 @@ const Charts = (() => {
     });
   }
 
-  /* =======================================================================
-     Chrome: header, controls, theme
-     ==================================================================== */
+  /* ======================= Chrome ======================================= */
   function renderChrome() {
     $("#facility-name").textContent = D.meta.facility;
     $("#foot-facility").textContent = D.meta.facility;
@@ -2254,10 +2205,6 @@ const Charts = (() => {
     $("#period-label").textContent = D.meta.period;
     if (D.meta.sampleData) $("#demo-chip").hidden = false;
     if (have(D.meta.sourceNote)) $("#foot-source").textContent = D.meta.sourceNote;
-    $("#foot-note").innerHTML = D.meta.sampleData
-      ? "Figures on this board are <strong>illustrative sample data</strong> for a " +
-        D.meta.licensedCapacity + "-seat PPEC, not the center's records. Replace them before anyone makes a decision from this page."
-      : "";
 
     $$(".segmented button[data-range]").forEach((b) => {
       b.addEventListener("click", () => {
@@ -2265,12 +2212,6 @@ const Charts = (() => {
         $$(".segmented button[data-range]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
         renderTrends();
       });
-    });
-    const pt = $("#proj-toggle");
-    pt.addEventListener("click", () => {
-      state.projection = !state.projection;
-      pt.setAttribute("aria-pressed", String(state.projection));
-      renderTrends();
     });
     $$("[data-task-filter]").forEach((b) => {
       b.addEventListener("click", () => {
@@ -2295,7 +2236,6 @@ const Charts = (() => {
     });
   }
 
-  // A section with nothing left in it takes its heading with it.
   function pruneEmptySections() {
     $$("section.section").forEach((sec) => {
       const cards = $$(".card", sec);
@@ -2314,15 +2254,13 @@ const Charts = (() => {
     renderLead();
     renderTargets();
     renderTrends();
-    renderProjection();
-    renderMoney();
+    renderCosts();
+    renderCash();
     renderAttendance();
-    renderFlow();
-    renderPeople();
+    renderRoster();
     renderMarketing();
     renderTasks();
     pruneEmptySections();
-    // Web fonts change text metrics; re-lay the charts once they land.
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => document.dispatchEvent(new Event("akp:theme")));
     }

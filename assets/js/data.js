@@ -3,100 +3,215 @@
    SINGLE SOURCE OF TRUTH FOR EVERY NUMBER ON THE BOARD.
    Edit this file to update the dashboard. Nothing else needs to change.
 
-   SOURCES WIRED UP SO FAR
-     • Census, attendance and roster counts
-         Drive → "Amazing Kids PPEC - Monthly Attendance Report" (Jan–May 2026)
+   SOURCES
+     • Census, attendance, rooms, roster movement
+         Drive → "Monthly Student Attendance: Amazing Kids PPEC" (Jan–Aug 2026)
          Aggregated per month. Child-level rows are deliberately NOT stored here.
+     • Revenue, cost, margin, cash position
+         "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026,
+         prepared 8/28/2026. Cash basis.
      • Targets
-         Drive → "Amazing Kids PPEC - Growth Plan" ("20 Kids - Quarter 1")
+         Drive → "Amazing Kids PPEC - Growth Plan": 20 kids in Q1, $60–65K budget.
+     • Task board
+         Drive → the operations discussion list (Aug 2026).
 
-   STILL UNSOURCED — set to null, so those cards and sections stay hidden:
-     financials, operating budget, upcoming expenses, enrollment pipeline,
-     removals, staffing, marketing, task board.
+   STILL UNSOURCED — null, so those cards stay hidden: staffing headcount,
+   referral pipeline, removal reasons, campaign updates, per-category budget.
 
-   PRIVACY: the attendance report names every child. Nothing at child level
-   belongs in this file — it is a static page, and everything here ships to
-   anyone who can open it. Aggregate first, then paste the aggregates.
+   ENROLLED means a child who attended at least one day that month. Children
+   listed on the attendance report with zero days are counted separately as
+   dormant records, not as enrollment.
+
+   PRIVACY: the attendance report and the school list name every child, and the
+   balance sheet names every member. None of that belongs in this file — it is a
+   static page, and everything here ships to anyone who can open it.
    ========================================================================== */
 
 window.AKP_DATA = {
   meta: {
     facility: "Amazing Kids PPEC",
     boardName: "Operations Board",
-    asOf: "May 31, 2026",
-    period: "May 2026 · monthly attendance close",
+    asOf: "August 31, 2026",
+    period: "Census through Aug · financials through Jul",
     sampleData: false,
-    sourceNote: "Census and attendance are aggregated from the Monthly Attendance Report " +
-      "in Drive (Jan–May 2026); targets come from the Growth Plan. No child-level detail is " +
-      "stored on this page. Sections without a wired-up source stay hidden."
+    sourceNote: "Census and attendance are aggregated from the monthly attendance report " +
+      "(Jan–Aug 2026). Revenue, cost and cash come from the management report for the period " +
+      "ended 7/31/2026, prepared 8/28/2026, on a cash basis. Targets come from the growth plan. " +
+      "No child-level or member-level detail is stored on this page."
   },
 
   /* ---- Lead band --------------------------------------------------------- */
   hero: {
-    eyebrow: "May 2026 close",
+    eyebrow: "August 2026",
     label: "Average daily census",
-    value: 16.1,
+    value: 16.35,
     unit: "children/day",
-    deltaLabel: "vs. April",
-    delta: 1.2,
+    deltaLabel: "vs. July",
+    delta: 0.18,
     deltaGood: true,
     target: 20,
-    note: "322 child-days across 20 operating days; 18 of the 19 children on the roster attended at least once"
+    note: "327 child-days across 20 operating days. 20 children attended at least once; 4 more sit on the report with no attendance"
   },
 
   kpis: [
-    { key: "roster", label: "Children on roster", value: 19, format: "int",
-      sub: "on the May attendance report", delta: "−7 vs. January", deltaGood: false,
-      target: "20 in Q1", state: "warning" },
-    { key: "attending", label: "Children attending", value: 18, format: "int",
-      sub: "attended at least one day in May", delta: "+1 vs. April", deltaGood: true,
-      target: "—", state: "good" },
-    { key: "attendance", label: "Attendance rate", value: 0.847, format: "pct1",
-      sub: "daily census ÷ roster", delta: "+6.5 pts vs. April", deltaGood: true,
-      target: "—", state: "good" },
-    { key: "childdays", label: "Child-days delivered", value: 322, format: "int",
-      sub: "the billable unit", delta: "−5 vs. April", deltaGood: false,
+    { key: "enrolled", label: "Children enrolled", value: 20, format: "int",
+      sub: "attended at least one day in August", delta: "same as July", deltaGood: true,
+      target: "20 in Q1", state: "good" },
+    { key: "attendance", label: "Attendance rate", value: 0.818, format: "pct1",
+      sub: "daily census ÷ enrolled", delta: "+0.9 pts vs. July", deltaGood: true,
+      target: "—", state: "" },
+    { key: "childdays", label: "Child-days delivered", value: 327, format: "int",
+      sub: "August · the billable unit", delta: "−45 vs. July", deltaGood: false,
       target: "—", state: "warning" },
-    { key: "opdays", label: "Operating days", value: 20, format: "int",
-      sub: "in May", delta: "−2 vs. April", deltaGood: false,
-      target: "—", state: "" }
+    { key: "revenue", label: "Revenue", value: 90630, format: "usd0",
+      sub: "July · cash basis", delta: "+19% vs. June", deltaGood: true,
+      target: "—", state: "" },
+    { key: "cost", label: "Operating cost", value: 83920, format: "usd0",
+      sub: "July · wages ran $57.4K", delta: "+30% vs. June", deltaGood: false,
+      target: "≤ $65K", state: "critical" },
+    { key: "net", label: "Net income", value: 6710, format: "usd0",
+      sub: "July · 7.4% margin", delta: "−42% vs. June", deltaGood: false,
+      target: "—", state: "warning" },
+    { key: "cash", label: "Cash in bank", value: 71116, format: "usd0",
+      sub: "as of Jul 31", delta: "+$62.1K vs. a year ago", deltaGood: true,
+      target: "—", state: "good" }
   ],
 
   /* ---- Targets ----------------------------------------------------------- */
   targets: [
-    { name: "Children on roster", actual: 19, target: 20, format: "int",
+    { name: "Children enrolled", actual: 20, target: 20, format: "int",
       owner: "Growth plan", horizon: "Quarter 1", direction: "up" },
-    { name: "Average daily census", actual: 16.1, target: 20, format: "dec1",
-      owner: "Growth plan", horizon: "Quarter 1", direction: "up" }
+    { name: "Monthly operating cost", actual: 83920, target: 65000, format: "usd0",
+      owner: "Growth plan", horizon: "Monthly", direction: "down" }
   ],
-  targetsNote: "The growth plan states one goal — \"20 Kids, Quarter 1\". It is shown against " +
-    "both the roster and the daily census, because the two differ by about three children. " +
-    "Confirm which one the goal means and the other row comes out. The plan's $60–65K budget " +
-    "target needs actual spend before it can be tracked here.",
+  targetsNote: "The growth plan sets two goals: 20 children and a $60–65K monthly budget. " +
+    "Enrollment reached 20 in June and has held. Operating cost has cleared $65K in three of " +
+    "seven months, and July's $83.9K was almost entirely wages — $57.4K against a $38K run rate.",
 
-  /* ---- Monthly census ---------------------------------------------------- */
+  /* ---- Monthly census + financials --------------------------------------- */
+  /* revenue/cost are null for months the management report does not cover. */
   months: [
-    { label: "Jan", full: "Jan 2026", enrolled: 26, attending: 19, adc: 13.9, opDays: 20, childDays: 278, revenue: null, expenses: null, projected: false },
-    { label: "Feb", full: "Feb 2026", enrolled: 22, attending: 16, adc: 14.2, opDays: 20, childDays: 284, revenue: null, expenses: null, projected: false },
-    { label: "Mar", full: "Mar 2026", enrolled: 22, attending: 19, adc: 13.7, opDays: 22, childDays: 302, revenue: null, expenses: null, projected: false },
-    { label: "Apr", full: "Apr 2026", enrolled: 19, attending: 17, adc: 14.9, opDays: 22, childDays: 327, revenue: null, expenses: null, projected: false },
-    { label: "May", full: "May 2026", enrolled: 19, attending: 18, adc: 16.1, opDays: 20, childDays: 322, revenue: null, expenses: null, projected: false }
+    { label: "Jan", full: "Jan 2026", enrolled: 19, onReport: 31, dormant: 12, adc: 13.90, opDays: 20, childDays: 278, started: null, stopped: null, revenue: 59997.84,  cost: 82893.64, projected: false },
+    { label: "Feb", full: "Feb 2026", enrolled: 16, onReport: 28, dormant: 12, adc: 14.20, opDays: 20, childDays: 284, started: 0, stopped: 3, revenue: 66239.53,  cost: 65676.48, projected: false },
+    { label: "Mar", full: "Mar 2026", enrolled: 19, onReport: 28, dormant:  9, adc: 13.73, opDays: 22, childDays: 302, started: 3, stopped: 0, revenue: 73420.75,  cost: 64117.55, projected: false },
+    { label: "Apr", full: "Apr 2026", enrolled: 17, onReport: 25, dormant:  8, adc: 14.86, opDays: 22, childDays: 327, started: 1, stopped: 3, revenue: 70211.97,  cost: 61677.26, projected: false },
+    { label: "May", full: "May 2026", enrolled: 18, onReport: 25, dormant:  7, adc: 16.20, opDays: 20, childDays: 324, started: 1, stopped: 0, revenue: 96294.66,  cost: 59424.22, projected: false },
+    { label: "Jun", full: "Jun 2026", enrolled: 20, onReport: 25, dormant:  5, adc: 15.73, opDays: 22, childDays: 346, started: 2, stopped: 0, revenue: 76100.84,  cost: 64527.16, projected: false },
+    { label: "Jul", full: "Jul 2026", enrolled: 20, onReport: 25, dormant:  5, adc: 16.17, opDays: 23, childDays: 372, started: 2, stopped: 2, revenue: 90629.63,  cost: 83919.86, projected: false },
+    { label: "Aug", full: "Aug 2026", enrolled: 20, onReport: 24, dormant:  4, adc: 16.35, opDays: 20, childDays: 327, started: 1, stopped: 1, revenue: null,       cost: null,     projected: false }
   ],
   censusTarget: 20,
+  costTarget: 65000,
   projectionAssumptions: null,
 
-  /* ---- Attendance by month ---------------------------------------------- */
-  attendanceTargetRate: null,
-  attendancePeriods: [
-    { label: "Jan", sub: "2026", adc: 13.9, roster: 26, attending: 19, opDays: 20, childDays: 278 },
-    { label: "Feb", sub: "2026", adc: 14.2, roster: 22, attending: 16, opDays: 20, childDays: 284 },
-    { label: "Mar", sub: "2026", adc: 13.7, roster: 22, attending: 19, opDays: 22, childDays: 302 },
-    { label: "Apr", sub: "2026", adc: 14.9, roster: 19, attending: 17, opDays: 22, childDays: 327 },
-    { label: "May", sub: "2026", adc: 16.1, roster: 19, attending: 18, opDays: 20, childDays: 322 }
-  ],
-  absenceReasons: null,
+  financeNote: "Cash basis: income lands when the payment arrives, not when the care was " +
+    "delivered, so a heavy claims batch inflates one month and starves the next. May's $96.3K " +
+    "and January's $60.0K are the same operation. Year to date, revenue works out to $239 per " +
+    "child-day across 2,233 child-days.",
 
-  /* ---- Everything below is waiting on a source --------------------------- */
+  /* ---- Rooms (latest month) ---------------------------------------------- */
+  rooms: {
+    month: "August 2026",
+    list: [
+      { name: "Main Room",       attending: 13, onReport: 15, adc: 10.95 },
+      { name: "Total Care Room", attending:  5, onReport:  5, adc:  3.55 },
+      { name: "Infant Room",     attending:  2, onReport:  4, adc:  1.85 }
+    ],
+    partnerSchool: { name: "Sunflower Christian Academy", children: 14 }
+  },
+
+  /* ---- Cost structure ---------------------------------------------------- */
+  costLines: {
+    current: "July 2026",
+    prior: "June 2026",
+    lines: [
+      { name: "Payroll, taxes & benefits",     prior: 40952.03, current: 61613.44 },
+      { name: "Rent",                          prior: 11767.09, current: 11767.09 },
+      { name: "Contract labor & supplies",     prior:  2809.60, current:  4128.71 },
+      { name: "Dues & subscriptions",          prior:  1075.60, current:  1075.60 },
+      { name: "Bank service charges",          prior:   811.94, current:   788.00 },
+      { name: "Internet & telephone",          prior:  1250.58, current:   764.32 },
+      { name: "Direct care supplies",          prior:   729.56, current:   762.61 },
+      { name: "Advertising & promotion",       prior:   537.92, current:   689.46 },
+      { name: "Licenses & permits",            prior:     0.00, current:   663.59 },
+      { name: "Electricity",                   prior:   572.95, current:   560.76 },
+      { name: "Insurance",                     prior:   426.33, current:   445.70 },
+      { name: "Meals & entertainment",         prior:  1288.95, current:   365.63 },
+      { name: "Repairs & maintenance",         prior:  2014.21, current:   160.00 },
+      { name: "Office expenses",               prior:   105.42, current:   104.96 },
+      { name: "Janitorial",                    prior:    59.98, current:    29.99 },
+      { name: "Professional fees",             prior:   125.00, current:     0.00 }
+    ]
+  },
+
+  /* ---- Cash position ----------------------------------------------------- */
+  cash: {
+    asOf: "July 31, 2026",
+    priorLabel: "a year earlier",
+    lines: [
+      { name: "Cash in bank",           value:  71116.36, prior: 8998.70, good: true },
+      { name: "Accounts payable",       value:  -1091.51, prior: null, good: false },
+      { name: "Credit card balance",    value: -19172.01, prior: null, good: false },
+      { name: "Line of credit drawn",   value: -33962.98, prior: null, good: false }
+    ],
+    ytdNet: 50659.05,
+    ytdNetPrior: -242951.91,
+    totalAssets: 373325.57,
+    totalEquity: 319099.07,
+    note: "Cash net of every current obligation is $16,890. The year-to-date swing is the " +
+      "headline: $50.7K of net income against a $243.0K loss over the same seven months last year."
+  },
+
+  /* ---- Marketing --------------------------------------------------------- */
+  adSpend: {
+    months: [
+      { label: "Jan", value: 1749.00 }, { label: "Feb", value: 2129.00 },
+      { label: "Mar", value:  386.41 }, { label: "Apr", value:  566.17 },
+      { label: "May", value:  856.45 }, { label: "Jun", value:  537.92 },
+      { label: "Jul", value:  689.46 }
+    ],
+    ytd: 6914.41,
+    ytdPrior: 20795.07,
+    note: "Advertising and promotion is running at about a quarter of last year's pace — " +
+      "$6.9K year to date against $20.8K — while enrollment climbed from 19 to 20 and dormant " +
+      "records fell from 12 to 4. Referral sources and campaign results are not tracked in any " +
+      "file shared yet, so what is working is not visible here."
+  },
+
+  /* ---- Task board -------------------------------------------------------- */
+  tasks: [
+    { id: "T-01", title: "Generator servicing", owner: "Unassigned", due: "2026-09-30",
+      status: "Not started", priority: "High", area: "Facilities",
+      note: "Scheduled for September 2026" },
+    { id: "T-02", title: "Hire a respiratory therapist or an RN with vent experience",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Staffing" },
+    { id: "T-03", title: "Hire EMTs for the transportation routes",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Staffing" },
+    { id: "T-04", title: "Add teaching staff for the total care room",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Staffing",
+      note: "For the children with higher support needs" },
+    { id: "T-05", title: "Move to the new accounting arrangement",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Finance" },
+    { id: "T-06", title: "Settle member distributions",
+      owner: "Unassigned", due: null, status: "Not started", priority: "High", area: "Finance" },
+    { id: "T-07", title: "Spring cleaning — clear unused items and repaint the walls",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-08", title: "Mock up the indoor playground and section off the floor areas",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-09", title: "Finish the fence and the outside area",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-10", title: "Install blinds in the second total care room",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Facilities" },
+    { id: "T-11", title: "Order branded promo material — blankets, onesies and the rest",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Low", area: "Marketing" },
+    { id: "T-12", title: "Run more marketing campaigns, including video footage and local exposure",
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Marketing" }
+  ],
+  tasksNote: "Taken from the August operations discussion list. None of them carry an owner or a " +
+    "due date yet except the generator service — add those to data.js and the board will start " +
+    "flagging what is overdue.",
+
+  /* ---- Waiting on a source ----------------------------------------------- */
   budget: null,
   upcomingExpenses: null,
   capitalReserve: null,
@@ -104,5 +219,6 @@ window.AKP_DATA = {
   removals: null,
   staffing: null,
   marketing: null,
-  tasks: null
+  absenceReasons: null,
+  attendanceTargetRate: null
 };

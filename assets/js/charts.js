@@ -19,11 +19,15 @@ const Charts = (() => {
   const fmt = {
     int:   (v) => Math.round(v).toLocaleString("en-US"),
     dec1:  (v) => v.toFixed(1),
+    dec2:  (v) => v.toFixed(2),
     pct0:  (v) => Math.round(v * 100) + "%",
     pct1:  (v) => (v * 100).toFixed(1) + "%",
-    usd:   (v) => "$" + Math.round(v).toLocaleString("en-US"),
-    usdk:  (v) => (Math.abs(v) >= 1000 ? "$" + (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + "K" : "$" + Math.round(v)),
-    usdk0: (v) => "$" + Math.round(v / 1000) + "K"
+    usd:   (v) => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US"),
+    usdk:  (v) => {
+      const s = v < 0 ? "−$" : "$", a = Math.abs(v);
+      return a >= 1000 ? s + (a / 1000).toFixed(a % 1000 === 0 ? 0 : 1) + "K" : s + Math.round(a);
+    },
+    usdk0: (v) => (v < 0 ? "−$" : "$") + Math.round(Math.abs(v) / 1000) + "K"
   };
 
   /* -- rounded data-end paths --------------------------------------------- */
@@ -50,6 +54,20 @@ const Charts = (() => {
     const out = [];
     for (let v = lo; v <= hi + step / 1000; v += step) out.push(Math.round(v * 1e6) / 1e6);
     return out;
+  }
+
+  // Text sits on top of lines and gridlines; a surface-colored halo keeps it
+  // readable without adding a box. Width is estimated from the mono metrics.
+  function haloText(svg, x, y, text, cls, anchor) {
+    const w = text.length * 6.1 + 8;
+    const left = anchor === "end" ? x - w + 4 : x - 4;
+    svg.appendChild(el("rect", {
+      x: left, y: y - 9.5, width: w, height: 13, rx: 2,
+      fill: css("--chart-bg"), opacity: .88
+    }));
+    const t = el("text", { x, y, class: cls, "text-anchor": anchor === "end" ? "end" : "start" });
+    t.textContent = text;
+    svg.appendChild(t);
   }
 
   /* -- tooltip ------------------------------------------------------------- */
@@ -130,6 +148,7 @@ const Charts = (() => {
       const Y = (v) => M.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
 
       const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+      let drawTargetLabel = null;
 
       // projected region wash + label
       if (projectFrom !== null && projectFrom < labels.length) {
@@ -155,9 +174,9 @@ const Charts = (() => {
       // target reference
       if (target) {
         svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(target.value), y2: Y(target.value), class: "ref-line" }));
-        const t = el("text", { x: M.l + iw, y: Y(target.value) - 5, class: "ref-label", "text-anchor": "end" });
-        t.textContent = target.label;
-        svg.appendChild(t);
+        // The rule stays under the data; its label is drawn after the series
+        // so a line never runs through the text.
+        drawTargetLabel = () => haloText(svg, M.l + 6, Y(target.value) - 6, target.label, "ref-label");
       }
 
       // x labels — thinned so they never collide
@@ -174,6 +193,7 @@ const Charts = (() => {
       });
 
       // series
+      const ends = [];
       series.forEach((s) => {
         const color = css(s.colorVar);
         const solidEnd = projectFrom === null ? s.values.length : Math.min(projectFrom, s.values.length);
@@ -196,13 +216,34 @@ const Charts = (() => {
           cx: X(last), cy: Y(s.values[last]), r: 4.5,
           fill: color, stroke: surface, "stroke-width": 2
         }));
-        // one direct label per series, at the end
-        const lab = el("text", {
-          x: X(last) + 9, y: Y(s.values[last]) + 4, class: "dlabel"
-        });
-        lab.textContent = (s.endFormat || format)(s.values[last]);
+        ends.push({ x: X(last), y: Y(s.values[last]), text: (s.endFormat || format)(s.values[last]) });
+      });
+
+      // Direct end labels. Where two series land close together, separate the
+      // labels and run a leader line back to the mark rather than stacking them.
+      ends.sort((a, b) => a.y - b.y);
+      const MIN_GAP = 13;
+      for (let i = 1; i < ends.length; i++) {
+        const gap = (ends[i].ly ?? ends[i].y) - (ends[i - 1].ly ?? ends[i - 1].y);
+        if (gap < MIN_GAP) {
+          const push = (MIN_GAP - gap) / 2;
+          ends[i - 1].ly = (ends[i - 1].ly ?? ends[i - 1].y) - push;
+          ends[i].ly = (ends[i].ly ?? ends[i].y) + push;
+        }
+      }
+      ends.forEach((e) => {
+        const ly = e.ly ?? e.y;
+        if (Math.abs(ly - e.y) > 1) {
+          svg.appendChild(el("path", {
+            d: `M${e.x + 5.5},${e.y} L${e.x + 7.5},${ly - 3.5}`,
+            stroke: css("--axis"), "stroke-width": 1, fill: "none"
+          }));
+        }
+        const lab = el("text", { x: e.x + 9, y: ly + 4, class: "dlabel" });
+        lab.textContent = e.text;
         svg.appendChild(lab);
       });
+      if (drawTargetLabel) drawTargetLabel();
 
       // hover layer
       const cross = el("line", { x1: 0, x2: 0, y1: M.t, y2: M.t + ih, class: "ref-line", opacity: 0 });
@@ -280,11 +321,10 @@ const Charts = (() => {
       });
       svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: "axis-line" }));
 
+      let drawTargetLabel = null;
       if (target) {
         svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(target.value), y2: Y(target.value), class: "ref-line" }));
-        const t = el("text", { x: M.l + iw, y: Y(target.value) - 5, class: "ref-label", "text-anchor": "end" });
-        t.textContent = target.label;
-        svg.appendChild(t);
+        drawTargetLabel = () => haloText(svg, M.l + iw, Y(target.value) - 5, target.label, "ref-label", "end");
       }
 
       values.forEach((v, i) => {
@@ -302,6 +342,7 @@ const Charts = (() => {
         svg.appendChild(hit);
       });
       svg.addEventListener("mouseleave", () => tip.hide());
+      if (drawTargetLabel) drawTargetLabel();
 
       const every = Math.ceil((labels.length * 40) / iw);
       labels.forEach((l, i) => {

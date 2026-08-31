@@ -1,6 +1,10 @@
 /* =============================================================================
    Amazing Kids PPEC — Operations Board
    Renders every card from window.AKP_DATA. No data is defined in this file.
+
+   Any block in data.js may be null while its source is still being wired up:
+   the card hides, a section whose cards all hid drops out, and the footer says
+   what is waiting. Nothing renders half-empty and nothing is invented.
    ========================================================================== */
 
 (() => {
@@ -10,11 +14,6 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  /* --- Data availability ---------------------------------------------------
-     Any block in data.js may be null or omitted while its source is still being
-     wired up. A card whose data is missing hides itself, a section whose cards
-     all hid drops out, and the footer lists what is waiting. Nothing is faked
-     and nothing renders half-empty. */
   const have = (v) => {
     if (v === null || v === undefined) return false;
     if (Array.isArray(v)) return v.length > 0;
@@ -33,23 +32,24 @@
 
   const AS_OF = new Date("2026-08-31T00:00:00");
   const MONTHS = have(D.months) ? D.months : [];
-  const ACTUALS = MONTHS.filter((m) => !m.projected);
-  const PROJECTED = MONTHS.filter((m) => m.projected);
-  const CUR = ACTUALS[ACTUALS.length - 1];
-  const PREV = ACTUALS[ACTUALS.length - 2];
-  const margin = (m) => (m.revenue - m.expenses) / m.revenue;
+  const MONEY = MONTHS.filter((m) => m.revenue != null && m.cost != null);
+  const CUR = MONTHS[MONTHS.length - 1];
+  const CUR_MONEY = MONEY[MONEY.length - 1];
+  const PREV_MONEY = MONEY[MONEY.length - 2];
+  const margin = (m) => (m.revenue - m.cost) / m.revenue;
 
-  const FMT = {
-    int: F.int, dec1: F.dec1, pct0: F.pct0, pct1: F.pct1, usd: F.usd, usdk: F.usdk
-  };
+  const FMT = { int: F.int, dec1: F.dec1, dec2: F.dec2, pct0: F.pct0, pct1: F.pct1,
+                usd: F.usd, usd0: F.usd, usdk: F.usdk };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const chip = (text, state = "", plain = false) =>
     `<span class="chip ${state}${plain ? " plain" : ""}">${esc(text)}</span>`;
   const signed = (v, digits = 1) => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(digits);
+  const signedUsd = (v) => (v >= 0 ? "+" : "−") + F.usd(Math.abs(v));
   const shortDate = (iso) =>
     new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+  const stats = (items) => items.map((s) =>
+    `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
 
-  /* -- table twin ---------------------------------------------------------- */
   function twin(node, headers, rows) {
     $$(".table-wrap", node).forEach((n) => n.remove());
     const wrap = document.createElement("div");
@@ -62,33 +62,30 @@
     node.appendChild(wrap);
   }
 
-  /* =======================================================================
-     Lead band
-     ==================================================================== */
+  /* ======================= Lead band ==================================== */
   function renderLead() {
     const lead = $("#lead");
     const h = D.hero;
-    if (!have(h) && !have(D.kpis)) { lead.hidden = true; AWAITING.push("Headline numbers"); return; }
+    if (!have(h) && !have(D.kpis)) { lead.hidden = true; return; }
     lead.innerHTML = (!have(h) ? "" :
       `<article class="card hero-card">
          <div class="card-head"><div class="titles">
-           <div class="eyebrow">${esc(h.eyebrow || "Month to date")}</div>
+           <div class="eyebrow">${esc(h.eyebrow || "Latest close")}</div>
            <h3>${esc(h.label)}</h3>
          </div></div>
          <div class="hero-figure">${h.value.toFixed(1)}<span class="unit">${esc(h.unit)}</span></div>
          <div class="hero-row">
-           <span class="delta ${h.delta >= 0 === h.deltaGood ? "up" : "down"}">${signed(h.delta)} ${esc(h.deltaLabel)}</span>
+           <span class="delta ${h.delta >= 0 === h.deltaGood ? "up" : "down"}">${signed(h.delta, 2)} ${esc(h.deltaLabel)}</span>
            ${chip("Target " + h.target, "", true)}
          </div>
          <div class="chart" id="hero-spark" style="margin:-4px 0 -2px"></div>
-         <p class="card-note">${esc(h.note)}${ACTUALS.length > 1 ? `. ${ACTUALS.length}-month trend above` : ""}.</p>
+         <p class="card-note">${esc(h.note)}.</p>
        </article>`) +
       (D.kpis || []).map((k) => {
-        const val = FMT[k.format](k.value);
-        const good = /^[+−-]?0/.test(k.delta) ? "flat" : k.deltaGood ? "up" : "down";
-        return `<article class="card tile" data-state="${k.state}">
+        const good = /^same/.test(k.delta) ? "flat" : k.deltaGood ? "up" : "down";
+        return `<article class="card tile"${k.state ? ` data-state="${k.state}"` : ""}>
           <div class="eyebrow">${esc(k.label)}</div>
-          <div class="tile-value">${esc(val)}</div>
+          <div class="tile-value">${esc(FMT[k.format](k.value))}</div>
           <div class="tile-sub">${esc(k.sub)}</div>
           <div class="tile-foot">
             <span class="delta ${good}">${esc(k.delta)}</span>
@@ -96,16 +93,11 @@
           </div>
         </article>`;
       }).join("");
-    if (have(h) && ACTUALS.length > 1) {
-      Charts.sparkline($("#hero-spark"), ACTUALS.map((m) => m.adc), { height: 44 });
-    } else if (have(h)) {
-      $("#hero-spark").hidden = true;
-    }
+    if (have(h) && MONTHS.length > 1) Charts.sparkline($("#hero-spark"), MONTHS.map((m) => m.adc), { height: 44 });
+    else if (have(h)) $("#hero-spark").hidden = true;
   }
 
-  /* =======================================================================
-     Targets
-     ==================================================================== */
+  /* ======================= Targets ====================================== */
   function renderTargets() {
     if (!need("card-targets", "Targets", D.targets)) return;
     let onTarget = 0;
@@ -114,8 +106,7 @@
       if (ratio >= 1) onTarget++;
       const state = ratio >= 1 ? "good" : ratio >= 0.92 ? "warning" : ratio >= 0.6 ? "serious" : "critical";
       const pct = Math.max(3, Math.min(100, ratio * 100));
-      const f = FMT[t.format];
-      const aim = t.direction === "up" ? "≥" : "≤";
+      const f = FMT[t.format], aim = t.direction === "up" ? "≥" : "≤";
       return `<div class="meter-row">
         <div class="meter-head">
           <span class="name">${esc(t.name)}</span>
@@ -127,240 +118,197 @@
         </div>
       </div>`;
     }).join("");
-    const note = $("#targets-note");
-    if (note && have(D.targetsNote)) note.textContent = D.targetsNote;
+    if (have(D.targetsNote)) $("#targets-note").textContent = D.targetsNote;
     const el = $("#targets-summary");
     el.textContent = `${onTarget} of ${D.targets.length} on target`;
-    el.className = "chip " + (onTarget >= D.targets.length * 0.75 ? "good" : onTarget >= D.targets.length / 2 ? "warning" : "serious");
+    el.className = "chip " + (onTarget === D.targets.length ? "good" : onTarget ? "warning" : "serious");
   }
 
-  /* =======================================================================
-     Trend charts (scoped by the control bar)
-     ==================================================================== */
-  const state = { range: 12, projection: true };
+  /* ======================= Trend charts ================================= */
+  const state = { range: 99 };
+  const slice = (rows) => (state.range >= rows.length ? rows : rows.slice(-state.range));
+  const yearLabels = (rows) => rows.map((m, i) => {
+    const yr = m.full.slice(-2);
+    return i === 0 || m.label === "Jan" ? `${m.label} '${yr}` : m.label;
+  });
 
-  function slice() {
-    const a = ACTUALS.slice(-state.range);
-    const rows = state.projection ? a.concat(PROJECTED) : a;
-    return { rows, projectFrom: state.projection ? a.length : null };
-  }
-
-  function legend(node, keys, withProjection) {
+  function legend(node, keys) {
     node.innerHTML = keys.map((k) =>
-      `<span class="key"><span class="swatch" style="background:var(${k.varName})"></span>${esc(k.name)}</span>`).join("") +
-      (withProjection ? `<span class="key"><span class="swatch dashed"></span>Projected</span>` : "");
+      `<span class="key"><span class="swatch" style="background:var(${k.varName})"></span>${esc(k.name)}</span>`).join("");
   }
 
   function renderTrends() {
-    const hasMonths = need("card-census", "Census and financial trends", ACTUALS);
-    if (!hasMonths) {
-      ["card-finance", "card-margin", "card-projection"].forEach((id) => {
-        const n = document.getElementById(id); if (n) n.hidden = true;
+    // The projection control has nothing to project against — no forecast in the data.
+    const pg = $("#proj-group"); if (pg) pg.hidden = true;
+    if (MONTHS.length <= 6) { const c = $("#controls"); if (c) c.hidden = true; }
+
+    if (need("card-census", "Census", MONTHS)) {
+      const rows = slice(MONTHS), labels = yearLabels(rows), full = rows.map((m) => m.full);
+      legend($("#legend-census"), [
+        { name: "Children enrolled", varName: "--series-1" },
+        { name: "Average daily census", varName: "--series-2" }
+      ]);
+      Charts.line($("#chart-census"), {
+        labels,
+        series: [
+          { name: "Enrolled", colorVar: "--series-1", values: rows.map((m) => m.enrolled) },
+          { name: "Avg daily census", colorVar: "--series-2", values: rows.map((m) => m.adc),
+            endFormat: F.dec1, tipFormat: F.dec1 }
+        ],
+        format: F.int,
+        target: have(D.censusTarget) ? { value: D.censusTarget, label: `TARGET ${D.censusTarget}` } : null,
+        tipTitle: (i) => full[i],
+        tipNote: (i) => `${F.pct1(rows[i].adc / rows[i].enrolled)} attendance · ` +
+          `${rows[i].childDays} child-days over ${rows[i].opDays} days`
       });
-      const ctl = $("#controls"); if (ctl) ctl.hidden = true;
+      twin($("#twin-census"), ["Month", "Enrolled", "On report", "No attendance", "Operating days", "Child-days", "Daily census"],
+        rows.map((m) => [m.full, F.int(m.enrolled), F.int(m.onReport), F.int(m.dormant),
+          F.int(m.opDays), F.int(m.childDays), F.dec1(m.adc)]));
+      const gap = $("#census-gap");
+      if (have(D.censusTarget)) {
+        const short = D.censusTarget - CUR.enrolled;
+        gap.textContent = short > 0 ? `${short} short of ${D.censusTarget} enrolled`
+                                    : `enrolled target of ${D.censusTarget} met`;
+      } else gap.hidden = true;
+    }
+
+    if (!need("card-finance", "Revenue and cost", MONEY)) {
+      const m = document.getElementById("card-margin"); if (m) m.hidden = true;
       return;
     }
-    const hasMoney = ACTUALS.some((m) => m.revenue != null && m.expenses != null);
-    if (!hasMoney) {
-      ["card-finance", "card-margin", "card-projection"].forEach((id) => {
-        const n = document.getElementById(id); if (n) n.hidden = true;
-      });
-      if (!AWAITING.includes("Revenue, expenses and margin")) AWAITING.push("Revenue, expenses and margin");
-    }
-    if (ACTUALS.length <= 6 && !PROJECTED.length) {
-      const ctl = $("#controls"); if (ctl) ctl.hidden = true;
-    }
-    if (!PROJECTED.length) {
-      const pg = $("#proj-group"); if (pg) pg.hidden = true;
-      const pc = document.getElementById("card-projection"); if (pc) pc.hidden = true;
-      state.projection = false;
-    }
-    const { rows, projectFrom } = slice();
-    const full = rows.map((m) => m.full);
-    const labels = rows.map((m, i) => {
-      const yr = m.full.slice(-2);
-      return i === 0 || m.label === "Jan" ? `${m.label} '${yr}` : m.label;
-    });
+    const rows = slice(MONEY), labels = yearLabels(rows), full = rows.map((m) => m.full);
 
-    // Census & enrollment — two counts of children, one axis.
-    legend($("#legend-census"), [
-      { name: "Enrolled", varName: "--series-1" },
-      { name: "Average daily census", varName: "--series-2" }
-    ], state.projection);
-    Charts.line($("#chart-census"), {
-      labels,
-      series: [
-        { name: "Enrolled", colorVar: "--series-1", values: rows.map((m) => m.enrolled) },
-        { name: "Avg daily census", colorVar: "--series-2", values: rows.map((m) => m.adc), endFormat: F.dec1, tipFormat: F.dec1 }
-      ],
-      format: F.int,
-      projectFrom,
-      target: have(D.censusTarget) ? { value: D.censusTarget, label: `TARGET ${D.censusTarget}` } : null,
-      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
-      tipNote: (i) => "Attendance " + F.pct1(rows[i].adc / rows[i].enrolled)
-    });
-    twin($("#twin-census"), ["Month", "Enrolled", "Avg daily census", "Attendance"],
-      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.int(m.enrolled), F.dec1(m.adc), F.pct1(m.adc / m.enrolled)]));
-    const gap = $("#census-gap");
-    if (have(D.censusTarget)) {
-      const short = D.censusTarget - CUR.enrolled;
-      gap.textContent = short > 0 ? `${short} short of the target of ${D.censusTarget}`
-                                  : `at or above the target of ${D.censusTarget}`;
-    } else { gap.hidden = true; }
-
-    if (!hasMoney) return;
-
-    // Revenue & expenses — both dollars, one axis.
     legend($("#legend-finance"), [
       { name: "Revenue", varName: "--series-1" },
-      { name: "Operating expenses", varName: "--series-2" }
-    ], state.projection);
+      { name: "Operating cost", varName: "--series-2" }
+    ]);
     Charts.line($("#chart-finance"), {
       labels,
       series: [
         { name: "Revenue", colorVar: "--series-1", values: rows.map((m) => m.revenue), endFormat: F.usdk, tipFormat: F.usd },
-        { name: "Operating expenses", colorVar: "--series-2", values: rows.map((m) => m.expenses), endFormat: F.usdk, tipFormat: F.usd }
+        { name: "Operating cost", colorVar: "--series-2", values: rows.map((m) => m.cost), endFormat: F.usdk, tipFormat: F.usd }
       ],
       format: F.usdk,
       yZero: true,
-      projectFrom,
-      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
-      tipNote: (i) => "Net " + F.usd(rows[i].revenue - rows[i].expenses) + " · " + F.pct1(margin(rows[i]))
+      target: have(D.costTarget) ? { value: D.costTarget, label: `COST TARGET ${F.usdk(D.costTarget)}` } : null,
+      tipTitle: (i) => full[i],
+      tipNote: (i) => `Net ${F.usd(rows[i].revenue - rows[i].cost)} · ${F.pct1(margin(rows[i]))} margin` +
+        (rows[i].childDays ? ` · ${F.usd(rows[i].revenue / rows[i].childDays)} per child-day` : "")
     });
-    twin($("#twin-finance"), ["Month", "Revenue", "Expenses", "Net", "Margin"],
-      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.usd(m.revenue), F.usd(m.expenses),
-        F.usd(m.revenue - m.expenses), F.pct1(margin(m))]));
+    twin($("#twin-finance"), ["Month", "Revenue", "Operating cost", "Net", "Margin", "Per child-day"],
+      rows.map((m) => [m.full, F.usd(m.revenue), F.usd(m.cost), F.usd(m.revenue - m.cost),
+        F.pct1(margin(m)), m.childDays ? F.usd(m.revenue / m.childDays) : "—"]));
     $("#finance-note").textContent =
-      `${CUR.full}: ${F.usdk(CUR.revenue)} in, ${F.usdk(CUR.revenue - CUR.expenses)} net`;
+      `${CUR_MONEY.full}: ${F.usdk(CUR_MONEY.revenue)} in, ${F.usdk(CUR_MONEY.revenue - CUR_MONEY.cost)} net`;
+    if (have(D.financeNote)) $("#finance-caveat").textContent = D.financeNote;
 
-    // Net margin — a single series, so no legend box.
     Charts.line($("#chart-margin"), {
       labels,
-      series: [{ name: "Net margin", colorVar: "--series-1", values: rows.map(margin), endFormat: F.pct1, tipFormat: F.pct1 }],
+      series: [{ name: "Net margin", colorVar: "--series-1", values: rows.map(margin),
+                 endFormat: F.pct1, tipFormat: F.pct1 }],
       format: F.pct0,
       height: 196,
-      projectFrom,
-      target: { value: 0.15, label: "TARGET 15%" },
-      tipTitle: (i) => full[i] + (rows[i].projected ? " · projected" : ""),
-      tipNote: (i) => F.usd(rows[i].revenue - rows[i].expenses) + " on " + F.usd(rows[i].revenue)
+      tipTitle: (i) => full[i],
+      tipNote: (i) => `${F.usd(rows[i].revenue - rows[i].cost)} on ${F.usd(rows[i].revenue)}`
     });
     twin($("#twin-margin"), ["Month", "Net", "Margin"],
-      rows.map((m) => [m.full + (m.projected ? " (proj.)" : ""), F.usd(m.revenue - m.expenses), F.pct1(margin(m))]));
+      rows.map((m) => [m.full, F.usd(m.revenue - m.cost), F.pct1(margin(m))]));
+
+    const mv = margin(CUR_MONEY), pv = PREV_MONEY ? margin(PREV_MONEY) : null;
+    const mc = $("#margin-chip");
+    mc.textContent = `${F.pct1(mv)} in ${CUR_MONEY.label}` +
+      (pv === null ? "" : ` · ${signed((mv - pv) * 100)} pts vs. ${PREV_MONEY.label}`);
+    mc.className = "chip " + (mv >= 0.15 ? "good" : mv >= 0.05 ? "warning" : mv >= 0 ? "serious" : "critical");
   }
 
-  /* =======================================================================
-     Projection table
-     ==================================================================== */
-  function renderProjection() {
-    if (have(CUR) && have(PREV) && CUR.revenue != null && PREV.revenue != null) {
-      const m = margin(CUR), pm = margin(PREV);
-      const mc = $("#margin-chip");
-      mc.textContent = `${F.pct1(m)} MTD · ${signed((m - pm) * 100)} pts vs. ${PREV.label}`;
-      mc.className = "chip " + (m >= 0.15 ? "good" : m >= 0.12 ? "warning" : "serious");
-    }
-    if (!need("card-projection", null, PROJECTED)) return;
-    $("#tbl-projection tbody").innerHTML = PROJECTED.map((m) =>
-      `<tr><td>${esc(m.full)}</td><td class="n">${F.int(m.enrolled)}</td><td class="n">${F.dec1(m.adc)}</td>
-       <td class="n">${esc(F.usdk(m.revenue))}</td><td class="n">${esc(F.pct1(margin(m)))}</td></tr>`).join("");
-    $("#assumptions").innerHTML = (D.projectionAssumptions || []).map((a) => `<li>${esc(a)}</li>`).join("");
-  }
-
-  /* =======================================================================
-     Budget, expense mix, upcoming expenses
-     ==================================================================== */
-  function renderMoney() {
-    renderUpcoming();
-    if (!need("card-budget", "Operating budget", D.budget, D.budget && D.budget.categories)) {
-      const mix = document.getElementById("card-expense-mix"); if (mix) mix.hidden = true;
+  /* ======================= Cost structure & mix ========================= */
+  function renderCosts() {
+    if (!need("card-costs", "Cost structure", D.costLines, D.costLines && D.costLines.lines)) {
+      const mix = document.getElementById("card-mix"); if (mix) mix.hidden = true;
       return;
     }
-    const b = D.budget;
-    const tb = b.categories.reduce((a, c) => a + c.budget, 0);
-    const ta = b.categories.reduce((a, c) => a + c.actual, 0);
-    $("#budget-title").textContent = `Budget vs. actual — ${b.month}`;
+    const c = D.costLines;
+    const lines = c.lines.slice().sort((a, b) => b.current - a.current);
+    const totC = lines.reduce((a, l) => a + l.current, 0);
+    const totP = lines.reduce((a, l) => a + l.prior, 0);
 
-    $("#budget-stats").innerHTML = [
-      { k: "Revenue budget", v: F.usdk(b.revenueBudget) },
-      { k: "Revenue actual", v: F.usdk(b.revenueActual) },
-      { k: "Expense budget", v: F.usdk(tb) },
-      { k: "Expense actual", v: F.usdk(ta) },
-      { k: "Net result", v: F.usdk(b.revenueActual - ta) }
-    ].map((s) => `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
-
-    $("#tbl-budget tbody").innerHTML = b.categories.map((c) => {
-      const varr = c.budget - c.actual;          // positive = under budget
-      const over = varr < 0;
-      const sev = !over ? "" : Math.abs(varr) / c.budget > 0.08 ? "critical" : "serious";
+    $("#costs-title").textContent = `Where the cost went — ${c.current}`;
+    $("#th-prior").textContent = c.prior;
+    $("#th-current").textContent = c.current;
+    $("#tbl-costs tbody").innerHTML = lines.map((l) => {
+      const d = l.current - l.prior;
+      const big = Math.abs(d) >= totC * 0.02;
+      const sev = !big ? "" : d > 0 ? "serious" : "good";
       return `<tr>
-        <td>${esc(c.name)}</td>
-        <td class="n">${esc(F.usd(c.budget))}</td>
-        <td class="n">${esc(F.usd(c.actual))}</td>
-        <td class="n">${chip((over ? "over " : "under ") + F.usd(Math.abs(varr)), sev, !over)}</td>
-        <td class="n">${esc(F.pct0(c.actual / c.budget))}</td>
+        <td>${esc(l.name)}</td>
+        <td class="n">${esc(F.usd(l.prior))}</td>
+        <td class="n">${esc(F.usd(l.current))}</td>
+        <td class="n">${Math.abs(d) < 1 ? chip("flat", "", true) : chip(signedUsd(d), sev, !big)}</td>
       </tr>`;
     }).join("");
-    $("#tbl-budget tfoot").innerHTML =
-      `<tr><td>Total operating expense</td><td class="n">${esc(F.usd(tb))}</td><td class="n">${esc(F.usd(ta))}</td>
-       <td class="n">${chip("under " + F.usd(tb - ta), "", true)}</td><td class="n">${esc(F.pct1(ta / tb))}</td></tr>`;
-    const bc = $("#budget-chip");
-    bc.textContent = `${F.pct1(ta / tb)} of budget used`;
-    bc.className = "chip " + (ta <= tb ? "good" : "serious");
+    const dt = totC - totP;
+    $("#tbl-costs tfoot").innerHTML =
+      `<tr><td>Total operating cost</td><td class="n">${esc(F.usd(totP))}</td>
+       <td class="n">${esc(F.usd(totC))}</td>
+       <td class="n">${chip(signedUsd(dt), dt > 0 ? "serious" : "good")}</td></tr>`;
+    const cc = $("#costs-chip");
+    const overBy = have(D.costTarget) ? totC - D.costTarget : null;
+    cc.textContent = overBy === null ? F.usd(totC)
+      : overBy > 0 ? `${F.usdk(overBy)} over the ${F.usdk(D.costTarget)} target`
+                   : `${F.usdk(-overBy)} under the ${F.usdk(D.costTarget)} target`;
+    cc.className = "chip " + (overBy === null ? "" : overBy > 0 ? "critical" : "good");
+    if (overBy !== null && overBy > 0) $("#card-costs").dataset.state = "critical";
 
-    // Expense mix — nominal categories, one color.
-    Charts.bars($("#chart-expense-mix"), {
-      rows: b.categories.slice().sort((x, y) => y.actual - x.actual)
-        .map((c) => ({ label: c.name, value: c.actual / ta, note: F.usd(c.actual) })),
+    // Composition — nominal lines, one color, small tail folded into Other.
+    const top = lines.slice(0, 8);
+    const rest = lines.slice(8).reduce((a, l) => a + l.current, 0);
+    $("#mix-title").textContent = `Share of ${c.current} cost`;
+    Charts.bars($("#chart-mix"), {
+      rows: top.map((l) => ({ label: l.name, value: l.current / totC, note: F.usd(l.current) }))
+        .concat(rest > 0 ? [{ label: "Everything else", value: rest / totC, note: F.usd(rest) }] : []),
       format: F.pct0,
-      seriesName: "Share of spend"
+      seriesName: "Share of cost"
     });
-
   }
 
-  function renderUpcoming() {
-    if (!need("card-upcoming", "Upcoming major expenses", D.upcomingExpenses)) return;
-    // Soonest first.
-    const parse = (w) => new Date(w.replace(/^(\w+)\s+(\d{4})$/, "$1 1, $2")).getTime();
-    const up = D.upcomingExpenses.slice().sort((a, z) => parse(a.when) - parse(z.when));
-    const total = up.reduce((a, e) => a + e.amount, 0);
-    $("#tbl-upcoming tbody").innerHTML = up.map((e) => {
-      const st = e.status === "Board approved" ? "good"
-        : e.status === "Budgeted" ? "good"
-        : e.status === "Quote pending" ? "warning" : "";
-      return `<tr>
-        <td>${esc(e.item)}<span class="sub">${esc(e.category)} · ${esc(e.note)}</span></td>
-        <td class="mono">${esc(e.when)}</td>
-        <td>${chip(e.status, st, !st)}</td>
-        <td class="n">${esc(F.usd(e.amount))}</td>
-      </tr>`;
-    }).join("");
-    $("#tbl-upcoming tfoot").innerHTML =
-      `<tr><td colspan="3">Committed and planned over the next six months</td><td class="n">${esc(F.usd(total))}</td></tr>`;
-    const rc = $("#reserve-chip");
-    const cover = D.capitalReserve - total;
-    rc.textContent = `${F.usdk(D.capitalReserve)} reserve · ${F.usdk(cover)} left after`;
-    rc.className = "chip " + (cover > total * 0.25 ? "good" : cover > 0 ? "warning" : "critical");
-    if (cover <= 0) $("#card-upcoming").dataset.state = "critical";
-    else if (cover < total * 0.25) $("#card-upcoming").dataset.state = "warning";
-    else delete $("#card-upcoming").dataset.state;
+  /* ======================= Cash ========================================= */
+  function renderCash() {
+    if (!need("card-cash", "Cash position", D.cash, D.cash && D.cash.lines)) return;
+    const c = D.cash;
+    $("#cash-title").textContent = `Cash and obligations — ${c.asOf}`;
+    const obligations = c.lines.filter((l) => l.value < 0).reduce((a, l) => a + l.value, 0);
+    const cashLine = c.lines.find((l) => l.value > 0);
+    const net = c.lines.reduce((a, l) => a + l.value, 0);
+
+    $("#cash-stats").innerHTML = stats([
+      { v: F.usdk(cashLine ? cashLine.value : 0), k: "Cash in bank" },
+      { v: F.usdk(-obligations), k: "Current obligations" },
+      { v: F.usdk(net), k: "Cash net of obligations" },
+      { v: F.usdk(c.ytdNet), k: "Net income, year to date" },
+      { v: F.usdk(c.ytdNetPrior), k: "Same period last year" },
+      { v: F.usdk(c.totalEquity), k: "Total equity" }
+    ]);
+    $("#tbl-cash tbody").innerHTML = c.lines.map((l) =>
+      `<tr><td>${esc(l.name)}</td>
+       <td class="n">${esc(F.usd(l.value))}</td>
+       <td>${l.prior != null ? chip(`${F.usd(l.prior)} ${esc(c.priorLabel)}`, "", true) : ""}</td></tr>`).join("");
+    $("#tbl-cash tfoot").innerHTML =
+      `<tr><td>Cash net of current obligations</td><td class="n">${esc(F.usd(net))}</td><td></td></tr>`;
+    const chipEl = $("#cash-chip");
+    chipEl.textContent = net > 0 ? `${F.usdk(net)} net of obligations` : `${F.usdk(net)} short of obligations`;
+    chipEl.className = "chip " + (net > 0 ? "good" : "critical");
+    if (have(c.note)) $("#cash-note").textContent = c.note;
   }
 
-  /* =======================================================================
-     Attendance
-     ==================================================================== */
+  /* ======================= Attendance & rooms =========================== */
   function renderAttendance() {
-    if (!need("card-absence", null, D.absenceReasons)) { /* card hidden */ }
-    else {
-      $("#tbl-absence tbody").innerHTML = D.absenceReasons.map((r) =>
-        `<tr><td>${esc(r.reason)}${r.note ? `<span class="sub">${esc(r.note)}</span>` : ""}</td>
-         <td class="n">${esc(F.pct0(r.share))}</td></tr>`).join("");
-    }
-    if (!need("card-attendance", "Attendance", D.attendancePeriods)) return;
-    const a = D.attendancePeriods;
-    const rate = (d) => d.adc / d.roster;
-
+    renderRooms();
+    if (!need("card-attendance", "Attendance", MONTHS)) return;
+    const a = MONTHS;
+    const rate = (m) => m.adc / m.enrolled;
     Charts.columns($("#chart-attendance"), {
-      labels: a.map((d) => d.label),
-      sublabels: a.map((d) => d.sub),
+      labels: a.map((m) => m.label),
+      sublabels: a.map((m) => m.full.slice(-4)),
       values: a.map(rate),
       format: F.pct1,
       yFormat: F.pct0,
@@ -368,177 +316,118 @@
       target: have(D.attendanceTargetRate)
         ? { value: D.attendanceTargetRate, label: "TARGET " + F.pct0(D.attendanceTargetRate) } : null,
       seriesName: "Attendance",
-      tipTitle: (i) => a[i].label + " " + a[i].sub,
-      tipNote: (i) => `${F.dec1(a[i].adc)} of ${a[i].roster} on the roster · ` +
-        `${F.pct0(a[i].adc / a[i].attending)} of the ${a[i].attending} who attended`
+      tipTitle: (i) => a[i].full,
+      tipNote: (i) => `${F.dec1(a[i].adc)} of ${a[i].enrolled} enrolled · ${a[i].childDays} child-days`
     });
-    twin($("#twin-attendance"),
-      ["Month", "Roster", "Attended", "Operating days", "Child-days", "Daily census", "Rate vs. roster", "Rate vs. attending"],
-      a.map((d) => [d.label + " " + d.sub, F.int(d.roster), F.int(d.attending), F.int(d.opDays),
-        F.int(d.childDays), F.dec1(d.adc), F.pct1(rate(d)), F.pct1(d.adc / d.attending)]));
+    twin($("#twin-attendance"), ["Month", "Enrolled", "Operating days", "Child-days", "Daily census", "Attendance rate"],
+      a.map((m) => [m.full, F.int(m.enrolled), F.int(m.opDays), F.int(m.childDays), F.dec1(m.adc), F.pct1(rate(m))]));
 
     const cur = a[a.length - 1], prev = a[a.length - 2];
     const ac = $("#attendance-chip");
-    const delta = prev ? signed((rate(cur) - rate(prev)) * 100) + " pts vs. " + prev.label : "";
-    ac.textContent = `${F.pct1(rate(cur))} in ${cur.label}${delta ? " · " + delta : ""}`;
+    ac.textContent = `${F.pct1(rate(cur))} in ${cur.label}` +
+      (prev ? ` · ${signed((rate(cur) - rate(prev)) * 100)} pts vs. ${prev.label}` : "");
     ac.className = "chip " + (rate(cur) >= 0.85 ? "good" : rate(cur) >= 0.75 ? "warning" : "serious");
-    delete $("#card-attendance").dataset.state;
   }
 
-  /* =======================================================================
-     Pipeline & removals
-     ==================================================================== */
-  function renderFlow() {
-    renderRemovals();
-    if (!need("card-pipeline", "Enrollment pipeline", D.pipeline, D.pipeline && D.pipeline.stages)) return;
-    const p = D.pipeline;
-    const total = p.stages.reduce((a, s) => a + s.count, 0);
-    Charts.bars($("#chart-pipeline"), {
-      rows: p.stages.map((s) => ({ label: s.name, value: s.count, note: s.note })),
-      format: F.int,
-      ramp: ["--ord-1", "--ord-2", "--ord-3", "--ord-4", "--ord-5"],
-      seriesName: "Children"
+  function renderRooms() {
+    if (!need("card-rooms", null, D.rooms, D.rooms && D.rooms.list)) return;
+    const r = D.rooms;
+    $("#rooms-eyebrow").textContent = r.month;
+    Charts.bars($("#chart-rooms"), {
+      rows: r.list.map((x) => ({ label: x.name, value: x.adc,
+        note: `${x.attending} attending of ${x.onReport} on the report` })),
+      format: F.dec1,
+      seriesName: "Daily census"
     });
-    $("#pipeline-chip").textContent = `${total} pending`;
-    $("#pipeline-stats").innerHTML = [
-      { v: F.int(p.referrals30), k: "Referrals, last 30 days" },
-      { v: F.pct0(p.conversion), k: "Referral to start" },
-      { v: F.int(p.avgDaysToStart) + " d", k: "Avg. days to start" },
-      { v: F.int(p.stalled), k: "Stalled over 45 days" }
-    ].map((s) => `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
-
-  }
-
-  function renderRemovals() {
-    const r = D.removals;
-    if (!need("card-removal-reasons", "Removals", r, r && r.reasons90)) {
-      if (!need("card-removals", null, r, r && r.recent)) return;
+    const totalAttending = r.list.reduce((a, x) => a + x.attending, 0);
+    $("#rooms-stats").innerHTML = stats([
+      { v: F.int(totalAttending), k: "Children attending" },
+      { v: F.int(r.list.length), k: "Rooms in use" }
+    ].concat(have(r.partnerSchool)
+      ? [{ v: F.int(r.partnerSchool.children), k: "At the partner school" }] : []));
+    if (have(r.partnerSchool)) {
+      $("#rooms-note").textContent =
+        `${r.partnerSchool.children} of the children are enrolled at ${r.partnerSchool.name}. ` +
+        `Bars are average daily census, so they add to the centre's ${F.dec1(CUR.adc)}.`;
     }
-    if (have(r) && have(r.reasons90)) Charts.bars($("#chart-removals"), {
-      rows: r.reasons90.map((x) => ({ label: x.reason, value: x.count })),
-      format: F.int,
-      colorVar: "--series-2",
-      seriesName: "Children"
-    });
-    if (have(r) && have(r.reasons90)) {
-      const n90 = r.reasons90.reduce((a, x) => a + x.count, 0);
-      const rc = $("#removals-chip");
-      rc.textContent = `${n90} in 90 days${r.ytd ? ` · ${r.ytd} YTD` : ""}`;
-      rc.className = "chip";
+  }
+
+  /* ======================= Roster movement ============================== */
+  function renderRoster() {
+    if (need("card-dormant", "Roster hygiene", MONTHS)) {
+      Charts.columns($("#chart-dormant"), {
+        labels: MONTHS.map((m) => m.label),
+        sublabels: MONTHS.map((m) => m.full.slice(-4)),
+        values: MONTHS.map((m) => m.dormant),
+        format: F.int,
+        height: 196,
+        seriesName: "No attendance",
+        tipTitle: (i) => MONTHS[i].full,
+        tipNote: (i) => `${MONTHS[i].onReport} on the report, ${MONTHS[i].enrolled} attended`
+      });
+      const dc = $("#dormant-chip");
+      dc.textContent = `${CUR.dormant} of ${CUR.onReport} on the report in ${CUR.label}`;
+      dc.className = "chip " + (CUR.dormant <= 2 ? "good" : CUR.dormant <= 5 ? "warning" : "serious");
     }
-    if (!need("card-removals", null, r, r && r.recent)) return;
-    $("#tbl-removals tbody").innerHTML = r.recent.map((x) =>
-      `<tr><td class="mono">${esc(x.date)}</td><td class="mono">${esc(x.record)}</td>
-       <td>${esc(x.reason)}</td>
-       <td>${chip(x.seat, x.seat.startsWith("Filled") ? "good" : x.seat === "Open" ? "serious" : "warning")}</td></tr>`).join("");
+
+    const moved = MONTHS.filter((m) => m.started != null);
+    if (!need("card-movement", null, moved)) return;
+    $("#tbl-movement tbody").innerHTML = moved.map((m) => {
+      const net = m.started - m.stopped;
+      return `<tr>
+        <td>${esc(m.full)}</td>
+        <td class="n">${m.started || "—"}</td>
+        <td class="n">${m.stopped || "—"}</td>
+        <td class="n">${net === 0 ? chip("flat", "", true) : chip(signed(net, 0), net > 0 ? "good" : "serious")}</td>
+        <td class="n">${F.int(m.enrolled)}</td>
+      </tr>`;
+    }).join("");
+    const started = moved.reduce((a, m) => a + m.started, 0);
+    const stopped = moved.reduce((a, m) => a + m.stopped, 0);
+    $("#movement-chip").textContent = `${started} started, ${stopped} stopped since ${moved[0].label}`;
   }
 
-  /* =======================================================================
-     People
-     ==================================================================== */
-  function renderPeople() {
-    const s = D.staffing || {};
-    if (!need("card-workforce", null, s.stats)) { /* hidden */ }
-    if (!need("card-credentials", null, s.credentials)) { /* hidden */ }
-    if (!need("card-staff", "Staffing", s.roles)) { renderStaffExtras(s); return; }
-    const total = s.roles.reduce((a, r) => a + r.count, 0);
-    const open = s.roles.reduce((a, r) => a + r.open, 0);
-    Charts.bars($("#chart-staff"), {
-      rows: s.roles.map((r) => ({ label: r.role, value: r.count, note: r.open ? `${r.open} open` : "fully staffed" })),
-      format: F.int,
-      seriesName: "On payroll"
-    });
-    twin($("#twin-staff"), ["Role", "On payroll", "Open"],
-      s.roles.map((r) => [r.role, F.int(r.count), r.open ? F.int(r.open) : "—"]));
-    const sc = $("#staff-chip");
-    sc.textContent = `${total} on payroll · ${open} open`;
-    sc.className = "chip " + (open === 0 ? "good" : open <= 2 ? "warning" : "serious");
-
-    renderStaffExtras(s);
-  }
-
-  function renderStaffExtras(s) {
-    if (have(s.stats)) {
-    const st = s.stats;
-    $("#staff-stats").innerHTML = [
-      { v: F.int(st.overtimeHours), k: `Overtime hours (target ${st.overtimeTarget})` },
-      { v: F.int(st.agencyShifts), k: "Agency shifts filled" },
-      { v: F.pct1(st.calloutRate), k: "Call-out rate" },
-      { v: F.pct0(st.turnover12mo), k: "Turnover, 12 months" },
-      { v: st.nurseToChild, k: "Nurse to child ratio" }
-    ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
-    }
-    if (!have(s.credentials)) return;
-    $("#tbl-credentials tbody").innerHTML = s.credentials.map((c) =>
-      `<tr><td>${esc(c.who)}</td><td>${esc(c.item)}</td>
-       <td class="n">${chip(c.due, c.state)}</td></tr>`).join("");
-    const urgent = s.credentials.filter((c) => c.state === "critical").length;
-    const cc = $("#cred-chip");
-    cc.textContent = urgent ? `${urgent} expiring within days` : "none urgent";
-    cc.className = "chip " + (urgent ? "critical" : "good");
-  }
-
-  /* =======================================================================
-     Marketing
-     ==================================================================== */
+  /* ======================= Marketing ==================================== */
   function renderMarketing() {
-    const m = D.marketing || {};
-    if (!need("card-tours", null, m.tours)) { /* hidden */ }
-    if (!need("card-marketing", null, m.updates)) { /* hidden */ }
-    if (!need("card-sources", "Marketing", m.sources90)) { renderMarketingExtras(m); return; }
-    const total = m.sources90.reduce((a, s) => a + s.count, 0);
-    Charts.bars($("#chart-sources"), {
-      rows: m.sources90.map((s) => ({ label: s.source, value: s.count, note: F.pct0(s.count / total) + " of referrals" })),
-      format: F.int,
-      seriesName: "Referrals"
+    if (!need("card-adspend", "Marketing", D.adSpend, D.adSpend && D.adSpend.months)) return;
+    const a = D.adSpend;
+    Charts.columns($("#chart-adspend"), {
+      labels: a.months.map((m) => m.label),
+      values: a.months.map((m) => m.value),
+      format: F.usd,
+      yFormat: F.usdk,
+      height: 190,
+      seriesName: "Spend",
+      tipTitle: (i) => a.months[i].label
     });
-    twin($("#twin-sources"), ["Source", "Referrals", "Share"],
-      m.sources90.map((s) => [s.source, F.int(s.count), F.pct0(s.count / total)]));
-    $("#sources-chip").textContent = `${total} referrals`;
-    renderMarketingExtras(m);
+    $("#adspend-stats").innerHTML = stats([
+      { v: F.usdk(a.ytd), k: "Year to date" },
+      { v: F.usdk(a.ytdPrior), k: "Same period last year" },
+      { v: F.usd(a.months[a.months.length - 1].value), k: "Latest month" }
+    ]);
+    const ch = $("#adspend-chip");
+    ch.textContent = `${F.pct0(a.ytd / a.ytdPrior)} of last year's spend`;
+    ch.className = "chip";
+    if (have(a.note)) $("#adspend-note").textContent = a.note;
   }
 
-  function renderMarketingExtras(m) {
-    if (have(m.tours)) $("#tour-stats").innerHTML = [
-      { v: F.int(m.tours.booked), k: "Tours booked" },
-      { v: F.int(m.tours.completed), k: "Tours completed" },
-      { v: F.int(m.tours.converted), k: "Converted to start" },
-      { v: m.tours.completed ? F.pct0(m.tours.converted / m.tours.completed) : "—", k: "Tour conversion" },
-      { v: F.usdk(m.spend90), k: "Spend, last 90 days" },
-      { v: F.usd(m.costPerStart), k: "Cost per start" }
-    ].map((x) => `<div class="stat"><span class="v num">${esc(x.v)}</span><span class="k">${esc(x.k)}</span></div>`).join("");
-    if (!have(m.updates)) return;
-    $("#marketing-feed").innerHTML = m.updates.map((u) =>
-      `<div class="feed-item">
-         <div class="when">${esc(u.date)}</div>
-         <div class="body">
-           <div class="t">${esc(u.title)}</div>
-           <div class="d">${esc(u.detail)}</div>
-           <div>${chip(u.tag, u.state === "pending" ? "accent" : u.state)}</div>
-         </div>
-       </div>`).join("");
-  }
-
-  /* =======================================================================
-     Task board
-     ==================================================================== */
+  /* ======================= Task board =================================== */
   const DONE_KEY = "akp.tasks.done";
   const readDone = () => {
-    try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); }
-    catch { return new Set(); }
+    try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); } catch { return new Set(); }
   };
   const writeDone = (set) => {
     try { localStorage.setItem(DONE_KEY, JSON.stringify(Array.from(set))); } catch { /* private mode */ }
   };
   let taskFilter = "open";
-
-  function isDone(t, done) { return t.status === "Done" || done.has(t.id); }
-  function isOverdue(t, done) { return !isDone(t, done) && new Date(t.due + "T00:00:00") < AS_OF; }
+  const isDone = (t, done) => t.status === "Done" || done.has(t.id);
+  const isOverdue = (t, done) => !!t.due && !isDone(t, done) && new Date(t.due + "T00:00:00") < AS_OF;
 
   function renderTasks() {
     if (!need("card-tasks", "Task board", D.tasks)) return;
     const done = readDone();
-    const all = D.tasks.slice().sort((a, b) => a.due.localeCompare(b.due));
+    // Undated work sorts last — it is not late, it is unscheduled.
+    const all = D.tasks.slice().sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999"));
     const view = all.filter((t) => {
       if (taskFilter === "all") return true;
       if (taskFilter === "open") return !isDone(t, done);
@@ -548,8 +437,7 @@
     });
 
     $("#tbl-tasks tbody").innerHTML = view.map((t) => {
-      const d = isDone(t, done);
-      const over = isOverdue(t, done);
+      const d = isDone(t, done), over = isOverdue(t, done);
       const statusState = d ? "good" : t.status === "Blocked" ? "critical" : t.status === "In progress" ? "accent" : "";
       return `<tr class="${d ? "is-done" : ""}">
         <td class="check"><input type="checkbox" data-task="${esc(t.id)}" ${d ? "checked" : ""}
@@ -558,7 +446,7 @@
         <td>${esc(t.area)}</td>
         <td>${esc(t.owner)}</td>
         <td><span class="pri ${esc(t.priority)}">${esc(t.priority)}</span></td>
-        <td class="n">${esc(shortDate(t.due))}${over ? ` ${chip("overdue", "critical")}` : ""}</td>
+        <td class="n">${t.due ? esc(shortDate(t.due)) : `<span class="chip plain">no date</span>`}${over ? ` ${chip("overdue", "critical")}` : ""}</td>
         <td>${chip(d ? "Done" : t.status, statusState, !statusState)}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="7" style="color:var(--ink-3);padding:14px 0">Nothing in this view.</td></tr>`;
@@ -566,13 +454,15 @@
     const openCount = all.filter((t) => !isDone(t, done)).length;
     const overdue = all.filter((t) => isOverdue(t, done)).length;
     const blocked = all.filter((t) => t.status === "Blocked").length;
-    $("#task-count").textContent = `${view.length} shown · ${openCount} open · ${overdue} overdue · ${blocked} blocked`;
+    const undated = all.filter((t) => !t.due && !isDone(t, done)).length;
+    $("#task-count").textContent =
+      `${view.length} shown · ${openCount} open · ${overdue} overdue · ${undated} with no date`;
     const tc = $("#tasks-chip");
-    tc.textContent = overdue ? `${overdue} overdue, ${blocked} blocked` : `${openCount} open`;
-    tc.className = "chip " + (overdue ? "critical" : blocked ? "warning" : "good");
+    tc.textContent = overdue ? `${overdue} overdue` : blocked ? `${blocked} blocked` : `${openCount} open`;
+    tc.className = "chip " + (overdue ? "critical" : blocked ? "warning" : undated ? "warning" : "good");
     if (overdue) $("#card-tasks").dataset.state = "critical";
-    else if (blocked) $("#card-tasks").dataset.state = "warning";
     else delete $("#card-tasks").dataset.state;
+    if (have(D.tasksNote)) $("#tasks-note").textContent = D.tasksNote;
 
     $$("#tbl-tasks input[type=checkbox]").forEach((box) => {
       box.addEventListener("change", () => {
@@ -584,9 +474,7 @@
     });
   }
 
-  /* =======================================================================
-     Chrome: header, controls, theme
-     ==================================================================== */
+  /* ======================= Chrome ======================================= */
   function renderChrome() {
     $("#facility-name").textContent = D.meta.facility;
     $("#foot-facility").textContent = D.meta.facility;
@@ -595,10 +483,6 @@
     $("#period-label").textContent = D.meta.period;
     if (D.meta.sampleData) $("#demo-chip").hidden = false;
     if (have(D.meta.sourceNote)) $("#foot-source").textContent = D.meta.sourceNote;
-    $("#foot-note").innerHTML = D.meta.sampleData
-      ? "Figures on this board are <strong>illustrative sample data</strong> for a " +
-        D.meta.licensedCapacity + "-seat PPEC, not the center's records. Replace them before anyone makes a decision from this page."
-      : "";
 
     $$(".segmented button[data-range]").forEach((b) => {
       b.addEventListener("click", () => {
@@ -606,12 +490,6 @@
         $$(".segmented button[data-range]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
         renderTrends();
       });
-    });
-    const pt = $("#proj-toggle");
-    pt.addEventListener("click", () => {
-      state.projection = !state.projection;
-      pt.setAttribute("aria-pressed", String(state.projection));
-      renderTrends();
     });
     $$("[data-task-filter]").forEach((b) => {
       b.addEventListener("click", () => {
@@ -636,7 +514,6 @@
     });
   }
 
-  // A section with nothing left in it takes its heading with it.
   function pruneEmptySections() {
     $$("section.section").forEach((sec) => {
       const cards = $$(".card", sec);
@@ -655,15 +532,13 @@
     renderLead();
     renderTargets();
     renderTrends();
-    renderProjection();
-    renderMoney();
+    renderCosts();
+    renderCash();
     renderAttendance();
-    renderFlow();
-    renderPeople();
+    renderRoster();
     renderMarketing();
     renderTasks();
     pruneEmptySections();
-    // Web fonts change text metrics; re-lay the charts once they land.
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => document.dispatchEvent(new Event("akp:theme")));
     }

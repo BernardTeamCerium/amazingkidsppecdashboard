@@ -1,18 +1,34 @@
 # Amazing Kids PPEC — Operations Board
 
-A single-page operations dashboard for a Prescribed Pediatric Extended Care
-center: census and enrollment, attendance, staffing, budget and margin, the
-enrollment pipeline, removals, upcoming major expenses, marketing, and the open
-task list — on one screen, with targets and a projection to year end.
+A single-page operations dashboard for Amazing Kids PPEC: census and attendance,
+revenue, cost, margin and cash, room mix, roster movement, marketing spend, and
+the open task list — on one screen, with the growth plan's targets on top.
 
-Open `index.html` in a browser. There is no build step, no server, no
-dependencies. The only network request is the Google Fonts stylesheet; the page
-falls back to system fonts without it.
+Open `index.html` in a browser. No build step, no server, no dependencies. The
+only network request is the Google Fonts stylesheet; the page falls back to
+system fonts without it.
 
-> **The numbers shipped here are illustrative sample data** modeled on a 60-seat
-> PPEC — not the center's records. Replace them before anyone makes a decision
-> from this page. The "Sample data" badge in the header disappears on its own
-> once you set `meta.sampleData` to `false`.
+## Where the numbers come from
+
+| Section | Source | Covers |
+|---|---|---|
+| Census, attendance, rooms, roster movement | "Monthly Student Attendance: Amazing Kids PPEC" (Drive) | Jan–Aug 2026 |
+| Revenue, operating cost, margin, cash position | "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026 | Jan–Jul 2026 |
+| Targets | "Amazing Kids PPEC - Growth Plan" | 20 children in Q1; $60–65K monthly budget |
+| Task board | August operations discussion list (Drive) | 12 items |
+
+Still unsourced, so those cards stay hidden: staffing headcount, referral
+pipeline, removal reasons, campaign results, and a per-category budget.
+
+### Two definitions worth knowing
+
+- **Enrolled** means a child who attended at least one day that month. Children
+  carried on the attendance report with zero days are counted separately as
+  *records with no attendance* — twelve of them in January, four in August.
+- **Financials are cash basis.** Income lands when the payment arrives, not when
+  the care was delivered, so a heavy claims batch inflates one month and starves
+  the next. Compare months with that in mind; the per-child-day figure in the
+  chart's table view is the steadier read.
 
 ## Updating the board
 
@@ -23,16 +39,24 @@ board, with a comment over each block.
 | Section on the board | Key in `data.js` |
 |---|---|
 | Hero figure and KPI tiles | `hero`, `kpis` |
-| Targets scorecard | `targets` |
-| Census, revenue, margin trends and the year-end projection | `months`, `projectionAssumptions` |
-| Daily attendance and absence reasons | `attendanceDaily`, `absenceReasons`, `attendanceTargetRate` |
-| Budget vs. actual and expense mix | `budget` |
-| Upcoming major expenses | `upcomingExpenses`, `capitalReserve` |
-| Pending enrollments by stage | `pipeline` |
-| Removals | `removals` |
-| Staffing, workforce load, credentials | `staffing` |
-| Referral sources, tours, campaign updates | `marketing` |
+| Targets scorecard | `targets`, `censusTarget`, `costTarget` |
+| Census, revenue, cost and margin charts | `months` |
+| Cost structure and composition | `costLines` |
+| Cash and obligations | `cash` |
+| Attendance and room mix | `months`, `rooms` |
+| Roster movement | `months` (`dormant`, `started`, `stopped`) |
+| Marketing spend | `adSpend` |
 | Task board | `tasks` |
+
+A few rules the file expects:
+
+- `months` carries census for every month and `revenue`/`cost` only for the
+  months the management report covers. Months without money are simply left out
+  of the financial charts.
+- Task `due` dates are ISO (`2026-09-30`) or `null` for unscheduled work.
+  "Overdue" is computed against `meta.asOf`, so keep that current.
+- `rooms.list` should add up to the latest month's census and enrollment; the
+  board does not check this for you.
 
 ### Sections hide themselves when there is no data
 
@@ -42,32 +66,17 @@ and the footer lists what is still waiting. Nothing renders half-empty and no
 number is invented to fill a gap.
 
 ```js
-attendanceDaily: null,   // Attendance section disappears until the log is wired up
-marketing: null,         // so does Marketing & referrals
+staffing: null,    // the People section disappears until headcount is wired up
+marketing: null,   // so does the referral breakdown
 ```
 
-The same works one level down for `staffing.credentials`, `staffing.stats`,
-`marketing.tours`, `marketing.updates`, `removals.recent`, and
-`projectionAssumptions` — each hides only its own card. Individual KPI tiles are
-entries in the `kpis` array, so drop the ones you cannot source yet.
+### Keep PHI and member detail off this page
 
-A few rules the file expects:
-
-- `months` holds actuals followed by projected months; a month is projected when
-  `projected: true`. The trend charts draw actuals solid and projections dashed
-  under a shaded band, and the projection table reads the projected months.
-- `pipeline.stages` is a *current* distribution — every pending child sits in
-  exactly one stage, so the counts sum to the pending total.
-- Task `due` dates are ISO (`2026-09-12`). "Overdue" is computed against the
-  as-of date, so keep `meta.asOf` current.
-- Attendance rate is average daily census ÷ enrollment. Enrollment is
-  authorization; attendance is what actually bills.
-
-### Keep PHI off this page
-
-Children are referenced by internal record ID only (`AK-1183`). No names, dates
-of birth, diagnoses, or clinical detail belong in `data.js` — this is a static
-page, and everything in that file ships to anyone who can open it.
+The attendance report names every child, the school list names them again, and
+the balance sheet names every member with their equity. **None of that belongs
+in `data.js`** — this is a static page, and everything in that file ships to
+anyone who can open it. Aggregate first, then paste the aggregates. The board is
+built so that nothing below the monthly total is ever needed.
 
 ## Files
 
@@ -90,18 +99,16 @@ node build.js
 ## How the board reads
 
 - **Left edge stripes** flag cards and tiles that need attention — amber for
-  watch, orange for slipping, red for act now. A card with no stripe is fine.
+  watch, orange for slipping, red for act now. No stripe means fine.
 - **Chips** carry state next to a label, never color alone.
 - **Every chart has a "Table view"** toggle underneath with the same numbers, and
   charts respond to hover and to arrow keys when focused.
-- **The trend window control** in the header scopes the three time-series charts
-  (census, revenue/expenses, margin) and nothing else. Everything else on the
-  board is month-to-date as of `meta.asOf`.
+- **The trend window control** scopes the census, revenue and margin charts and
+  nothing else.
 - **Ticking a task** stores that in your browser only. It is a personal working
   view, not a shared record — the task list itself lives in `data.js`.
 
 Colors are a validated palette: the two chart series clear colorblind-safe
 separation in both light and dark themes, status colors are reserved for state
-and never reused as a series, and the pipeline ramp is a single hue stepped
-light to dark. The board follows the viewer's system theme, and the **Theme**
-button overrides it.
+and never reused as a series, and every column grows from zero. The board
+follows the viewer's system theme, and the **Theme** button overrides it.
