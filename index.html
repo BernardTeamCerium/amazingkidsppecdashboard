@@ -28,6 +28,7 @@
       <div>As of <strong id="as-of">—</strong></div>
       <div id="period-label">—</div>
     </div>
+    <button class="icon-btn" id="edit-toggle" type="button" hidden>Edit data</button>
     <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch color theme">Theme</button>
   </div>
 </header>
@@ -125,6 +126,57 @@
         <div class="stat-strip" id="projection-stats"></div>
         <ul class="assumptions" id="assumptions"></ul>
         <p class="card-note" id="projection-caveat"></p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= DISTRIBUTIONS ================= -->
+  <section class="section" id="section-distributions">
+    <div class="section-head">
+      <h2>Distributions &amp; savings</h2>
+      <span class="section-note">A policy for splitting net income — every percentage is editable</span>
+    </div>
+    <div class="grid">
+
+      <article class="card col-8" id="card-distributions">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Policy</div>
+            <h3>Where each month's net income goes</h3>
+          </div>
+          <div class="card-meta"><span class="chip accent" id="dist-chip">—</span></div>
+        </div>
+        <div class="stat-strip" id="dist-policy"></div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-distributions">
+            <thead><tr><th>Month</th><th class="n">Revenue</th><th class="n">Net</th><th class="n">Savings</th><th class="n">Debt</th><th class="n">Owners</th><th class="n">Reserve after</th></tr></thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+        <p class="card-note" id="dist-note"></p>
+      </article>
+
+      <article class="card col-4" id="card-reserve">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Company savings</div>
+            <h3>The reserve</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="reserve-chip">—</span></div>
+        </div>
+        <div class="meter-track" id="reserve-meter" role="img" aria-label="Reserve progress"></div>
+        <div class="meter-sub" id="reserve-caption"></div>
+        <div class="stat-strip" id="reserve-stats"></div>
+        <div class="eyebrow" id="members-head">Owner split, by equity</div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-members">
+            <thead><tr><th>Member</th><th class="n">Share</th><th class="n">Distribution</th></tr></thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
       </article>
 
     </div>
@@ -415,8 +467,29 @@
 
 </main>
 
+<aside class="editor" id="editor" hidden aria-label="Edit board data">
+  <header class="ed-head">
+    <div>
+      <div class="eyebrow">Edit</div>
+      <h2>Board data</h2>
+    </div>
+    <button class="icon-btn" id="ed-close" type="button">Close</button>
+  </header>
+  <div class="ed-status" id="ed-status"></div>
+  <p class="ed-hint" id="ed-local" hidden>This copy is running from a file, so Save is unavailable —
+    your changes are live in this tab only and will be lost on reload. On the published board, Save
+    writes a new version that everyone opening the link will see.</p>
+  <p class="ed-warning" id="ed-split-warning" hidden></p>
+  <div class="ed-body" id="ed-body"></div>
+  <footer class="ed-foot">
+    <button class="btn-primary" id="ed-save" type="button">Save for everyone</button>
+  </footer>
+</aside>
+
 <script src="assets/js/data.js"></script>
+<script src="assets/js/model.js"></script>
 <script src="assets/js/charts.js"></script>
+<script src="assets/js/editor.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

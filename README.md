@@ -43,9 +43,24 @@ campaign results, and a per-category budget.
 
 ## Updating the board
 
-Every figure lives in **`assets/js/data.js`**. Edit that one file and reload —
-nothing else needs to change. The file is organized in the same order as the
-board, with a comment over each block.
+Two ways in.
+
+**On the published board — the Edit button.** It opens a panel of the inputs.
+Type a number and every figure that depends on it moves immediately: change the
+day rate and the projection, the distribution schedule and the reserve date all
+follow. **Save** publishes a new version of the page, and every open view
+reloads to it. Saving needs the artifact runtime, so it works on the published
+board and not on a copy opened from a file — there the edits are live but local
+to the tab.
+
+**In the repo — `assets/js/data.js`.** Same inputs, same effect, and the right
+place for a bulk update. The file is organized in the same order as the board.
+
+Either way the file holds **inputs only**. Average daily census, attendance
+rate, margin, the whole projection, staffing spare capacity, cost shares, the
+reserve schedule and the owner split are all calculated in
+`assets/js/model.js` — never stored, so they cannot drift out of step with the
+numbers they come from.
 
 | Section on the board | Key in `data.js` |
 |---|---|
@@ -59,6 +74,7 @@ board, with a comment over each block.
 | Attendance and room mix | `months`, `rooms` |
 | Roster movement | `months` (`dormant`, `started`, `stopped`) |
 | Staffing and the daily model | `staffing` |
+| Distributions and the reserve | `distributions` |
 | Marketing spend | `adSpend` |
 | Task board | `tasks` |
 
@@ -72,10 +88,13 @@ A few rules the file expects:
   the task list by hand — see below.
 - `rooms.list` should add up to the latest month's census and enrollment; the
   board does not check this for you.
-- `projection.months` rows are precomputed, not derived at render time. Each row
-  must satisfy `opDays = weekdays − closures`, `adc = enrolled × attendanceRate`
-  and `revenue = adc × opDays × perDiem`. Change an input and recompute the row,
-  or the table will disagree with itself.
+- `projection.months` rows carry only `weekdays`, `closures` and `enrolled`.
+  Operating days, daily census and revenue are calculated from them.
+- `distributions` is a policy, not a forecast. The three shares split each
+  month's net income; the panel warns if they add to more or less than 100%.
+  `assumedMonthlyCost` is the one figure with no source — the management report
+  gives no basis for forecasting cost, so the schedule holds it at the
+  year-to-date average.
 
 ## The task board is maintained in a sheet
 
@@ -117,6 +136,22 @@ staffing: null,    // the People section disappears until headcount is wired up
 marketing: null,   // so does the referral breakdown
 ```
 
+## Who can see this board
+
+The published artifact is **private to your Claude account** unless you share
+it. That is the real access control: a link nobody has cannot be opened. Share
+it deliberately, and remove access from the artifact's share menu when someone
+should no longer have it.
+
+A password box drawn on the page itself would not add to that. Everything the
+board displays travels inside the page, so anyone who can open the page can read
+the numbers whether or not a passcode is drawn on top — it would look like
+protection without being any.
+
+`distributions.showMembers` is the one switch that changes what a viewer can
+see: set it to `false` and the owner split collapses to a single pool with no
+names or shares.
+
 ### Keep PHI and member detail off this page
 
 The attendance report names every child, the school list names them again, and
@@ -149,9 +184,11 @@ from the amber warning status, and status colors are reserved.
 ```
 index.html               page structure — cards, headings, mount points
 assets/css/dashboard.css design tokens and every component style
-assets/js/data.js        ALL data — the only file you normally edit
+assets/js/data.js        ALL inputs — the only file you normally edit
+assets/js/model.js       the calculation layer — everything derived lives here
 assets/js/charts.js      SVG chart primitives (line, column, bar, sparkline)
-assets/js/app.js         renders the cards from data.js
+assets/js/editor.js      the edit panel, and rebuilding the page to publish it
+assets/js/app.js         renders the cards from the computed model
 build.js                 inlines everything into dist/dashboard.html
 tools/import-tasks.js    pulls the task board in from the task sheet's CSV
 assets/img/logo.png      the logo (drop it in; not in the repo yet)
