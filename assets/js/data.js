@@ -277,7 +277,10 @@ window.AKP_DATA = {
     { id: "T-11", title: "Order branded promo material — blankets, onesies and the rest",
       owner: "Unassigned", due: null, status: "Not started", priority: "Low", area: "Marketing" },
     { id: "T-12", title: "Run more marketing campaigns, including video footage and local exposure",
-      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Marketing" }
+      owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Marketing" },
+    { id: "T-13", title: "Stand up the Amazing Kids PPEC operations board on a shared link",
+      owner: "Unassigned", due: null, status: "In progress", priority: "High", area: "Operations",
+      note: "Live on the artifact link now — decide who gets access and share it from there" }
   ],
   /* TASKS:END */
   tasksNote: "Owners and due dates are maintained in the “Amazing Kids PPEC - Task Board” sheet " +
