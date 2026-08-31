@@ -9,19 +9,19 @@
 
   /* Neutrals are pulled toward the logo's navy rather than a default grey, so
      the brand mark sits in a page that already shares its temperature. */
-  --brand-navy:   #0b2c42;
-  --brand-gold:   #ffc20e;
+  --brand-navy:   #052c45;
+  --brand-gold:   #ffbb02;
   --plane:        #e9eef3;
   --surface:      #ffffff;
   --surface-2:    #f4f7fa;
   --surface-3:    #e4ebf1;
-  --ink:          #0b2c42;   /* the logo navy, doing the work of near-black */
+  --ink:          #052c45;   /* the logo navy, doing the work of near-black */
   --ink-2:        #46606f;
   --ink-3:        #78909f;
   --rule:         #d9e3ea;
   --rule-strong:  #bccbd7;
   --logo-plate:   transparent;
-  --shadow:       0 1px 2px rgba(11, 44, 66, .05), 0 8px 24px -16px rgba(11, 44, 66, .20);
+  --shadow:       0 1px 2px rgba(5, 44, 69, .05), 0 8px 24px -16px rgba(5, 44, 69, .20);
 
   /* Accent + chart series. Series are navy-shifted toward the brand and still
      clear every gate on this surface: adjacent CVD ΔE 23.6, contrast ≥ 3:1. */
@@ -217,7 +217,7 @@ code {
 .masthead-inner {
   max-width: 1560px;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 11px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -229,13 +229,13 @@ code {
 /* The logo is navy line art, so on a dark ground it needs a light plate to sit
    on. In light mode the plate is the surface itself, so it disappears. */
 .brand-logo {
-  height: 46px;
+  height: 54px;   /* the mark is close to square, so height drives the lockup */
   width: auto;
-  max-width: 250px;
+  max-width: 190px;
   display: block;
   background: var(--logo-plate);
-  border-radius: 8px;
-  padding: 3px 7px;
+  border-radius: 10px;
+  padding: 5px 9px;
 }
 
 .mark {
