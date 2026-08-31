@@ -239,6 +239,38 @@ window.AKP_DATA = {
       "headline: $50.7K of net income against a $243.0K loss over the same seven months last year."
   },
 
+
+  /* ---- Staffing ---------------------------------------------------------- */
+  staffing: {
+    asOf: "September 1, 2026",
+    fullTime: 8, partTime: 1, perDiem: 5, total: 14,
+    /* Listed in skill order, not by size — the mix is what matters here. */
+    roles: [
+      { role: "RN", count: 2, type: "Full time" },
+      { role: "LPN", count: 2, type: "Full time" },
+      { role: "CNA", count: 4, type: "Full time" },
+      { role: "HHA", count: 1, type: "Part time" },
+      { role: "Per diem, all roles", count: 5, type: "Per diem" }
+    ],
+    discrepancy: "Recorded as 7 full-time staff, but the roles given — 2 RN, 2 LPN, 4 CNA — " +
+      "sum to 8. The board counts 8. Confirm which is right and correct it here.",
+    dailyModel: {
+      supports: 25,
+      perDay: 7,
+      lines: [
+        { role: "RN", perDay: 1, roster: 2, have: "2 full time" },
+        { role: "LPN", perDay: 2, roster: 2, have: "2 full time" },
+        { role: "Techs (CNA / HHA)", perDay: 4, roster: 5, have: "4 full-time CNAs, 1 part-time HHA" }
+      ],
+      excludes: "Children in the total care room are not in this model — they are staffed separately. " +
+        "Five children were in that room in August.",
+      note: "The LPN line is the pinch: two are needed on the floor every day and two are on the " +
+        "roster, so a single absence has to be covered by a per diem. The RN and tech lines each " +
+        "carry one spare. At 25 children this is one staff member per 3.6 children; at the 23 " +
+        "enrolled the projection assumes, about 18 children a day, it is one per 2.6."
+    }
+  },
+
   /* ---- Marketing --------------------------------------------------------- */
   adSpend: {
     months: [
@@ -298,7 +330,6 @@ window.AKP_DATA = {
   capitalReserve: null,
   pipeline: null,
   removals: null,
-  staffing: null,
   marketing: null,
   absenceReasons: null,
   attendanceTargetRate: null

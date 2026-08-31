@@ -439,6 +439,58 @@
     $("#movement-chip").textContent = `${started} started, ${stopped} stopped since ${moved[0].label}`;
   }
 
+  /* ======================= Staffing ===================================== */
+  function renderStaffing() {
+    const s = D.staffing || {};
+    if (!need("card-staff", "Staffing", s.roles)) {
+      const m = document.getElementById("card-staff-model"); if (m) m.hidden = true;
+      return;
+    }
+    if (have(s.asOf)) $("#staff-eyebrow").textContent = "As of " + s.asOf;
+    $("#staff-stats").innerHTML = stats([
+      { v: F.int(s.fullTime), k: "Full time" },
+      { v: F.int(s.partTime), k: "Part time" },
+      { v: F.int(s.perDiem), k: "Per diem" },
+      { v: F.int(s.total), k: "On the team" }
+    ]);
+    Charts.bars($("#chart-staff"), {
+      rows: s.roles.map((r) => ({ label: r.role, value: r.count, note: r.type })),
+      format: F.int,
+      seriesName: "Staff"
+    });
+    twin($("#twin-staff"), ["Role", "Employment", "Staff"],
+      s.roles.map((r) => [r.role, r.type, F.int(r.count)]));
+    $("#staff-chip").textContent = `${s.total} on the team`;
+    $("#staff-chip").className = "chip";
+    // The stated full-time total and the roles given do not agree; say so rather
+    // than quietly picking one.
+    if (have(s.discrepancy)) {
+      $("#staff-note").textContent = s.discrepancy;
+      $("#card-staff").dataset.state = "warning";
+    }
+
+    const m = s.dailyModel;
+    if (!need("card-staff-model", null, m, m && m.lines)) return;
+    $("#model-title").textContent = `Daily staffing for ${m.supports} children`;
+    $("#tbl-staff-model tbody").innerHTML = m.lines.map((l) => {
+      const spare = l.roster - l.perDay;
+      const state = spare <= 0 ? "critical" : spare === 1 ? "warning" : "good";
+      const label = spare <= 0 ? "no spare" : spare === 1 ? "1 spare" : `${spare} spare`;
+      return `<tr>
+        <td>${esc(l.role)}</td>
+        <td class="n">${l.perDay}</td>
+        <td class="n">${l.roster}<span class="sub">${esc(l.have)}</span></td>
+        <td>${chip(label, state)}</td>
+      </tr>`;
+    }).join("");
+    $("#tbl-staff-model tfoot").innerHTML =
+      `<tr><td>On the floor each day</td><td class="n">${m.perDay}</td>
+       <td class="n">${s.fullTime + s.partTime}</td>
+       <td>${chip(`1 staff per ${(m.supports / m.perDay).toFixed(1)} children at ${m.supports}`, "", true)}</td></tr>`;
+    $("#model-chip").textContent = `${m.perDay} on the floor supports ${m.supports} children`;
+    $("#model-note").textContent = [m.excludes, m.note].filter(have).join(" ");
+  }
+
   /* ======================= Marketing ==================================== */
   function renderMarketing() {
     if (!need("card-adspend", "Marketing", D.adSpend, D.adSpend && D.adSpend.months)) return;
@@ -610,6 +662,7 @@
     renderCash();
     renderAttendance();
     renderRoster();
+    renderStaffing();
     renderMarketing();
     renderTasks();
     pruneEmptySections();

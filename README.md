@@ -16,14 +16,15 @@ system fonts without it.
 | Revenue, operating cost, margin, cash position | "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026 | Jan–Jul 2026 |
 | Targets | "Amazing Kids PPEC - Growth Plan" | 20 children in Q1; $60–65K monthly budget |
 | Task board | "Amazing Kids PPEC - Task Board" sheet (Drive) | 12 items |
+| Roster, day rate, staffing | Reported directly | as of Sep 1, 2026 |
 
 Two attendance exports exist in Drive. The authoritative one is the Jan–Aug 2026
 export (`17wAFP-TfpzM9ZXLyaJlB8ZbGTwvWIH2RZnaQMFSImIs`); an older Jan–May export
 disagrees on some May figures and is not used. The file ids for every source are
 recorded at the top of `data.js`.
 
-Still unsourced, so those cards stay hidden: staffing headcount, referral
-pipeline, removal reasons, campaign results, and a per-category budget.
+Still unsourced, so those cards stay hidden: referral pipeline, removal reasons,
+campaign results, and a per-category budget.
 
 ### Three definitions worth knowing
 
@@ -57,6 +58,7 @@ board, with a comment over each block.
 | Cash and obligations | `cash` |
 | Attendance and room mix | `months`, `rooms` |
 | Roster movement | `months` (`dormant`, `started`, `stopped`) |
+| Staffing and the daily model | `staffing` |
 | Marketing spend | `adSpend` |
 | Task board | `tasks` |
 

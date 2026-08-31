@@ -1045,6 +1045,49 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
     </div>
   </section>
 
+  <!-- ================= STAFFING ================= -->
+  <section class="section" id="section-staffing">
+    <div class="section-head">
+      <h2>Staffing</h2>
+      <span class="section-note">Who is on the team, and what a day at 25 children needs</span>
+    </div>
+    <div class="grid">
+
+      <article class="card col-5" id="card-staff">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow" id="staff-eyebrow">The team</div>
+            <h3>Staff by role</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="staff-chip">—</span></div>
+        </div>
+        <div class="stat-strip" id="staff-stats"></div>
+        <div class="chart" id="chart-staff"></div>
+        <details class="twin" id="twin-staff"><summary>Table view</summary></details>
+        <p class="card-note" id="staff-note"></p>
+      </article>
+
+      <article class="card col-7" id="card-staff-model">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Target</div>
+            <h3 id="model-title">Daily staffing model</h3>
+          </div>
+          <div class="card-meta"><span class="chip accent" id="model-chip">—</span></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-staff-model">
+            <thead><tr><th>Role</th><th class="n">On the floor daily</th><th class="n">On the roster</th><th>Cover</th></tr></thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+        <p class="card-note" id="model-note"></p>
+      </article>
+
+    </div>
+  </section>
+
   <!-- ================= MARKETING ================= -->
   <section class="section" id="section-marketing">
     <div class="section-head">
@@ -1361,6 +1404,38 @@ window.AKP_DATA = {
       "headline: $50.7K of net income against a $243.0K loss over the same seven months last year."
   },
 
+
+  /* ---- Staffing ---------------------------------------------------------- */
+  staffing: {
+    asOf: "September 1, 2026",
+    fullTime: 8, partTime: 1, perDiem: 5, total: 14,
+    /* Listed in skill order, not by size — the mix is what matters here. */
+    roles: [
+      { role: "RN", count: 2, type: "Full time" },
+      { role: "LPN", count: 2, type: "Full time" },
+      { role: "CNA", count: 4, type: "Full time" },
+      { role: "HHA", count: 1, type: "Part time" },
+      { role: "Per diem, all roles", count: 5, type: "Per diem" }
+    ],
+    discrepancy: "Recorded as 7 full-time staff, but the roles given — 2 RN, 2 LPN, 4 CNA — " +
+      "sum to 8. The board counts 8. Confirm which is right and correct it here.",
+    dailyModel: {
+      supports: 25,
+      perDay: 7,
+      lines: [
+        { role: "RN", perDay: 1, roster: 2, have: "2 full time" },
+        { role: "LPN", perDay: 2, roster: 2, have: "2 full time" },
+        { role: "Techs (CNA / HHA)", perDay: 4, roster: 5, have: "4 full-time CNAs, 1 part-time HHA" }
+      ],
+      excludes: "Children in the total care room are not in this model — they are staffed separately. " +
+        "Five children were in that room in August.",
+      note: "The LPN line is the pinch: two are needed on the floor every day and two are on the " +
+        "roster, so a single absence has to be covered by a per diem. The RN and tech lines each " +
+        "carry one spare. At 25 children this is one staff member per 3.6 children; at the 23 " +
+        "enrolled the projection assumes, about 18 children a day, it is one per 2.6."
+    }
+  },
+
   /* ---- Marketing --------------------------------------------------------- */
   adSpend: {
     months: [
@@ -1420,7 +1495,6 @@ window.AKP_DATA = {
   capitalReserve: null,
   pipeline: null,
   removals: null,
-  staffing: null,
   marketing: null,
   absenceReasons: null,
   attendanceTargetRate: null
@@ -2307,6 +2381,58 @@ const Charts = (() => {
     $("#movement-chip").textContent = `${started} started, ${stopped} stopped since ${moved[0].label}`;
   }
 
+  /* ======================= Staffing ===================================== */
+  function renderStaffing() {
+    const s = D.staffing || {};
+    if (!need("card-staff", "Staffing", s.roles)) {
+      const m = document.getElementById("card-staff-model"); if (m) m.hidden = true;
+      return;
+    }
+    if (have(s.asOf)) $("#staff-eyebrow").textContent = "As of " + s.asOf;
+    $("#staff-stats").innerHTML = stats([
+      { v: F.int(s.fullTime), k: "Full time" },
+      { v: F.int(s.partTime), k: "Part time" },
+      { v: F.int(s.perDiem), k: "Per diem" },
+      { v: F.int(s.total), k: "On the team" }
+    ]);
+    Charts.bars($("#chart-staff"), {
+      rows: s.roles.map((r) => ({ label: r.role, value: r.count, note: r.type })),
+      format: F.int,
+      seriesName: "Staff"
+    });
+    twin($("#twin-staff"), ["Role", "Employment", "Staff"],
+      s.roles.map((r) => [r.role, r.type, F.int(r.count)]));
+    $("#staff-chip").textContent = `${s.total} on the team`;
+    $("#staff-chip").className = "chip";
+    // The stated full-time total and the roles given do not agree; say so rather
+    // than quietly picking one.
+    if (have(s.discrepancy)) {
+      $("#staff-note").textContent = s.discrepancy;
+      $("#card-staff").dataset.state = "warning";
+    }
+
+    const m = s.dailyModel;
+    if (!need("card-staff-model", null, m, m && m.lines)) return;
+    $("#model-title").textContent = `Daily staffing for ${m.supports} children`;
+    $("#tbl-staff-model tbody").innerHTML = m.lines.map((l) => {
+      const spare = l.roster - l.perDay;
+      const state = spare <= 0 ? "critical" : spare === 1 ? "warning" : "good";
+      const label = spare <= 0 ? "no spare" : spare === 1 ? "1 spare" : `${spare} spare`;
+      return `<tr>
+        <td>${esc(l.role)}</td>
+        <td class="n">${l.perDay}</td>
+        <td class="n">${l.roster}<span class="sub">${esc(l.have)}</span></td>
+        <td>${chip(label, state)}</td>
+      </tr>`;
+    }).join("");
+    $("#tbl-staff-model tfoot").innerHTML =
+      `<tr><td>On the floor each day</td><td class="n">${m.perDay}</td>
+       <td class="n">${s.fullTime + s.partTime}</td>
+       <td>${chip(`1 staff per ${(m.supports / m.perDay).toFixed(1)} children at ${m.supports}`, "", true)}</td></tr>`;
+    $("#model-chip").textContent = `${m.perDay} on the floor supports ${m.supports} children`;
+    $("#model-note").textContent = [m.excludes, m.note].filter(have).join(" ");
+  }
+
   /* ======================= Marketing ==================================== */
   function renderMarketing() {
     if (!need("card-adspend", "Marketing", D.adSpend, D.adSpend && D.adSpend.months)) return;
@@ -2478,6 +2604,7 @@ const Charts = (() => {
     renderCash();
     renderAttendance();
     renderRoster();
+    renderStaffing();
     renderMarketing();
     renderTasks();
     pruneEmptySections();
