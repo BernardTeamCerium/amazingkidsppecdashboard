@@ -476,6 +476,7 @@
 
   /* ======================= Chrome ======================================= */
   function renderChrome() {
+    renderBrand();
     $("#facility-name").textContent = D.meta.facility;
     $("#foot-facility").textContent = D.meta.facility;
     $("#board-name").textContent = D.meta.boardName;
@@ -512,6 +513,26 @@
       try { localStorage.setItem("akp.theme", next); } catch { /* private mode */ }
       document.dispatchEvent(new Event("akp:theme"));
     });
+  }
+
+  // The logo carries the facility name itself, so when it loads the wordmark
+  // beside it would be a second copy — drop it and keep the board name.
+  // If the file is missing or fails to load we fall back to the monogram.
+  function renderBrand() {
+    const img = $("#brand-logo"), mark = $("#brand-mark"), text = $("#facility-name");
+    if (!img || !have(D.meta.logo)) return;
+    img.addEventListener("load", () => {
+      img.hidden = false;
+      if (mark) mark.hidden = true;
+      if (text) text.hidden = true;
+    });
+    img.addEventListener("error", () => {
+      img.hidden = true;
+      if (mark) mark.hidden = false;
+      if (text) text.hidden = false;
+    });
+    img.alt = D.meta.logoAlt || D.meta.facility;
+    img.src = D.meta.logo;
   }
 
   function pruneEmptySections() {

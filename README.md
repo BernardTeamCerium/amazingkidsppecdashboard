@@ -112,6 +112,25 @@ in `data.js`** — this is a static page, and everything in that file ships to
 anyone who can open it. Aggregate first, then paste the aggregates. The board is
 built so that nothing below the monthly total is ever needed.
 
+## The logo
+
+Drop the logo at **`assets/img/logo.png`** (PNG or SVG, transparent background,
+roughly 3:1). The masthead swaps to it on load and drops the "Amazing Kids PPEC"
+wordmark beside it, since the logo carries the name itself; `build.js` inlines
+the file into `dist/dashboard.html` as a data URI, which the published page
+needs because its CSP blocks external images. If the file is missing or fails to
+load, the board falls back to the navy-and-gold "AK" monogram — nothing breaks.
+
+The logo is navy line art, so in dark mode it sits on a white plate
+(`--logo-plate`). In light mode that plate is the masthead surface and
+disappears.
+
+Page colors are drawn from the logo: navy `#0b2c42` does the work of near-black
+for text, the neutrals are pulled toward it rather than a default grey, and gold
+`#ffc20e` appears exactly once, as the rule under the masthead. Gold is
+deliberately *not* used for controls or state — at that size it is hard to tell
+from the amber warning status, and status colors are reserved.
+
 ## Files
 
 ```
@@ -122,6 +141,7 @@ assets/js/charts.js      SVG chart primitives (line, column, bar, sparkline)
 assets/js/app.js         renders the cards from data.js
 build.js                 inlines everything into dist/dashboard.html
 tools/import-tasks.js    pulls the task board in from the task sheet's CSV
+assets/img/logo.png      the logo (drop it in; not in the repo yet)
 dist/dashboard.html      one self-contained file, for sharing or publishing
 ```
 

@@ -45,6 +45,12 @@ window.AKP_DATA = {
     asOf: "August 31, 2026",
     period: "Census through Aug · financials through Jul",
     sampleData: false,
+    /* Drop the logo file at assets/img/logo.png (PNG or SVG, transparent
+       background, roughly 3:1). The masthead swaps to it automatically and
+       build.js inlines it into dist/dashboard.html as a data URI. Until the
+       file exists the board falls back to the AK monogram. */
+    logo: "assets/img/logo.png",
+    logoAlt: "Amazing Kids PPEC — Prescribed Pediatric Extended Care",
     sourceNote: "Census and attendance are aggregated from the monthly attendance report " +
       "(Jan–Aug 2026). Revenue, cost and cash come from the management report for the period " +
       "ended 7/31/2026, prepared 8/28/2026, on a cash basis. Targets come from the growth plan. " +

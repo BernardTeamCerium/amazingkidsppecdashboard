@@ -21,7 +21,29 @@ const body = html.match(/<body>([\s\S]*)<\/body>/)[1]
   .replace(/\s*<script src="assets\/js\/[^"]+"><\/script>/g, "")
   .trim();
 
-for (const [name, src] of [["css", css], ["js", js]]) {
+// The published page is a single file and its CSP blocks external images, so
+// the logo has to travel with it as a data URI.
+const LOGO_TYPES = { ".png": "image/png", ".svg": "image/svg+xml",
+                     ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
+let jsOut = js;
+const logoRef = js.match(/logo:\s*"([^"]+)"/);
+if (logoRef) {
+  const rel = logoRef[1];
+  const abs = path.join(__dirname, rel);
+  if (fs.existsSync(abs)) {
+    const type = LOGO_TYPES[path.extname(abs).toLowerCase()];
+    if (!type) throw new Error(`Unsupported logo type: ${rel}`);
+    const bytes = fs.readFileSync(abs);
+    const uri = `data:${type};base64,${bytes.toString("base64")}`;
+    jsOut = js.replace(logoRef[0], `logo: "${uri}"`);
+    console.log(`  logo inlined from ${rel} (${(bytes.length / 1024).toFixed(0)} KB)`);
+  } else {
+    jsOut = js.replace(logoRef[0], "logo: null");
+    console.log(`  no logo at ${rel} — the masthead falls back to the monogram`);
+  }
+}
+
+for (const [name, src] of [["css", css], ["js", jsOut]]) {
   if (/<\/(style|script)/i.test(src)) throw new Error(`Refusing to inline ${name}: it contains a closing tag that would break the page.`);
 }
 
@@ -37,7 +59,7 @@ ${css}
 ${body}
 
 <script>
-${js}
+${jsOut}
 </script>
 `;
 

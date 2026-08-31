@@ -13,24 +13,28 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces & ink — a cool, slightly blue-biased neutral, chosen to sit under
-     the clinical blue accent rather than a default grey. */
-  --plane:        #eef1f5;
+  /* Neutrals are pulled toward the logo's navy rather than a default grey, so
+     the brand mark sits in a page that already shares its temperature. */
+  --brand-navy:   #0b2c42;
+  --brand-gold:   #ffc20e;
+  --plane:        #e9eef3;
   --surface:      #ffffff;
-  --surface-2:    #f5f8fb;
-  --surface-3:    #eaeff5;
-  --ink:          #10151c;
-  --ink-2:        #4c5666;
-  --ink-3:        #77828f;
-  --rule:         #dce3ea;
-  --rule-strong:  #c3cdd9;
-  --shadow:       0 1px 2px rgba(16, 21, 28, .05), 0 8px 24px -16px rgba(16, 21, 28, .18);
+  --surface-2:    #f4f7fa;
+  --surface-3:    #e4ebf1;
+  --ink:          #0b2c42;   /* the logo navy, doing the work of near-black */
+  --ink-2:        #46606f;
+  --ink-3:        #78909f;
+  --rule:         #d9e3ea;
+  --rule-strong:  #bccbd7;
+  --logo-plate:   transparent;
+  --shadow:       0 1px 2px rgba(11, 44, 66, .05), 0 8px 24px -16px rgba(11, 44, 66, .20);
 
-  /* Accent + chart series (validated: adjacent CVD ΔE 24.7, all checks pass) */
-  --accent:       #2a78d6;
-  --accent-ink:   #1c5cab;
-  --accent-wash:  rgba(42, 120, 214, .10);
-  --series-1:     #2a78d6;
+  /* Accent + chart series. Series are navy-shifted toward the brand and still
+     clear every gate on this surface: adjacent CVD ΔE 23.6, contrast ≥ 3:1. */
+  --accent:       #1668a5;
+  --accent-ink:   #0f4f80;
+  --accent-wash:  rgba(22, 104, 165, .10);
+  --series-1:     #2a6fc4;
   --series-2:     #eb6834;
 
   /* Ordinal ramp for the pipeline stages (validated --ordinal, light end 2.11:1) */
@@ -55,8 +59,8 @@
   --critical-wash: rgba(208, 59, 59, .10);
 
   /* Chart chrome */
-  --grid:     #e6ebf1;
-  --axis:     #c3cdd9;
+  --grid:     #e4ebf1;
+  --axis:     #bccbd7;
   --chart-bg: var(--surface);
 
   --font-display: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -70,21 +74,22 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --plane:       #0b0e13;
-    --surface:     #161b22;
-    --surface-2:   #1b212a;
-    --surface-3:   #222a34;
-    --ink:         #f1f4f8;
-    --ink-2:       #a9b4c2;
-    --ink-3:       #7d8896;
-    --rule:        #262e39;
-    --rule-strong: #384352;
+    --plane:       #071520;
+    --surface:     #0f2534;
+    --surface-2:   #16303f;
+    --surface-3:   #1e3c4d;
+    --ink:         #eef4f8;
+    --ink-2:       #a7bcc9;
+    --ink-3:       #7c94a3;
+    --rule:        #1d3a4b;
+    --rule-strong: #2c4d61;
+    --logo-plate:  #ffffff;
     --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .6);
 
-    --accent:      #3987e5;
-    --accent-ink:  #86b6ef;
-    --accent-wash: rgba(57, 135, 229, .16);
-    --series-1:    #3987e5;
+    --accent:      #4e9fe0;
+    --accent-ink:  #8fc4f0;
+    --accent-wash: rgba(78, 159, 224, .18);
+    --series-1:    #3f8fdd;
     --series-2:    #d95926;
 
     --ord-1: #cde2fb;
@@ -102,28 +107,29 @@
     --serious-wash:  rgba(236, 131, 90, .14);
     --critical-wash: rgba(208, 59, 59, .18);
 
-    --grid: #232b35;
-    --axis: #38424f;
+    --grid: #1a3746;
+    --axis: #2c4d61;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --plane:       #0b0e13;
-  --surface:     #161b22;
-  --surface-2:   #1b212a;
-  --surface-3:   #222a34;
-  --ink:         #f1f4f8;
-  --ink-2:       #a9b4c2;
-  --ink-3:       #7d8896;
-  --rule:        #262e39;
-  --rule-strong: #384352;
+  --plane:       #071520;
+  --surface:     #0f2534;
+  --surface-2:   #16303f;
+  --surface-3:   #1e3c4d;
+  --ink:         #eef4f8;
+  --ink-2:       #a7bcc9;
+  --ink-3:       #7c94a3;
+  --rule:        #1d3a4b;
+  --rule-strong: #2c4d61;
+  --logo-plate:  #ffffff;
   --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .6);
 
-  --accent:      #3987e5;
-  --accent-ink:  #86b6ef;
-  --accent-wash: rgba(57, 135, 229, .16);
-  --series-1:    #3987e5;
+  --accent:      #4e9fe0;
+  --accent-ink:  #8fc4f0;
+  --accent-wash: rgba(78, 159, 224, .18);
+  --series-1:    #3f8fdd;
   --series-2:    #d95926;
 
   --ord-1: #cde2fb;
@@ -141,8 +147,8 @@
   --serious-wash:  rgba(236, 131, 90, .14);
   --critical-wash: rgba(208, 59, 59, .18);
 
-  --grid: #232b35;
-  --axis: #38424f;
+  --grid: #1a3746;
+  --axis: #2c4d61;
 }
 
 /* ---- Base ---------------------------------------------------------------- */
@@ -211,6 +217,7 @@ code {
   z-index: 40;
   background: var(--surface);
   border-bottom: 1px solid var(--rule);
+  box-shadow: inset 0 -3px 0 var(--brand-gold);   /* the one brand signature */
 }
 
 .masthead-inner {
@@ -223,12 +230,26 @@ code {
   flex-wrap: wrap;
 }
 
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+/* The logo is navy line art, so on a dark ground it needs a light plate to sit
+   on. In light mode the plate is the surface itself, so it disappears. */
+.brand-logo {
+  height: 46px;
+  width: auto;
+  max-width: 250px;
+  display: block;
+  background: var(--logo-plate);
+  border-radius: 8px;
+  padding: 3px 7px;
+}
+
 .mark {
   width: 38px; height: 38px;
   flex: 0 0 38px;
   border-radius: 9px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--brand-navy);
+  color: var(--brand-gold);
   display: grid;
   place-items: center;
   font-family: var(--font-display);
@@ -740,10 +761,13 @@ table.tasks td.title .note { display: block; color: var(--ink-3); font-size: 11.
 
 <header class="masthead">
   <div class="masthead-inner">
-    <div class="mark" aria-hidden="true">AK</div>
-    <div>
-      <h1 id="facility-name">Amazing Kids PPEC</h1>
-      <div class="sub" id="board-name">Operations Board</div>
+    <div class="brand">
+      <img class="brand-logo" id="brand-logo" alt="Amazing Kids PPEC" hidden>
+      <div class="mark" id="brand-mark" aria-hidden="true">AK</div>
+      <div class="brand-text">
+        <h1 id="facility-name">Amazing Kids PPEC</h1>
+        <div class="sub" id="board-name">Operations Board</div>
+      </div>
     </div>
     <span class="demo-chip" id="demo-chip" hidden>Sample data</span>
     <div class="spacer"></div>
@@ -1102,6 +1126,12 @@ window.AKP_DATA = {
     asOf: "August 31, 2026",
     period: "Census through Aug · financials through Jul",
     sampleData: false,
+    /* Drop the logo file at assets/img/logo.png (PNG or SVG, transparent
+       background, roughly 3:1). The masthead swaps to it automatically and
+       build.js inlines it into dist/dashboard.html as a data URI. Until the
+       file exists the board falls back to the AK monogram. */
+    logo: null,
+    logoAlt: "Amazing Kids PPEC — Prescribed Pediatric Extended Care",
     sourceNote: "Census and attendance are aggregated from the monthly attendance report " +
       "(Jan–Aug 2026). Revenue, cost and cash come from the management report for the period " +
       "ended 7/31/2026, prepared 8/28/2026, on a cash basis. Targets come from the growth plan. " +
@@ -2213,6 +2243,7 @@ const Charts = (() => {
 
   /* ======================= Chrome ======================================= */
   function renderChrome() {
+    renderBrand();
     $("#facility-name").textContent = D.meta.facility;
     $("#foot-facility").textContent = D.meta.facility;
     $("#board-name").textContent = D.meta.boardName;
@@ -2249,6 +2280,26 @@ const Charts = (() => {
       try { localStorage.setItem("akp.theme", next); } catch { /* private mode */ }
       document.dispatchEvent(new Event("akp:theme"));
     });
+  }
+
+  // The logo carries the facility name itself, so when it loads the wordmark
+  // beside it would be a second copy — drop it and keep the board name.
+  // If the file is missing or fails to load we fall back to the monogram.
+  function renderBrand() {
+    const img = $("#brand-logo"), mark = $("#brand-mark"), text = $("#facility-name");
+    if (!img || !have(D.meta.logo)) return;
+    img.addEventListener("load", () => {
+      img.hidden = false;
+      if (mark) mark.hidden = true;
+      if (text) text.hidden = true;
+    });
+    img.addEventListener("error", () => {
+      img.hidden = true;
+      if (mark) mark.hidden = false;
+      if (text) text.hidden = false;
+    });
+    img.alt = D.meta.logoAlt || D.meta.facility;
+    img.src = D.meta.logo;
   }
 
   function pruneEmptySections() {
