@@ -181,6 +181,72 @@ window.AKP_DATA = {
     sensitivity: [14, 15, 16, 17, 18, 19]
   },
 
+
+  /* ---- Other ventures ----------------------------------------------------
+     The volume side of each line is real: it comes from the census. The RATE
+     side is deliberately null. Medicaid transport rates, Step Up scholarship
+     amounts and therapy reimbursement rates are published figures that change
+     annually, and none of them are in any file shared here — so nothing is
+     guessed. Enter a rate and that line, its tab and the totals all populate.
+
+     Ages are the other gap: no file shared carries a date of birth, so the
+     count of children aged 4 and up is unknown. */
+  ventures: {
+    ppecAnnualBasis: "year-to-date revenue, annualized",
+    list: [
+      {
+        id: "transportation",
+        name: "Transportation",
+        basis: "Medicaid non-emergency transport, billed per one-way trip",
+        lines: [
+          { name: "Daily routes", children: 19, childrenBasis: "every enrolled child — a ceiling, not a count of riders",
+            unitsPerPeriod: 2, unitLabel: "one-way trips a day",
+            periodsPerYear: 250, periodLabel: "operating days", rate: null, assumed: true }
+        ],
+        needs: [
+          "The Florida Medicaid rate, and whether it pays per one-way trip, per round trip or per loaded mile.",
+          "How many children would actually ride, rather than the 19 ceiling used here.",
+          "Whether the two transportation staff already cover the routes, or this needs the EMT hires on the task board."
+        ]
+      },
+      {
+        id: "education",
+        name: "Education",
+        basis: "Step Up For Students, an annual scholarship per eligible student aged 4 and up",
+        lines: [
+          { name: "Scholarships", children: null, childrenBasis: "children aged 4 and up — no ages are on file",
+            unitsPerPeriod: 1, unitLabel: "scholarship",
+            periodsPerYear: 1, periodLabel: "a year", rate: null }
+        ],
+        needs: [
+          "How many children are 4 or older. No file shared carries a date of birth, so this cannot be derived.",
+          "Which scholarship applies and its current annual amount per student.",
+          "Whether the 14 children already at Sunflower Christian Academy are claimed there, which would leave fewer to claim here."
+        ]
+      },
+      {
+        id: "therapy",
+        name: "Therapy",
+        basis: "Billed per session by discipline",
+        lines: [
+          { name: "Respiratory", children: 5, childrenBasis: "the total care room", unitsPerPeriod: null,
+            unitLabel: "sessions a week", periodsPerYear: 52, periodLabel: "weeks", rate: null, assumed: true },
+          { name: "Physical", children: 19, childrenBasis: "every enrolled child — a ceiling", unitsPerPeriod: null,
+            unitLabel: "sessions a week", periodsPerYear: 52, periodLabel: "weeks", rate: null, assumed: true },
+          { name: "Occupational", children: 19, childrenBasis: "every enrolled child — a ceiling", unitsPerPeriod: null,
+            unitLabel: "sessions a week", periodsPerYear: 52, periodLabel: "weeks", rate: null, assumed: true },
+          { name: "Speech", children: 19, childrenBasis: "every enrolled child — a ceiling", unitsPerPeriod: null,
+            unitLabel: "sessions a week", periodsPerYear: 52, periodLabel: "weeks", rate: null, assumed: true }
+        ],
+        needs: [
+          "The reimbursement rate for each discipline, and whether it pays per session or per 15-minute unit.",
+          "How many children are authorized for each therapy, and how many sessions a week each receives.",
+          "No therapists are on the staffing list, so each discipline also needs a hire or a contract before it bills."
+        ]
+      }
+    ]
+  },
+
   /* ---- Cost structure ---------------------------------------------------- */
   costLines: {
     current: "July 2026",

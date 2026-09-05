@@ -717,6 +717,98 @@
     if (have(a.note)) $("#adspend-note").textContent = a.note;
   }
 
+
+  /* ======================= Other ventures =============================== */
+  let ventureTab = "all";
+
+  function renderVentures() {
+    const v = M.ventures;
+    if (!need("card-ventures", null, v && v.list)) return;
+    const tabs = [{ id: "all", name: "All ventures" }].concat(v.list.map((x) => ({ id: x.id, name: x.name })));
+    if (!tabs.some((t) => t.id === ventureTab)) ventureTab = "all";
+
+    $("#venture-tabs").innerHTML = tabs.map((t) => {
+      const ven = v.list.find((x) => x.id === t.id);
+      const count = ven ? `${ven.linesReady}/${ven.linesTotal}` : `${v.readyCount}/${v.total}`;
+      return `<button role="tab" type="button" data-venture="${esc(t.id)}"
+        aria-selected="${t.id === ventureTab}" tabindex="${t.id === ventureTab ? 0 : -1}">
+        ${esc(t.name)} <span class="tab-count">${count}</span></button>`;
+    }).join("");
+
+    $("#venture-panel").innerHTML = ventureTab === "all" ? allPanel(v) : venturePanel(v.list.find((x) => x.id === ventureTab));
+
+    $$("#venture-tabs button").forEach((b, i, all) => {
+      b.addEventListener("click", () => { ventureTab = b.dataset.venture; renderVentures(); });
+      b.addEventListener("keydown", (e) => {
+        const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        const next = all[(i + d + all.length) % all.length];
+        ventureTab = next.dataset.venture;
+        renderVentures();
+        $(`#venture-tabs button[data-venture="${ventureTab}"]`).focus();
+      });
+    });
+  }
+
+  function allPanel(v) {
+    return `<div class="venture-head">
+        <div><h3>What the other ventures could add</h3></div>
+        <div class="card-meta">${chip(
+          v.annual === null ? "no rates entered yet" : `${F.usdk(v.annual)} a year`,
+          v.annual === null ? "warning" : "good")}</div>
+      </div>
+      <p class="venture-basis">Each venture is priced as children × units × periods × rate. The volumes come
+        from the census; the rates are blank until someone supplies them, and a blank rate is not a zero.</p>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>Venture</th><th>Billing basis</th><th class="n">Lines priced</th><th class="n">Annual</th><th class="n">Against PPEC</th></tr></thead>
+        <tbody>${v.list.map((x) => `<tr>
+          <td>${esc(x.name)}</td>
+          <td><span class="sub" style="display:block">${esc(x.basis)}</span></td>
+          <td class="n">${x.linesReady} of ${x.linesTotal}</td>
+          <td class="n">${x.annual === null ? chip("rate needed", "warning") : esc(F.usd(x.annual))}</td>
+          <td class="n">${x.shareOfPpec === null ? "—" : esc(F.pct0(x.shareOfPpec))}</td>
+        </tr>`).join("")}</tbody>
+        <tfoot><tr><td colspan="3">Total, once the rates are in</td>
+          <td class="n">${v.annual === null ? "—" : esc(F.usd(v.annual))}</td><td class="n"></td></tr></tfoot>
+      </table></div>
+      <p class="card-note">For scale, PPEC itself is running at about ${F.usd(v.ppecAnnual)} a year
+        (${esc(v.ppecAnnualBasis)}). Open a tab to see what each venture needs before it can be priced.</p>`;
+  }
+
+  function venturePanel(x) {
+    const rows = x.lines.map((l) => `<tr>
+      <td>${esc(l.name)}${l.assumed && l.children != null ? " " + chip("assumed", "warning") : ""}
+        <span class="sub">${esc(l.childrenBasis)}</span></td>
+      <td class="n">${l.children == null ? chip("count needed", "warning") : F.int(l.children)}</td>
+      <td class="n">${l.unitsPerPeriod == null ? chip("needed", "warning") : F.dec1(l.unitsPerPeriod)}
+        <span class="sub">${esc(l.unitLabel)}</span></td>
+      <td class="n">${F.int(l.periodsPerYear)}<span class="sub">${esc(l.periodLabel)}</span></td>
+      <td class="n">${l.rate == null ? chip("rate needed", "warning") : esc(F.usd(l.rate))}</td>
+      <td class="n">${l.annual === null ? "—" : esc(F.usd(l.annual))}</td>
+    </tr>`).join("");
+    return `<div class="venture-head">
+        <div><h3>${esc(x.name)}</h3></div>
+        <div class="card-meta">${chip(
+          x.annual === null ? x.status : `${F.usdk(x.annual)} a year`,
+          x.annual === null ? "warning" : "good")}</div>
+      </div>
+      <p class="venture-basis">${esc(x.basis)}</p>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>Line</th><th class="n">Children</th><th class="n">Units</th><th class="n">Periods</th><th class="n">Rate</th><th class="n">Annual</th></tr></thead>
+        <tbody>${rows}</tbody>
+        ${x.annual === null ? "" : `<tfoot><tr><td colspan="5">Annual, at these volumes</td>
+          <td class="n">${esc(F.usd(x.annual))}</td></tr></tfoot>`}
+      </table></div>
+      ${x.annual === null ? "" : `<div class="stat-strip">${stats([
+        { v: F.usdk(x.annual), k: "A year" },
+        { v: F.usdk(x.monthly), k: "A month" },
+        { v: x.shareOfPpec === null ? "—" : F.pct0(x.shareOfPpec), k: "Against PPEC revenue" }
+      ])}</div>`}
+      <div class="eyebrow needs-head">What this needs before it is a number</div>
+      <ul class="needs">${x.needs.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`;
+  }
+
   /* ======================= Task board =================================== */
   const DONE_KEY = "akp.tasks.done";
   const readDone = () => { try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); } catch { return new Set(); } };
@@ -820,6 +912,7 @@
     renderRoster();
     renderStaffing();
     renderMarketing();
+    renderVentures();
     renderTasks();
     pruneEmptySections();
   }

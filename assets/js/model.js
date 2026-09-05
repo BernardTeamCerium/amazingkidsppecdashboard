@@ -304,6 +304,42 @@ const Model = (() => {
       };
     }
 
+
+    /* -- other ventures ----------------------------------------------------
+       A line only produces revenue when every part of it is filled in. A null
+       rate is not a zero: it means nobody has supplied the figure yet. */
+    if (raw.ventures && raw.ventures.list) {
+      const ppecAnnual = m.moneyMonths.length
+        ? (m.ytd.revenue / m.moneyMonths.length) * 12 : null;
+      const list = raw.ventures.list.map((v) => {
+        const lines = v.lines.map((l) => {
+          const ready = l.children != null && l.unitsPerPeriod != null && l.rate != null;
+          const annual = ready ? l.children * l.unitsPerPeriod * l.periodsPerYear * l.rate : null;
+          const missing = [];
+          if (l.children == null) missing.push("children");
+          if (l.unitsPerPeriod == null) missing.push(l.unitLabel);
+          if (l.rate == null) missing.push("rate");
+          return { ...l, ready, annual, monthly: annual === null ? null : annual / 12, missing };
+        });
+        const priced = lines.filter((l) => l.annual !== null);
+        const annual = priced.length ? sum(priced, (l) => l.annual) : null;
+        return {
+          ...v, lines, annual,
+          monthly: annual === null ? null : annual / 12,
+          linesReady: priced.length, linesTotal: lines.length,
+          shareOfPpec: annual !== null && ppecAnnual ? annual / ppecAnnual : null,
+          status: priced.length === 0 ? "Rates needed"
+                : priced.length < lines.length ? "Partly priced" : "Priced"
+        };
+      });
+      const priced = list.filter((v) => v.annual !== null);
+      m.ventures = {
+        ...raw.ventures, list, ppecAnnual,
+        annual: priced.length ? sum(priced, (v) => v.annual) : null,
+        readyCount: priced.length, total: list.length
+      };
+    }
+
     return m;
   }
 

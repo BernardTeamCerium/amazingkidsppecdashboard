@@ -920,3 +920,50 @@ table.data tr.stage-row td {
 }
 table.data tr.stage-row td:first-child { padding-left: 8px; }
 table.data tr.stage-row:hover td { background: var(--surface-2); }
+
+/* ---- Tabs ---------------------------------------------------------------- */
+.tabs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule-strong);
+  margin-bottom: -1px;
+}
+.tabs button {
+  appearance: none;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 7px 7px 0 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.tabs button:hover { background: var(--surface-2); color: var(--ink); }
+.tabs button[aria-selected="true"] {
+  background: var(--surface);
+  border-color: var(--rule-strong);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+.tabs .tab-count {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+.venture-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 4px; }
+.venture-head h3 { font-family: var(--font-display); font-size: 15px; font-weight: 600; margin: 0; }
+.venture-head .card-meta { margin-left: auto; }
+.venture-basis { color: var(--ink-3); font-size: 12.5px; margin: 0 0 12px; }
+.needs { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 12.5px; line-height: 1.55; }
+.needs li { margin-bottom: 5px; }
+.needs li:last-child { margin-bottom: 0; }
+.needs-head { margin: 14px 0 6px; }

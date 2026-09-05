@@ -76,6 +76,7 @@ numbers they come from.
 | Staffing and the daily model | `staffing` |
 | Distributions and the reserve | `distributions` |
 | What-if scenario and sensitivity | `scenario` |
+| Other ventures (tabs) | `ventures` |
 | Marketing spend | `adSpend` |
 | Task board | `tasks` |
 
@@ -95,6 +96,12 @@ A few rules the file expects:
   cost run through the same operating-day calendar and the same distribution
   policy as the live projection, so the two can never drift apart. Both inputs
   are editable on the card itself.
+- `ventures` prices each line as children × units × periods × rate. **Every
+  rate ships as `null` on purpose.** Medicaid transport rates, Step Up
+  scholarship amounts and therapy reimbursement rates are published figures
+  that change annually and were not in any file shared, so none are guessed. A
+  null rate renders as "rate needed", never as zero, and the line stays out of
+  every total until a real figure is entered.
 - `distributions` is a policy, not a forecast. Savings takes whatever is still
   needed to reach `reserveTarget`, then keeps taking `ongoingSavings` of net
   every period after that; `split` divides what is left between debt paydown

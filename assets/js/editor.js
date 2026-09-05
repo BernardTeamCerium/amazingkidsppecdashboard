@@ -59,6 +59,23 @@ const Editor = (() => {
         cols: [["perDay", "On the floor daily", "int"], ["roster", "On the roster", "int"]] } }
     ] },
 
+    { title: "Ventures — Transportation", blocks: [
+      { rows: { path: "ventures.list.0.lines", label: "name", cols: [
+        ["children", "Children", "int"], ["unitsPerPeriod", "Units", "num"],
+        ["periodsPerYear", "Periods/yr", "int"], ["rate", "Rate", "usd2"]] } }
+    ] },
+
+    { title: "Ventures — Education", blocks: [
+      { rows: { path: "ventures.list.1.lines", label: "name", cols: [
+        ["children", "Children 4+", "int"], ["rate", "Annual rate", "usd2"]] } }
+    ] },
+
+    { title: "Ventures — Therapy", blocks: [
+      { rows: { path: "ventures.list.2.lines", label: "name", cols: [
+        ["children", "Children", "int"], ["unitsPerPeriod", "Sessions/wk", "num"],
+        ["rate", "Rate", "usd2"]] } }
+    ] },
+
     { title: "Cash", blocks: [
       { rows: { path: "cash.lines", label: "name", cols: [["value", "Balance", "usd2"]] } },
       { fields: [["cash.ytdNet", "Net income, year to date", "usd2"]] }
