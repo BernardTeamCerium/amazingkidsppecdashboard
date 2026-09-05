@@ -71,6 +71,7 @@ numbers they come from.
 | Census, revenue, cost and margin charts | `months` |
 | Cost structure and composition | `costLines` |
 | Cash and obligations | `cash` |
+| August cash movement | `bankAugust` |
 | Attendance and room mix | `months`, `rooms` |
 | Roster movement | `months` (`dormant`, `started`, `stopped`) |
 | Staffing and the daily model | `staffing` |

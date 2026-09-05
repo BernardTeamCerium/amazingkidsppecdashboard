@@ -343,6 +343,24 @@ const Model = (() => {
       };
     }
 
+
+    /* -- August bank statement --------------------------------------------- */
+    const bk = raw.bankAugust;
+    if (bk) {
+      const target = raw.targets ? raw.targets.monthlyCost : null;
+      const julyCost = m.latestMoney ? m.latestMoney.cost : null;
+      m.bankAugust = {
+        ...bk,
+        net: bk.moneyIn - bk.moneyOut,
+        movement: bk.closing - bk.opening,
+        vsTarget: target === null ? null : bk.moneyOut - target,
+        vsPlan: raw.distributions ? bk.moneyOut - raw.distributions.assumedMonthlyCost : null,
+        vsPriorCost: julyCost === null ? null : bk.moneyOut - julyCost,
+        largestShare: bk.largest.map((x) => ({ ...x, share: div(x.amount, bk.moneyOut) }))
+      };
+      m.bankAugust.reconciles = Math.abs(m.bankAugust.net - m.bankAugust.movement) < 0.01;
+    }
+
     return m;
   }
 

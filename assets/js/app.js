@@ -602,7 +602,8 @@
       { v: F.usdk(c.totalEquity), k: "Total equity" }
     ]);
     $("#tbl-cash tbody").innerHTML = c.lines.map((l) =>
-      `<tr><td>${esc(l.name)}</td><td class="n">${esc(F.usd(l.value))}</td>
+      `<tr><td>${esc(l.name)}${l.asOf ? `<span class="sub">as of ${esc(l.asOf)}</span>` : ""}</td>
+       <td class="n">${esc(F.usd(l.value))}</td>
        <td>${l.prior != null ? chip(`${F.usd(l.prior)} ${c.priorLabel}`, "", true) : ""}</td></tr>`).join("");
     $("#tbl-cash tfoot").innerHTML =
       `<tr><td>Cash net of current obligations</td><td class="n">${esc(F.usd(c.net))}</td><td></td></tr>`;
@@ -610,6 +611,44 @@
     chipEl.textContent = c.net > 0 ? `${F.usdk(c.net)} net of obligations` : `${F.usdk(c.net)} short of obligations`;
     chipEl.className = "chip " + (c.net > 0 ? "good" : "critical");
     if (have(c.note)) $("#cash-note").textContent = c.note;
+  }
+
+
+  /* ======================= August bank statement ======================== */
+  function renderBank() {
+    const b = M.bankAugust;
+    if (!need("card-bank", null, b)) return;
+    $("#bank-eyebrow").textContent = b.source;
+    $("#bank-title").textContent = `${b.period} cash movement`;
+    $("#bank-stats").innerHTML = stats([
+      { v: F.usdk(b.moneyIn), k: `Money in · ${b.moneyInNote}` },
+      { v: F.usdk(b.moneyOut), k: "Money out" },
+      { v: F.usdk(b.net), k: "Net for the month" },
+      { v: F.usdk(b.closing), k: "Cash at the close" }
+    ]);
+    $("#tbl-bank tbody").innerHTML = b.largestShare.map((x) =>
+      `<tr><td>${esc(x.name)}<span class="sub">${esc(x.note)}</span></td>
+       <td class="n">${esc(F.usd(x.amount))}</td>
+       <td class="n">${esc(F.pct0(x.share))}</td></tr>`).join("");
+    $("#tbl-bank tfoot").innerHTML =
+      `<tr><td>Total out</td><td class="n">${esc(F.usd(b.moneyOut))}</td><td class="n">100%</td></tr>`;
+
+    const ch = $("#bank-chip");
+    const over = b.vsPlan;
+    ch.textContent = over === null ? F.usdk(b.moneyOut)
+      : over > 0 ? `${F.usd(over)} over the ${F.usdk(RAW.distributions.assumedMonthlyCost)} plan`
+                 : `${F.usd(-over)} under the ${F.usdk(RAW.distributions.assumedMonthlyCost)} plan`;
+    ch.className = "chip " + (over === null ? "" : over <= 0 ? "good" : over < 2000 ? "warning" : "serious");
+    if (over !== null && over > 2000) $("#card-bank").dataset.state = "warning";
+    else delete $("#card-bank").dataset.state;
+
+    $("#bank-note").textContent =
+      (b.vsPriorCost !== null
+        ? `Against July's ${F.usd(M.latestMoney.cost)} of operating cost this is ${F.usd(-b.vsPriorCost)} lower. `
+        : "") +
+      (b.vsTarget !== null
+        ? `Against the ${F.usdk(RAW.targets.monthlyCost)} budget on the scorecard it is ${F.usd(b.vsTarget)} over. `
+        : "") + b.caveat;
   }
 
   /* ======================= Attendance & rooms =========================== */
@@ -938,6 +977,7 @@
     renderScenario();
     renderCosts();
     renderCash();
+    renderBank();
     renderAttendance();
     renderRoster();
     renderStaffing();

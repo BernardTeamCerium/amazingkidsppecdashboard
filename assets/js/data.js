@@ -145,7 +145,7 @@ window.AKP_DATA = {
        every period rather than stopping. */
     ongoingSavings: 0.15,
     assumedMonthlyCost: 70000,
-    startingReserve: 71116.36,          /* cash in bank at Jul 31 */
+    startingReserve: 81381.53,          /* cash in bank at Aug 31 */
     startingDebt: 53134.99,             /* credit card + line of credit drawn */
     /* Reserve first: savings takes whatever is still needed to reach the target,
        then 15% of what is left pays down debt and the rest is distributed. */
@@ -277,19 +277,48 @@ window.AKP_DATA = {
 
   /* ---- Cash -------------------------------------------------------------- */
   cash: {
-    asOf: "July 31, 2026",
+    asOf: "August 31, 2026",
     priorLabel: "a year earlier",
+    /* Cash is from the August bank statement. The three obligations are still
+       at July 31 — no August balance sheet has been shared — so each line
+       carries its own date rather than implying they share one. */
     lines: [
-      { name: "Cash in bank",         value:  71116.36, prior: 8998.70 },
-      { name: "Accounts payable",     value:  -1091.51, prior: null },
-      { name: "Credit card balance",  value: -19172.01, prior: null },
-      { name: "Line of credit drawn", value: -33962.98, prior: null }
+      { name: "Cash in bank",         value:  81381.53, prior: 8998.70, asOf: "Aug 31" },
+      { name: "Accounts payable",     value:  -1091.51, prior: null, asOf: "Jul 31" },
+      { name: "Credit card balance",  value: -19172.01, prior: null, asOf: "Jul 31" },
+      { name: "Line of credit drawn", value: -33962.98, prior: null, asOf: "Jul 31" }
     ],
     ytdNet: 50659.05,
     ytdNetPrior: -242951.91,
     totalEquity: 319099.07,
-    note: "The year-to-date swing is the headline: net income against a substantial loss over the " +
-      "same seven months last year."
+    note: "Cash is the August bank balance; the three obligations are still where the July balance " +
+      "sheet left them, so the net figure will move when the August one arrives. The year-to-date " +
+      "net income is through July."
+  },
+
+  /* ---- August, from the bank statement -----------------------------------
+     A bank statement is not a profit and loss. Money in is what Medicaid
+     actually paid; money out is what left the accounts, which excludes
+     anything bought on the credit card and includes items that are not
+     operating expenses. It answers the cash question, not the margin one. */
+  bankAugust: {
+    period: "August 2026",
+    source: "Truist consolidated statement, 31 August 2026",
+    opening: 71116.36,
+    closing: 81381.53,
+    moneyIn: 80931.62,
+    moneyInNote: "four Medicaid claim payments",
+    moneyOut: 70666.45,
+    largest: [
+      { name: "Two ACH settlements", amount: 42480.07, note: "twice-monthly, the size and timing of payroll" },
+      { name: "Rent", amount: 11767.09, note: "matches the rent line on the July P&L exactly" },
+      { name: "Zelle payments to people and vendors", amount: 5256.07, note: "ten payments" },
+      { name: "AHCA licence fee", amount: 2077.75, note: "the renewal on the task board" },
+      { name: "Everything else", amount: 9085.47, note: "supplies, utilities, software, card payment, bank charges" }
+    ],
+    caveat: "Money out excludes anything paid on the credit card — only $533 of card payment cleared " +
+      "the bank in August — so the true operating cost for the month will be higher than this. The " +
+      "August management report is still needed for revenue, cost and margin."
   },
 
   /* ---- Staffing ---------------------------------------------------------- */
