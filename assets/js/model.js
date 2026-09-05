@@ -14,7 +14,8 @@ const Model = (() => {
      is left. Used for the live projection and for any what-if scenario, so the
      two can never drift apart. */
   function allocate(months, opts) {
-    const { adcFor, revenueFor, monthlyCost, reserveTarget, startingReserve, startingDebt, split, perDiem } = opts;
+    const { adcFor, revenueFor, monthlyCost, reserveTarget, startingReserve, startingDebt,
+            split, perDiem, ongoingSavings } = opts;
     let reserve = startingReserve, debt = startingDebt;
     return months.map((x) => {
       const adc = adcFor ? adcFor(x) : x.adc;
@@ -24,8 +25,12 @@ const Model = (() => {
       if (net <= 0) {
         toSavings = net;                                  // a loss comes out of the reserve
       } else {
+        // Close any remaining gap to the target first, then keep putting the
+        // ongoing share of whatever is left into savings.
         const gap = Math.max(0, reserveTarget - reserve);
-        toSavings = Math.min(net, gap);
+        const toClose = Math.min(net, gap);
+        const afterGap = net - toClose;
+        toSavings = toClose + afterGap * (ongoingSavings || 0);
         const rest = net - toSavings;
         toDebt = Math.min(rest * (split.debt || 0), Math.max(0, debt));
         toOwners = rest - toDebt;                         // the rest is distributed
@@ -183,7 +188,8 @@ const Model = (() => {
       const schedule = allocate(m.projection.months, {
         revenueFor: (x) => x.revenue, monthlyCost: d.assumedMonthlyCost,
         reserveTarget: d.reserveTarget, startingReserve: d.startingReserve,
-        startingDebt: d.startingDebt, split, perDiem: raw.perDiem
+        startingDebt: d.startingDebt, split, perDiem: raw.perDiem,
+        ongoingSavings: d.ongoingSavings
       }).map((x) => ({ ...x, phase: x.toSavings > 0 ? "building" : "funded" }));
 
       const tot = (k) => sum(schedule, (x) => x[k]);
@@ -214,6 +220,19 @@ const Model = (() => {
           ...x, share: div(x.equity, equity), amount: owners * div(x.equity, equity)
         })),
         monthsCovered: div(d.reserveTarget, d.assumedMonthlyCost),
+        ongoingSavings: d.ongoingSavings,
+        /* Where the ongoing contribution takes the reserve after the target:
+           two months of cost was the original rule of thumb. */
+        growth: (() => {
+          const funded = schedule.filter((x) => x.reserve >= d.reserveTarget && x.toSavings > 0
+            && x.reserve - x.toSavings >= d.reserveTarget);
+          const perMonth = funded.length ? sum(funded, (x) => x.toSavings) / funded.length : null;
+          const twoMonths = 2 * d.assumedMonthlyCost;
+          const end = schedule.length ? schedule[schedule.length - 1].reserve : d.startingReserve;
+          return { perMonth, twoMonths,
+                   monthsToTwoMonths: perMonth && end < twoMonths
+                     ? Math.ceil((twoMonths - end) / perMonth) : (end >= twoMonths ? 0 : null) };
+        })(),
         required: {
           gap, months: n,
           revenue: requiredRevenue,
@@ -240,7 +259,7 @@ const Model = (() => {
       const base = {
         monthlyCost: sc.monthlyCost, reserveTarget: d.reserveTarget,
         startingReserve: d.startingReserve, startingDebt: d.startingDebt,
-        split, perDiem: raw.perDiem
+        split, perDiem: raw.perDiem, ongoingSavings: d.ongoingSavings
       };
       const run = (perDay) => {
         const rows = allocate(m.projection.months, { ...base, adcFor: () => perDay });

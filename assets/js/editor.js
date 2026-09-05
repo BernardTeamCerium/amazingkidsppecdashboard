@@ -46,6 +46,7 @@ const Editor = (() => {
         ["distributions.assumedMonthlyCost", "Assumed monthly cost", "usd2"],
         ["distributions.startingReserve", "Reserve in the bank today", "usd2"],
         ["distributions.startingDebt", "Revolving debt outstanding", "usd2"],
+        ["distributions.ongoingSavings", "Of net after the target, to savings", "pct"],
         ["distributions.split.debt", "Of what is left, to debt", "pct"],
         ["distributions.split.owners", "Of what is left, to distributions", "pct"]
       ] }

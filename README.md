@@ -96,9 +96,10 @@ A few rules the file expects:
   policy as the live projection, so the two can never drift apart. Both inputs
   are editable on the card itself.
 - `distributions` is a policy, not a forecast. Savings takes whatever is still
-  needed to reach `reserveTarget` first; `split` then divides what is left
-  between debt paydown and distributions, and the panel warns if those two do
-  not add to 100%. A loss draws the reserve down rather than being distributed.
+  needed to reach `reserveTarget`, then keeps taking `ongoingSavings` of net
+  every period after that; `split` divides what is left between debt paydown
+  and distributions, and the panel warns if those two do not add to 100%. A
+  loss draws the reserve down rather than being distributed.
   `assumedMonthlyCost` is the one figure with no source — the management report
   gives no basis for forecasting cost, so the schedule holds it at the
   year-to-date average.

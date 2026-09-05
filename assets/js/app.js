@@ -333,8 +333,9 @@
     }
     $("#dist-policy").innerHTML = stats([
       { v: "First", k: `To savings, until ${F.usdk(d.reserveTarget)} is banked` },
+      { v: F.pct0(d.ongoingSavings), k: "Of net after that, still to savings" },
       { v: F.pct0(d.split.debt), k: "Of the rest, to paying down debt" },
-      { v: F.pct0(d.split.owners), k: "Of the rest, to owner distributions" }
+      { v: F.pct0(d.split.owners), k: "Of the rest, to distributions" }
     ]);
     $("#tbl-distributions tbody").innerHTML = d.schedule.map((x) =>
       `<tr>
@@ -373,7 +374,8 @@
         style="width:${Math.max(3, Math.min(100, pctFunded * 100)).toFixed(1)}%"></div>`;
     $("#reserve-caption").textContent =
       `${F.usd(d.startingReserve)} of ${F.usd(d.reserveTarget)} today` +
-      (d.targetMonth ? ` · reaches the target in ${d.targetMonth} on this schedule` : " · the schedule does not reach the target");
+      (d.targetMonth ? ` · reaches the target in ${d.targetMonth}, then keeps growing at ${F.pct0(d.ongoingSavings)} of net`
+                     : " · the schedule does not reach the target");
     const rc = $("#reserve-chip");
     rc.textContent = d.targetMonth ? `funded by ${d.targetMonth}` : "target not reached";
     rc.className = "chip " + (d.targetMonth ? "good" : "warning");
@@ -385,6 +387,13 @@
       { v: R.adc.toFixed(1), k: "Children a day it takes" },
       { v: R.enrolled.toFixed(0), k: `Enrolled at ${F.pct0(M.projection.attendanceRate)} attendance` }
     ]);
+    const g = d.growth;
+    $("#reserve-growth").textContent = g && g.perMonth
+      ? `${F.usdk(d.reserveTarget)} is ${d.monthsCovered.toFixed(1)} months of cost, short of the two-month rule. ` +
+        `The ongoing ${F.pct0(d.ongoingSavings)} adds about ${F.usd(g.perMonth)} a month once the target is met, ` +
+        `taking the reserve to ${F.usdk(d.endReserve)} by year end` +
+        (g.monthsToTwoMonths ? ` and to two months of cost, ${F.usdk(g.twoMonths)}, about ${g.monthsToTwoMonths} months after that.` : ".")
+      : "";
     $("#required-note").textContent =
       `The gap is ${F.usd(R.gap)}; the rest of that revenue just covers running the months it is earned over. ` +
       (R.surplus >= 0

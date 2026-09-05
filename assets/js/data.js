@@ -140,8 +140,10 @@ window.AKP_DATA = {
      average is $68,891 and July ran $83,920, so it is achievable but not
      automatic — the gap is almost entirely wages. */
   distributions: {
-    reserveTarget: 130000,
-    monthsOfExpenses: 2,
+    reserveTarget: 100000,
+    /* Once the target is reached, savings keeps taking this share of net income
+       every period rather than stopping. */
+    ongoingSavings: 0.15,
     assumedMonthlyCost: 70000,
     startingReserve: 71116.36,          /* cash in bank at Jul 31 */
     startingDebt: 53134.99,             /* credit card + line of credit drawn */
