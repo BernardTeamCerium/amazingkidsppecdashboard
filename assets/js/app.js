@@ -449,10 +449,7 @@
   /* ======================= Scenario ===================================== */
   function renderScenario() {
     const s = M.scenario;
-    if (!need("card-scenario", null, s && s.rows)) {
-      const x = document.getElementById("card-sensitivity"); if (x) x.hidden = true;
-      return;
-    }
+    if (!need("card-scenario", null, s && s.rows)) return;
     // Don't fight someone mid-keystroke.
     const perDay = $("#sc-per-day"), cost = $("#sc-cost");
     if (document.activeElement !== perDay) perDay.value = s.childrenPerDay;
@@ -496,26 +493,57 @@
       : `At this level the reserve never reaches ${F.usd(M.distributions.reserveTarget)}, so nothing is distributed. ` +
         `Break-even alone is ${s.breakEvenPerDay.toFixed(1)} children a day.`;
 
-    if (!need("card-sensitivity", null, s.sensitivity)) return;
-    Charts.columns($("#chart-sensitivity"), {
+  }
+
+
+  /* ======================= Census levels ================================ */
+  function renderLevels() {
+    const s = M.scenario;
+    if (!need("card-levels", null, s && s.sensitivity)) return;
+    const today = M.latest ? M.latest.adc : null;
+    const goal = RAW.targets && M.projection
+      ? RAW.targets.enrollment * M.projection.attendanceRate : null;
+    const nearest = (v) => v === null ? null
+      : s.sensitivity.reduce((a, x) => (Math.abs(x.perDay - v) < Math.abs(a.perDay - v) ? x : a)).perDay;
+    const todayLevel = nearest(today), goalLevel = nearest(goal);
+
+    Charts.columns($("#chart-levels"), {
       labels: s.sensitivity.map((x) => String(x.perDay)),
-      sublabels: s.sensitivity.map(() => "a day"),
-      values: s.sensitivity.map((x) => x.owners),
-      // The scenario's own column is emphasised; the rest recede.
-      states: s.sensitivity.map((x) => (x.perDay === s.childrenPerDay ? "--series-1" : "--ord-2")),
-      format: F.usd, yFormat: F.usdk, height: 196, seriesName: "Distribution pool",
+      sublabels: s.sensitivity.map((x) => (x.perDay === todayLevel ? "today" : x.perDay === goalLevel ? "goal" : "a day")),
+      values: s.sensitivity.map((x) => x.revenue),
+      states: s.sensitivity.map((x) => (x.perDay === todayLevel || x.perDay === goalLevel ? "--series-1" : "--ord-2")),
+      format: F.usd, yFormat: F.usdk, height: 210, seriesName: "Revenue over 4 months",
       tipTitle: (i) => `${s.sensitivity[i].perDay} children a day`,
-      tipNote: (i) => `${F.usd(s.sensitivity[i].revenue)} revenue · reserve funded ${s.sensitivity[i].fundedMonth || "not in this period"}`
+      tipNote: (i) => `${F.usd(s.sensitivity[i].monthlyRevenue)} a month · ${F.usd(s.sensitivity[i].owners)} distributable`
     });
-    twin($("#twin-sensitivity"), ["Children a day", "Revenue", "Net", "To distributions", "Reserve funded"],
-      s.sensitivity.map((x) => [x.perDay, F.usd(x.revenue), F.usd(x.net), F.usd(x.owners), x.fundedMonth || "—"]));
-    const step = s.sensitivity.length > 1
-      ? (s.sensitivity[s.sensitivity.length - 1].owners - s.sensitivity[0].owners) /
-        (s.sensitivity[s.sensitivity.length - 1].perDay - s.sensitivity[0].perDay) : 0;
-    $("#sensitivity-note").textContent =
-      `Once the reserve is funded, every extra child a day adds about ${F.usdk(step)} to the distribution ` +
-      `pool over these ${s.rows.length} months — ${F.usd(step / s.rows.length)} a month. Cost is held at ` +
-      `${F.usdk(s.monthlyCost)} across all of them.`;
+
+    $("#tbl-levels tbody").innerHTML = s.sensitivity.map((x) => {
+      const mark = x.perDay === todayLevel ? chip("today", "accent")
+                 : x.perDay === goalLevel ? chip("the goal", "good") : "";
+      return `<tr>
+        <td><strong>${x.perDay}</strong> ${mark}</td>
+        <td class="n">${esc(F.usd(x.revenue))}</td>
+        <td class="n">${esc(F.usd(x.monthlyRevenue))}</td>
+        <td class="n">${esc(F.usd(x.net))}</td>
+        <td class="n">${esc(F.usd(x.savings))}</td>
+        <td class="n">${esc(F.usd(x.debt))}</td>
+        <td class="n">${x.owners > 0 ? esc(F.usd(x.owners)) : chip("nothing", "warning")}</td>
+        <td class="n">${x.fundedMonth ? esc(x.fundedMonth) : chip("never", "critical")}</td>
+      </tr>`;
+    }).join("");
+
+    const ch = $("#levels-chip");
+    ch.textContent = `${s.childrenPerDay} a day at ${F.usdk(s.monthlyCost)} cost`;
+    ch.className = "chip";
+    const a = s.sensitivity[0], b = s.sensitivity[s.sensitivity.length - 1];
+    const perChild = (b.revenue - a.revenue) / (b.perDay - a.perDay);
+    $("#levels-note").textContent =
+      `Every line is the same four months — ${M.projection.totalOpDays} operating days at ` +
+      `${usd2(RAW.perDiem)} a child-day — with cost held at ${F.usdk(s.monthlyCost)} a month. ` +
+      `One more child a day is worth ${F.usd(perChild)} of revenue over the four months, ` +
+      `${F.usd(perChild / s.rows.length)} a month. ` +
+      (todayLevel ? `The centre is running about ${F.dec1(today)} a day today. ` : "") +
+      (goalLevel ? `The enrollment goal of ${RAW.targets.enrollment} at ${F.pct0(M.projection.attendanceRate)} attendance is ${F.dec1(goal)} a day.` : "");
   }
 
   /* ======================= Cost structure & mix ========================= */
@@ -904,6 +932,7 @@
     renderTargets();
     renderTrends();
     renderProjection();
+    renderLevels();
     renderDistributions();
     renderScenario();
     renderCosts();

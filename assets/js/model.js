@@ -299,7 +299,9 @@ const Model = (() => {
         breakEvenPerDay: div(sc.monthlyCost, m.projection.avgOpDays * raw.perDiem),
         sensitivity: (sc.sensitivity || []).map((n) => {
           const r = run(n);
-          return { perDay: n, revenue: r.revenue, net: r.net, owners: r.owners, fundedMonth: r.fundedMonth };
+          return { perDay: n, revenue: r.revenue, monthlyRevenue: r.revenue / m.projection.months.length,
+                   net: r.net, savings: r.savings, debt: r.debt, owners: r.owners,
+                   endReserve: r.endReserve, fundedMonth: r.fundedMonth };
         })
       };
     }

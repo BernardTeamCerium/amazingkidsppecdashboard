@@ -178,7 +178,7 @@ window.AKP_DATA = {
   scenario: {
     childrenPerDay: 15,
     monthlyCost: 70000,
-    sensitivity: [14, 15, 16, 17, 18, 19]
+    sensitivity: [14, 15, 16, 17, 18, 19, 20, 21, 22]
   },
 
 
