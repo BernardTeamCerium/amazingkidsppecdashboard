@@ -59,6 +59,10 @@ const Editor = (() => {
         cols: [["perDay", "On the floor daily", "int"], ["roster", "On the roster", "int"]] } }
     ] },
 
+    { title: "Owner shares", blocks: [
+      { rows: { path: "distributions.members", label: "name", cols: [["share", "Share", "pct"]] } }
+    ] },
+
     { title: "Ventures — Transportation", blocks: [
       { rows: { path: "ventures.list.0.lines", label: "name", cols: [
         ["children", "Children", "int"], ["unitsPerPeriod", "Units", "num"],

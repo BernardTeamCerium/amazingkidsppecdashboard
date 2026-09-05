@@ -102,6 +102,10 @@ A few rules the file expects:
   that change annually and were not in any file shared, so none are guessed. A
   null rate renders as "rate needed", never as zero, and the line stays out of
   every total until a real figure is entered.
+- `distributions.members` carries an agreed ownership `share` per member, not a
+  ratio of the capital accounts on the balance sheet — those record what each
+  member contributed, which is a different thing. The shares must add to 100%;
+  the pool row flags it in red if they do not.
 - `distributions` is a policy, not a forecast. Savings takes whatever is still
   needed to reach `reserveTarget`, then keeps taking `ongoingSavings` of net
   every period after that; `split` divides what is left between debt paydown

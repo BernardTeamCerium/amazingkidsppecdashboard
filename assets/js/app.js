@@ -437,7 +437,8 @@
         `<tr><td>${esc(x.name)}</td><td class="n">${esc(F.pct1(x.share))}</td>
          <td class="n">${esc(F.usd(x.amount))}</td></tr>`).join("");
       $("#tbl-members tfoot").innerHTML =
-        `<tr><td>Distribution pool</td><td class="n">100.0%</td>
+        `<tr><td>Distribution pool</td>
+         <td class="n">${d.shareBalanced ? "100.0%" : chip(F.pct1(d.shareTotal), "critical")}</td>
          <td class="n">${esc(F.usd(d.totals.owners))}</td></tr>`;
     } else {
       members.closest(".table-wrap").hidden = true;

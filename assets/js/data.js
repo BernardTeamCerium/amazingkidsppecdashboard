@@ -154,13 +154,18 @@ window.AKP_DATA = {
     /* The one place member-level detail appears. Set showMembers to false and
        the split collapses to a single distribution pool. */
     showMembers: true,
+    /* Ownership is an agreed percentage, not a ratio of the capital accounts on
+       the balance sheet — those record what each member put in, which is a
+       different thing. Four members hold 20% each; the remaining 20% is split
+       between the other two in proportion to their capital accounts
+       ($99,000 and $91,300), which is an assumption worth confirming. */
     members: [
-      { name: "Eliecer Vallejo", equity: 166000 },
-      { name: "Juan Labrador",   equity: 166000 },
-      { name: "Miguel Montes",   equity: 166000 },
-      { name: "Ivan Velasquez",  equity: 161000 },
-      { name: "Matt Klynsmith",  equity:  99000 },
-      { name: "Bernard Frazier", equity:  91300 }
+      { name: "Eliecer Vallejo", share: 0.20 },
+      { name: "Juan Labrador",   share: 0.20 },
+      { name: "Miguel Montes",   share: 0.20 },
+      { name: "Ivan Velasquez",  share: 0.20 },
+      { name: "Matt Klynsmith",  share: 0.104046 },
+      { name: "Bernard Frazier", share: 0.095954 }
     ],
     note: "Distributions are paid from cash actually collected, not from projected revenue, and " +
       "never below one month of operating cost left in the bank.",

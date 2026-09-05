@@ -199,7 +199,8 @@ const Model = (() => {
 
       const tot = (k) => sum(schedule, (x) => x[k]);
       const owners = tot("toOwners");
-      const equity = sum(d.members || [], (x) => x.equity);
+      // Ownership comes from the agreed share, not from the capital accounts.
+      const shareTotal = sum(d.members || [], (x) => x.share || 0);
       const funded = schedule.find((x) => x.reserve >= d.reserveTarget);
 
       /* What it takes to fund the reserve, in money and then in children.
@@ -220,9 +221,10 @@ const Model = (() => {
         endReserve: schedule.length ? schedule[schedule.length - 1].reserve : d.startingReserve,
         endDebt: schedule.length ? schedule[schedule.length - 1].debt : d.startingDebt,
         targetMonth: funded ? funded.full : null,
-        equity,
+        shareTotal,
+        shareBalanced: Math.abs(shareTotal - 1) < 0.0005,
         members: (d.members || []).map((x) => ({
-          ...x, share: div(x.equity, equity), amount: owners * div(x.equity, equity)
+          ...x, amount: owners * (x.share || 0)
         })),
         stages: ["Building the reserve", "Reserve funded"].map((name) => {
           const rows = schedule.filter((x) => x.stage === name);
@@ -292,9 +294,8 @@ const Model = (() => {
       const main = run(sc.childrenPerDay);
       m.scenario = {
         ...sc, ...main,
-        equity: m.distributions ? m.distributions.equity : null,
         members: m.distributions
-          ? m.distributions.members.map((x) => ({ ...x, amount: main.owners * x.share })) : [],
+          ? m.distributions.members.map((x) => ({ ...x, amount: main.owners * (x.share || 0) })) : [],
         // Children a day needed to cover cost, and to cover cost plus the gap.
         breakEvenPerDay: div(sc.monthlyCost, m.projection.avgOpDays * raw.perDiem),
         sensitivity: (sc.sensitivity || []).map((n) => {
