@@ -135,14 +135,14 @@ window.AKP_DATA = {
      settled the split moves to the second set of percentages. Change any
      percentage and the whole schedule re-runs.
 
-     assumedMonthlyCost is the one number here with no source: the management
-     report gives no basis for forecasting cost, so the schedule holds it at the
-     year-to-date average. July actually ran $83.9K, so treat the schedule as
-     the good case and watch the sensitivity note on the card. */
+     assumedMonthlyCost is a target rather than an observation: $70,000 a month
+     is what the centre intends to hold cost to. For reference the year-to-date
+     average is $68,891 and July ran $83,920, so it is achievable but not
+     automatic — the gap is almost entirely wages. */
   distributions: {
     reserveTarget: 130000,
     monthsOfExpenses: 2,
-    assumedMonthlyCost: 68890.88,
+    assumedMonthlyCost: 70000,
     startingReserve: 71116.36,          /* cash in bank at Jul 31 */
     startingDebt: 53134.99,             /* credit card + line of credit drawn */
     /* Reserve first: savings takes whatever is still needed to reach the target,
@@ -162,10 +162,10 @@ window.AKP_DATA = {
     ],
     note: "Distributions are paid from cash actually collected, not from projected revenue, and " +
       "never below one month of operating cost left in the bank.",
-    caveat: "Two things would change this materially. Cost is held flat at the year-to-date " +
-      "average; July ran well above it, and at July's level the distributable net nearly " +
-      "disappears. And revenue is the projection at the posted day rate; at the rate actually " +
-      "realized year to date, net over the four months is roughly half."
+    caveat: "Two things would change this materially. Cost is held at the $70,000 target; July " +
+      "ran $83,920, and at that level the distributable net nearly disappears. And revenue is the " +
+      "projection at the posted day rate; at the rate actually realized year to date, net over the " +
+      "four months is roughly half."
   },
 
 
