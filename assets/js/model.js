@@ -190,7 +190,12 @@ const Model = (() => {
         reserveTarget: d.reserveTarget, startingReserve: d.startingReserve,
         startingDebt: d.startingDebt, split, perDiem: raw.perDiem,
         ongoingSavings: d.ongoingSavings
-      }).map((x) => ({ ...x, phase: x.toSavings > 0 ? "building" : "funded" }));
+      }).map((x) => ({
+        ...x,
+        // "Building" while the month still closes part of the gap; "funded"
+        // once savings is only taking its ongoing share.
+        stage: x.reserve - x.toSavings < d.reserveTarget ? "Building the reserve" : "Reserve funded"
+      }));
 
       const tot = (k) => sum(schedule, (x) => x[k]);
       const owners = tot("toOwners");
@@ -219,6 +224,16 @@ const Model = (() => {
         members: (d.members || []).map((x) => ({
           ...x, share: div(x.equity, equity), amount: owners * div(x.equity, equity)
         })),
+        stages: ["Building the reserve", "Reserve funded"].map((name) => {
+          const rows = schedule.filter((x) => x.stage === name);
+          const t = (k) => sum(rows, (x) => x[k]);
+          return rows.length ? {
+            name, months: rows.length,
+            from: rows[0].label, to: rows[rows.length - 1].label,
+            net: t("net"), savings: t("toSavings"), debt: t("toDebt"), owners: t("toOwners"),
+            endReserve: rows[rows.length - 1].reserve
+          } : null;
+        }).filter(Boolean),
         monthsCovered: div(d.reserveTarget, d.assumedMonthlyCost),
         ongoingSavings: d.ongoingSavings,
         /* Where the ongoing contribution takes the reserve after the target:

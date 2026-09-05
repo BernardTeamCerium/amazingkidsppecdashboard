@@ -30,6 +30,7 @@
   --accent-wash:  rgba(22, 104, 165, .10);
   --series-1:     #2a6fc4;
   --series-2:     #eb6834;
+  --series-3:     #1baf7a;
 
   /* Ordinal ramp for the pipeline stages (validated --ordinal, light end 2.11:1) */
   --ord-1: #86b6ef;
@@ -85,6 +86,7 @@
     --accent-wash: rgba(78, 159, 224, .18);
     --series-1:    #3f8fdd;
     --series-2:    #d95926;
+    --series-3:    #199e70;
 
     --ord-1: #cde2fb;
     --ord-2: #9ec5f4;
@@ -125,6 +127,7 @@
   --accent-wash: rgba(78, 159, 224, .18);
   --series-1:    #3f8fdd;
   --series-2:    #d95926;
+  --series-3:    #199e70;
 
   --ord-1: #cde2fb;
   --ord-2: #9ec5f4;
@@ -905,3 +908,15 @@ img { max-width: 100%; }
   font-variant-numeric: tabular-nums;
 }
 .inline-inputs input[type="number"]:focus-visible { border-color: var(--accent); }
+
+/* A stage heading inside a table, so a schedule reads as phases not just rows. */
+table.data tr.stage-row td {
+  background: var(--surface-2);
+  font-weight: 600;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+table.data tr.stage-row td:first-child { padding-left: 8px; }
+table.data tr.stage-row:hover td { background: var(--surface-2); }

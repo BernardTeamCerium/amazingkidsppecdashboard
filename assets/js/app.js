@@ -337,18 +337,46 @@
       { v: F.pct0(d.split.debt), k: "Of the rest, to paying down debt" },
       { v: F.pct0(d.split.owners), k: "Of the rest, to distributions" }
     ]);
-    $("#tbl-distributions tbody").innerHTML = d.schedule.map((x) =>
-      `<tr>
-        <td>${esc(x.full)}</td>
-        <td class="n">${esc(F.usd(x.revenue))}</td>
-        <td class="n">${esc(F.usd(x.net))}</td>
-        <td class="n">${esc(F.usd(x.toSavings))}</td>
-        <td class="n">${esc(F.usd(x.toDebt))}</td>
-        <td class="n">${esc(F.usd(x.toOwners))}</td>
-        <td class="n">${esc(F.usd(x.reserve))}</td>
-      </tr>`).join("");
+    // Where each month's net actually goes, stacked.
+    const parts = [
+      { name: "Savings", colorVar: "--series-1", values: d.schedule.map((x) => x.toSavings) },
+      { name: "Debt paydown", colorVar: "--series-2", values: d.schedule.map((x) => x.toDebt) },
+      { name: "Distributions", colorVar: "--series-3", values: d.schedule.map((x) => x.toOwners) }
+    ];
+    $("#legend-split").innerHTML = parts.map((p) =>
+      `<span class="key"><span class="swatch dot" style="background:var(${p.colorVar})"></span>${esc(p.name)}</span>`).join("");
+    Charts.stacked($("#chart-split"), {
+      labels: d.schedule.map((x) => x.label),
+      sublabels: d.schedule.map((x) => x.full.slice(-4)),
+      series: parts,
+      format: F.usd, yFormat: F.usdk, height: 210,
+      tipTitle: (i) => `${d.schedule[i].full} · ${d.schedule[i].stage.toLowerCase()}`,
+      emptyNote: (i) => `net loss of ${F.usd(-d.schedule[i].net)}, drawn from the reserve`
+    });
+
+    // Stage subtotals sit in the table as their own rows, so the split is
+    // readable as two phases rather than four unrelated months.
+    let rows = "";
+    d.stages.forEach((st) => {
+      rows += `<tr class="stage-row"><td colspan="2">${esc(st.name)} · ${esc(st.from)}–${esc(st.to)}</td>
+        <td class="n">${esc(F.usd(st.net))}</td><td class="n">${esc(F.usd(st.savings))}</td>
+        <td class="n">${esc(F.usd(st.debt))}</td><td class="n">${esc(F.usd(st.owners))}</td>
+        <td class="n">${esc(F.usd(st.endReserve))}</td></tr>`;
+      d.schedule.filter((x) => x.stage === st.name).forEach((x) => {
+        rows += `<tr>
+          <td>${esc(x.full)}</td>
+          <td>${chip(x.stage === "Reserve funded" ? "funded" : "building", x.stage === "Reserve funded" ? "good" : "", x.stage !== "Reserve funded")}</td>
+          <td class="n">${esc(F.usd(x.net))}</td>
+          <td class="n">${esc(F.usd(x.toSavings))}</td>
+          <td class="n">${esc(F.usd(x.toDebt))}</td>
+          <td class="n">${esc(F.usd(x.toOwners))}</td>
+          <td class="n">${esc(F.usd(x.reserve))}</td>
+        </tr>`;
+      });
+    });
+    $("#tbl-distributions tbody").innerHTML = rows;
     $("#tbl-distributions tfoot").innerHTML =
-      `<tr><td>Total</td><td class="n">${esc(F.usd(M.projection.totalRevenue))}</td>
+      `<tr><td colspan="2">Total, ${esc(d.schedule[0].full)} to ${esc(d.schedule[d.schedule.length - 1].full)}</td>
        <td class="n">${esc(F.usd(d.totals.net))}</td>
        <td class="n">${esc(F.usd(d.totals.savings))}</td>
        <td class="n">${esc(F.usd(d.totals.debt))}</td>

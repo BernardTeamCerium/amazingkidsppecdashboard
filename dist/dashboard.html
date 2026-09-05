@@ -36,6 +36,7 @@
   --accent-wash:  rgba(22, 104, 165, .10);
   --series-1:     #2a6fc4;
   --series-2:     #eb6834;
+  --series-3:     #1baf7a;
 
   /* Ordinal ramp for the pipeline stages (validated --ordinal, light end 2.11:1) */
   --ord-1: #86b6ef;
@@ -91,6 +92,7 @@
     --accent-wash: rgba(78, 159, 224, .18);
     --series-1:    #3f8fdd;
     --series-2:    #d95926;
+    --series-3:    #199e70;
 
     --ord-1: #cde2fb;
     --ord-2: #9ec5f4;
@@ -131,6 +133,7 @@
   --accent-wash: rgba(78, 159, 224, .18);
   --series-1:    #3f8fdd;
   --series-2:    #d95926;
+  --series-3:    #199e70;
 
   --ord-1: #cde2fb;
   --ord-2: #9ec5f4;
@@ -912,6 +915,18 @@ img { max-width: 100%; }
 }
 .inline-inputs input[type="number"]:focus-visible { border-color: var(--accent); }
 
+/* A stage heading inside a table, so a schedule reads as phases not just rows. */
+table.data tr.stage-row td {
+  background: var(--surface-2);
+  font-weight: 600;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+table.data tr.stage-row td:first-child { padding-left: 8px; }
+table.data tr.stage-row:hover td { background: var(--surface-2); }
+
 </style>
 
 <template id="board-template">
@@ -1051,9 +1066,11 @@ img { max-width: 100%; }
           <div class="card-meta"><span class="chip accent" id="dist-chip">—</span></div>
         </div>
         <div class="stat-strip" id="dist-policy"></div>
+        <div class="legend" id="legend-split"></div>
+        <div class="chart" id="chart-split"></div>
         <div class="table-wrap">
           <table class="data" id="tbl-distributions">
-            <thead><tr><th>Month</th><th class="n">Revenue</th><th class="n">Net</th><th class="n">Savings</th><th class="n">Debt</th><th class="n">Owners</th><th class="n">Reserve after</th></tr></thead>
+            <thead><tr><th>Month</th><th>Stage</th><th class="n">Net</th><th class="n">Savings</th><th class="n">Debt</th><th class="n">Owners</th><th class="n">Reserve after</th></tr></thead>
             <tbody></tbody>
             <tfoot></tfoot>
           </table>
@@ -1630,7 +1647,12 @@ const Model = (() => {
         reserveTarget: d.reserveTarget, startingReserve: d.startingReserve,
         startingDebt: d.startingDebt, split, perDiem: raw.perDiem,
         ongoingSavings: d.ongoingSavings
-      }).map((x) => ({ ...x, phase: x.toSavings > 0 ? "building" : "funded" }));
+      }).map((x) => ({
+        ...x,
+        // "Building" while the month still closes part of the gap; "funded"
+        // once savings is only taking its ongoing share.
+        stage: x.reserve - x.toSavings < d.reserveTarget ? "Building the reserve" : "Reserve funded"
+      }));
 
       const tot = (k) => sum(schedule, (x) => x[k]);
       const owners = tot("toOwners");
@@ -1659,6 +1681,16 @@ const Model = (() => {
         members: (d.members || []).map((x) => ({
           ...x, share: div(x.equity, equity), amount: owners * div(x.equity, equity)
         })),
+        stages: ["Building the reserve", "Reserve funded"].map((name) => {
+          const rows = schedule.filter((x) => x.stage === name);
+          const t = (k) => sum(rows, (x) => x[k]);
+          return rows.length ? {
+            name, months: rows.length,
+            from: rows[0].label, to: rows[rows.length - 1].label,
+            net: t("net"), savings: t("toSavings"), debt: t("toDebt"), owners: t("toOwners"),
+            endReserve: rows[rows.length - 1].reserve
+          } : null;
+        }).filter(Boolean),
         monthsCovered: div(d.reserveTarget, d.assumedMonthlyCost),
         ongoingSavings: d.ongoingSavings,
         /* Where the ongoing contribution takes the reserve after the target:
@@ -2099,6 +2131,83 @@ const Charts = (() => {
     return mount(host, draw);
   }
 
+
+  /* =========================================================================
+     STACKED COLUMN — one column per period, split into named parts. Segments
+     are separated by a 2px surface gap rather than a stroke; only the top
+     segment carries the rounded cap. Columns grow from zero.
+     ====================================================================== */
+  function stacked(host, opts) {
+    const { labels, series, format = fmt.int, height = 220, sublabels = null,
+            tipTitle = (i) => labels[i], emptyNote = null } = opts;
+    const tip = makeTip(host);
+
+    const draw = (W) => {
+      const surface = css("--chart-bg") || "#fff";
+      const M = { t: 14, r: 12, b: 30, l: 52 };
+      const H = height, iw = Math.max(60, W - M.l - M.r), ih = H - M.t - M.b;
+      const totals = labels.map((_, i) => series.reduce((a, s) => a + Math.max(0, s.values[i]), 0));
+      const tk = ticks(0, Math.max(...totals) * 1.08 || 1, 4);
+      const yMin = tk[0], yMax = tk[tk.length - 1];
+      const Y = (v) => M.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
+      const band = iw / labels.length;
+      const bw = Math.min(24, Math.max(6, band - 18));   // ≤24px, per the mark spec
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+
+      tk.forEach((v) => {
+        svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(v), y2: Y(v), class: "grid-line" }));
+        const t = el("text", { x: M.l - 8, y: Y(v) + 3.5, class: "tick", "text-anchor": "end" });
+        t.textContent = (opts.yFormat || format)(v);
+        svg.appendChild(t);
+      });
+      svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: "axis-line" }));
+
+      labels.forEach((_, i) => {
+        const x = M.l + band * i + (band - bw) / 2;
+        let cum = 0;
+        const parts = series.map((s) => ({ s, v: Math.max(0, s.values[i]) })).filter((p) => p.v > 0);
+        parts.forEach((p, k) => {
+          const y0 = Y(cum), y1 = Y(cum + p.v);
+          const top = k === parts.length - 1;
+          const gap = k === 0 ? 0 : 2;                   // surface gap under every segment but the first
+          const h = Math.max(1, y0 - y1 - gap);
+          const d = top ? columnPath(x, y1, bw, h, 4)
+                        : `M${x},${y1} h${bw} v${h} h${-bw} Z`;
+          svg.appendChild(el("path", { d, fill: css(p.s.colorVar) }));
+          cum += p.v;
+        });
+        if (!parts.length) {
+          svg.appendChild(el("line", { x1: x, x2: x + bw, y1: M.t + ih, y2: M.t + ih,
+            stroke: css("--axis"), "stroke-width": 2 }));
+        }
+        const hit = el("rect", { x: M.l + band * i, y: M.t, width: band, height: ih, fill: "transparent" });
+        hit.addEventListener("mouseenter", () => {
+          const rows = series.map((s) => ({ color: css(s.colorVar), label: s.name, value: format(s.values[i]) }));
+          tip.show(x + bw / 2, Y(totals[i]),
+            `<div class="tip-title">${tipTitle(i)}</div>` + tipRows(rows) +
+            (totals[i] > 0
+              ? `<div class="tip-note">${format(totals[i])} in total</div>`
+              : emptyNote ? `<div class="tip-note">${emptyNote(i)}</div>` : ""));
+        });
+        svg.appendChild(hit);
+      });
+      svg.addEventListener("mouseleave", () => tip.hide());
+
+      labels.forEach((l, i) => {
+        const t = el("text", { x: M.l + band * i + band / 2, y: H - 14, class: "tick", "text-anchor": "middle" });
+        t.textContent = l;
+        svg.appendChild(t);
+        if (sublabels) {
+          const s = el("text", { x: M.l + band * i + band / 2, y: H - 3, class: "tick", "text-anchor": "middle", opacity: .75 });
+          s.textContent = sublabels[i];
+          svg.appendChild(s);
+        }
+      });
+      return svg;
+    };
+    return mount(host, draw);
+  }
+
   /* =========================================================================
      BAR — horizontal, one color per set (or an ordinal ramp for ordered
      stages). Value labels ride the tip; labels sit above each bar.
@@ -2171,7 +2280,7 @@ const Charts = (() => {
     return mount(host, draw);
   }
 
-  return { line, columns, bars, sparkline, fmt, ticks };
+  return { line, columns, stacked, bars, sparkline, fmt, ticks };
 })();
 
 
@@ -2769,18 +2878,46 @@ window.Editor = Editor;
       { v: F.pct0(d.split.debt), k: "Of the rest, to paying down debt" },
       { v: F.pct0(d.split.owners), k: "Of the rest, to distributions" }
     ]);
-    $("#tbl-distributions tbody").innerHTML = d.schedule.map((x) =>
-      `<tr>
-        <td>${esc(x.full)}</td>
-        <td class="n">${esc(F.usd(x.revenue))}</td>
-        <td class="n">${esc(F.usd(x.net))}</td>
-        <td class="n">${esc(F.usd(x.toSavings))}</td>
-        <td class="n">${esc(F.usd(x.toDebt))}</td>
-        <td class="n">${esc(F.usd(x.toOwners))}</td>
-        <td class="n">${esc(F.usd(x.reserve))}</td>
-      </tr>`).join("");
+    // Where each month's net actually goes, stacked.
+    const parts = [
+      { name: "Savings", colorVar: "--series-1", values: d.schedule.map((x) => x.toSavings) },
+      { name: "Debt paydown", colorVar: "--series-2", values: d.schedule.map((x) => x.toDebt) },
+      { name: "Distributions", colorVar: "--series-3", values: d.schedule.map((x) => x.toOwners) }
+    ];
+    $("#legend-split").innerHTML = parts.map((p) =>
+      `<span class="key"><span class="swatch dot" style="background:var(${p.colorVar})"></span>${esc(p.name)}</span>`).join("");
+    Charts.stacked($("#chart-split"), {
+      labels: d.schedule.map((x) => x.label),
+      sublabels: d.schedule.map((x) => x.full.slice(-4)),
+      series: parts,
+      format: F.usd, yFormat: F.usdk, height: 210,
+      tipTitle: (i) => `${d.schedule[i].full} · ${d.schedule[i].stage.toLowerCase()}`,
+      emptyNote: (i) => `net loss of ${F.usd(-d.schedule[i].net)}, drawn from the reserve`
+    });
+
+    // Stage subtotals sit in the table as their own rows, so the split is
+    // readable as two phases rather than four unrelated months.
+    let rows = "";
+    d.stages.forEach((st) => {
+      rows += `<tr class="stage-row"><td colspan="2">${esc(st.name)} · ${esc(st.from)}–${esc(st.to)}</td>
+        <td class="n">${esc(F.usd(st.net))}</td><td class="n">${esc(F.usd(st.savings))}</td>
+        <td class="n">${esc(F.usd(st.debt))}</td><td class="n">${esc(F.usd(st.owners))}</td>
+        <td class="n">${esc(F.usd(st.endReserve))}</td></tr>`;
+      d.schedule.filter((x) => x.stage === st.name).forEach((x) => {
+        rows += `<tr>
+          <td>${esc(x.full)}</td>
+          <td>${chip(x.stage === "Reserve funded" ? "funded" : "building", x.stage === "Reserve funded" ? "good" : "", x.stage !== "Reserve funded")}</td>
+          <td class="n">${esc(F.usd(x.net))}</td>
+          <td class="n">${esc(F.usd(x.toSavings))}</td>
+          <td class="n">${esc(F.usd(x.toDebt))}</td>
+          <td class="n">${esc(F.usd(x.toOwners))}</td>
+          <td class="n">${esc(F.usd(x.reserve))}</td>
+        </tr>`;
+      });
+    });
+    $("#tbl-distributions tbody").innerHTML = rows;
     $("#tbl-distributions tfoot").innerHTML =
-      `<tr><td>Total</td><td class="n">${esc(F.usd(M.projection.totalRevenue))}</td>
+      `<tr><td colspan="2">Total, ${esc(d.schedule[0].full)} to ${esc(d.schedule[d.schedule.length - 1].full)}</td>
        <td class="n">${esc(F.usd(d.totals.net))}</td>
        <td class="n">${esc(F.usd(d.totals.savings))}</td>
        <td class="n">${esc(F.usd(d.totals.debt))}</td>

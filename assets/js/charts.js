@@ -361,6 +361,83 @@ const Charts = (() => {
     return mount(host, draw);
   }
 
+
+  /* =========================================================================
+     STACKED COLUMN — one column per period, split into named parts. Segments
+     are separated by a 2px surface gap rather than a stroke; only the top
+     segment carries the rounded cap. Columns grow from zero.
+     ====================================================================== */
+  function stacked(host, opts) {
+    const { labels, series, format = fmt.int, height = 220, sublabels = null,
+            tipTitle = (i) => labels[i], emptyNote = null } = opts;
+    const tip = makeTip(host);
+
+    const draw = (W) => {
+      const surface = css("--chart-bg") || "#fff";
+      const M = { t: 14, r: 12, b: 30, l: 52 };
+      const H = height, iw = Math.max(60, W - M.l - M.r), ih = H - M.t - M.b;
+      const totals = labels.map((_, i) => series.reduce((a, s) => a + Math.max(0, s.values[i]), 0));
+      const tk = ticks(0, Math.max(...totals) * 1.08 || 1, 4);
+      const yMin = tk[0], yMax = tk[tk.length - 1];
+      const Y = (v) => M.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
+      const band = iw / labels.length;
+      const bw = Math.min(24, Math.max(6, band - 18));   // ≤24px, per the mark spec
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+
+      tk.forEach((v) => {
+        svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: Y(v), y2: Y(v), class: "grid-line" }));
+        const t = el("text", { x: M.l - 8, y: Y(v) + 3.5, class: "tick", "text-anchor": "end" });
+        t.textContent = (opts.yFormat || format)(v);
+        svg.appendChild(t);
+      });
+      svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: "axis-line" }));
+
+      labels.forEach((_, i) => {
+        const x = M.l + band * i + (band - bw) / 2;
+        let cum = 0;
+        const parts = series.map((s) => ({ s, v: Math.max(0, s.values[i]) })).filter((p) => p.v > 0);
+        parts.forEach((p, k) => {
+          const y0 = Y(cum), y1 = Y(cum + p.v);
+          const top = k === parts.length - 1;
+          const gap = k === 0 ? 0 : 2;                   // surface gap under every segment but the first
+          const h = Math.max(1, y0 - y1 - gap);
+          const d = top ? columnPath(x, y1, bw, h, 4)
+                        : `M${x},${y1} h${bw} v${h} h${-bw} Z`;
+          svg.appendChild(el("path", { d, fill: css(p.s.colorVar) }));
+          cum += p.v;
+        });
+        if (!parts.length) {
+          svg.appendChild(el("line", { x1: x, x2: x + bw, y1: M.t + ih, y2: M.t + ih,
+            stroke: css("--axis"), "stroke-width": 2 }));
+        }
+        const hit = el("rect", { x: M.l + band * i, y: M.t, width: band, height: ih, fill: "transparent" });
+        hit.addEventListener("mouseenter", () => {
+          const rows = series.map((s) => ({ color: css(s.colorVar), label: s.name, value: format(s.values[i]) }));
+          tip.show(x + bw / 2, Y(totals[i]),
+            `<div class="tip-title">${tipTitle(i)}</div>` + tipRows(rows) +
+            (totals[i] > 0
+              ? `<div class="tip-note">${format(totals[i])} in total</div>`
+              : emptyNote ? `<div class="tip-note">${emptyNote(i)}</div>` : ""));
+        });
+        svg.appendChild(hit);
+      });
+      svg.addEventListener("mouseleave", () => tip.hide());
+
+      labels.forEach((l, i) => {
+        const t = el("text", { x: M.l + band * i + band / 2, y: H - 14, class: "tick", "text-anchor": "middle" });
+        t.textContent = l;
+        svg.appendChild(t);
+        if (sublabels) {
+          const s = el("text", { x: M.l + band * i + band / 2, y: H - 3, class: "tick", "text-anchor": "middle", opacity: .75 });
+          s.textContent = sublabels[i];
+          svg.appendChild(s);
+        }
+      });
+      return svg;
+    };
+    return mount(host, draw);
+  }
+
   /* =========================================================================
      BAR — horizontal, one color per set (or an ordinal ramp for ordered
      stages). Value labels ride the tip; labels sit above each bar.
@@ -433,5 +510,5 @@ const Charts = (() => {
     return mount(host, draw);
   }
 
-  return { line, columns, bars, sparkline, fmt, ticks };
+  return { line, columns, stacked, bars, sparkline, fmt, ticks };
 })();
