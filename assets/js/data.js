@@ -168,6 +168,17 @@ window.AKP_DATA = {
       "realized year to date, net over the four months is roughly half."
   },
 
+
+  /* ---- What-if -----------------------------------------------------------
+     A flat children-per-day figure and a flat monthly cost, run through the
+     same operating-day calendar and the same distribution policy as the live
+     projection. Both numbers are editable on the card. */
+  scenario: {
+    childrenPerDay: 15,
+    monthlyCost: 70000,
+    sensitivity: [14, 15, 16, 17, 18, 19]
+  },
+
   /* ---- Cost structure ---------------------------------------------------- */
   costLines: {
     current: "July 2026",

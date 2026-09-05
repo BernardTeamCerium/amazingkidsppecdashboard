@@ -408,6 +408,79 @@
     }
   }
 
+
+  /* ======================= Scenario ===================================== */
+  function renderScenario() {
+    const s = M.scenario;
+    if (!need("card-scenario", null, s && s.rows)) {
+      const x = document.getElementById("card-sensitivity"); if (x) x.hidden = true;
+      return;
+    }
+    // Don't fight someone mid-keystroke.
+    const perDay = $("#sc-per-day"), cost = $("#sc-cost");
+    if (document.activeElement !== perDay) perDay.value = s.childrenPerDay;
+    if (document.activeElement !== cost) cost.value = s.monthlyCost;
+
+    $("#scenario-title").textContent =
+      `${s.childrenPerDay} children a day, cost at ${F.usdk(s.monthlyCost)} a month`;
+    $("#scenario-stats").innerHTML = stats([
+      { v: F.usdk(s.revenue), k: `Revenue over ${s.rows.length} months` },
+      { v: F.usdk(s.net), k: "Net income" },
+      { v: F.usdk(s.savings), k: "To the reserve" },
+      { v: F.usdk(s.owners), k: "To distributions" },
+      { v: s.fundedMonth || "—", k: "Reserve funded" },
+      { v: s.breakEvenPerDay.toFixed(1), k: "Break-even, children a day" }
+    ]);
+    $("#tbl-scenario tbody").innerHTML = s.rows.map((x) =>
+      `<tr><td>${esc(x.full)}</td><td class="n">${x.opDays}</td>
+       <td class="n">${esc(F.usd(x.revenue))}</td><td class="n">${esc(F.usd(x.net))}</td>
+       <td class="n">${esc(F.usd(x.toSavings))}</td><td class="n">${esc(F.usd(x.toDebt))}</td>
+       <td class="n">${esc(F.usd(x.toOwners))}</td><td class="n">${esc(F.usd(x.reserve))}</td></tr>`).join("");
+    $("#tbl-scenario tfoot").innerHTML =
+      `<tr><td>Total</td><td class="n">${M.projection.totalOpDays}</td>
+       <td class="n">${esc(F.usd(s.revenue))}</td><td class="n">${esc(F.usd(s.net))}</td>
+       <td class="n">${esc(F.usd(s.savings))}</td><td class="n">${esc(F.usd(s.debt))}</td>
+       <td class="n">${esc(F.usd(s.owners))}</td><td class="n">${esc(F.usd(s.endReserve))}</td></tr>`;
+
+    const ch = $("#scenario-chip");
+    ch.textContent = s.owners > 0
+      ? `${F.usdk(s.owners)} distributable` : "nothing left to distribute";
+    ch.className = "chip " + (s.owners <= 0 ? "critical" : s.owners < 25000 ? "warning" : "good");
+    if (s.owners <= 0) $("#card-scenario").dataset.state = "critical";
+    else if (s.owners < 25000) $("#card-scenario").dataset.state = "warning";
+    else delete $("#card-scenario").dataset.state;
+
+    const perOwner = s.members.length ? s.members[s.members.length - 1].amount : null;
+    $("#scenario-note").textContent = s.fundedMonth
+      ? `The reserve absorbs the first ${F.usd(s.savings)}, so distributions only start once it is full — ` +
+        `in ${s.fundedMonth} here. ${F.usd(s.owners)} is left to distribute` +
+        (perOwner !== null ? `, from ${F.usd(perOwner)} to ${F.usd(s.members[0].amount)} a member.` : ".") +
+        ` The thinnest month is ${s.worstMonth.full} at ${F.usd(s.worstMonth.net)} net, on ${s.worstMonth.opDays} operating days.`
+      : `At this level the reserve never reaches ${F.usd(M.distributions.reserveTarget)}, so nothing is distributed. ` +
+        `Break-even alone is ${s.breakEvenPerDay.toFixed(1)} children a day.`;
+
+    if (!need("card-sensitivity", null, s.sensitivity)) return;
+    Charts.columns($("#chart-sensitivity"), {
+      labels: s.sensitivity.map((x) => String(x.perDay)),
+      sublabels: s.sensitivity.map(() => "a day"),
+      values: s.sensitivity.map((x) => x.owners),
+      // The scenario's own column is emphasised; the rest recede.
+      states: s.sensitivity.map((x) => (x.perDay === s.childrenPerDay ? "--series-1" : "--ord-2")),
+      format: F.usd, yFormat: F.usdk, height: 196, seriesName: "Distribution pool",
+      tipTitle: (i) => `${s.sensitivity[i].perDay} children a day`,
+      tipNote: (i) => `${F.usd(s.sensitivity[i].revenue)} revenue · reserve funded ${s.sensitivity[i].fundedMonth || "not in this period"}`
+    });
+    twin($("#twin-sensitivity"), ["Children a day", "Revenue", "Net", "To distributions", "Reserve funded"],
+      s.sensitivity.map((x) => [x.perDay, F.usd(x.revenue), F.usd(x.net), F.usd(x.owners), x.fundedMonth || "—"]));
+    const step = s.sensitivity.length > 1
+      ? (s.sensitivity[s.sensitivity.length - 1].owners - s.sensitivity[0].owners) /
+        (s.sensitivity[s.sensitivity.length - 1].perDay - s.sensitivity[0].perDay) : 0;
+    $("#sensitivity-note").textContent =
+      `Once the reserve is funded, every extra child a day adds about ${F.usdk(step)} to the distribution ` +
+      `pool over these ${s.rows.length} months — ${F.usd(step / s.rows.length)} a month. Cost is held at ` +
+      `${F.usdk(s.monthlyCost)} across all of them.`;
+  }
+
   /* ======================= Cost structure & mix ========================= */
   function renderCosts() {
     const c = M.costLines;
@@ -703,6 +776,7 @@
     renderTrends();
     renderProjection();
     renderDistributions();
+    renderScenario();
     renderCosts();
     renderCash();
     renderAttendance();
@@ -748,6 +822,15 @@
       root.setAttribute("data-theme", next);
       try { localStorage.setItem("akp.theme", next); } catch { /* private mode */ }
       document.dispatchEvent(new Event("akp:theme"));
+    });
+
+    $$(".inline-inputs input[data-path]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const keys = input.dataset.path.split("."), last = keys.pop();
+        const target = keys.reduce((a, k) => (a == null ? a : a[k]), RAW);
+        const n = Number(input.value);
+        if (target && isFinite(n)) { target[last] = n; renderAll(); }
+      });
     });
 
     if (typeof Editor !== "undefined" && Editor && Editor.init) Editor.init();

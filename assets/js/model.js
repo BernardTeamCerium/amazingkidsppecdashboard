@@ -9,6 +9,33 @@ const Model = (() => {
   const num = (v) => (typeof v === "number" && isFinite(v) ? v : null);
   const div = (a, b) => (b ? a / b : null);
 
+  /* Runs a set of months through the distribution policy: savings takes
+     whatever is still needed to reach the target, then the split divides what
+     is left. Used for the live projection and for any what-if scenario, so the
+     two can never drift apart. */
+  function allocate(months, opts) {
+    const { adcFor, revenueFor, monthlyCost, reserveTarget, startingReserve, startingDebt, split, perDiem } = opts;
+    let reserve = startingReserve, debt = startingDebt;
+    return months.map((x) => {
+      const adc = adcFor ? adcFor(x) : x.adc;
+      const revenue = revenueFor ? revenueFor(x) : adc * x.opDays * perDiem;
+      const net = revenue - monthlyCost;
+      let toSavings = 0, toDebt = 0, toOwners = 0;
+      if (net <= 0) {
+        toSavings = net;                                  // a loss comes out of the reserve
+      } else {
+        const gap = Math.max(0, reserveTarget - reserve);
+        toSavings = Math.min(net, gap);
+        const rest = net - toSavings;
+        toDebt = Math.min(rest * (split.debt || 0), Math.max(0, debt));
+        toOwners = rest - toDebt;                         // the rest is distributed
+      }
+      reserve += toSavings;
+      debt -= toDebt;
+      return { ...x, adc, revenue, net, toSavings, toDebt, toOwners, reserve, debt };
+    });
+  }
+
   function build(raw) {
     const m = { raw };
 
@@ -153,24 +180,12 @@ const Model = (() => {
     const d = raw.distributions;
     if (d && m.projection) {
       const split = d.split || { debt: 0, owners: 1 };
-      let reserve = d.startingReserve, debt = d.startingDebt;
-      const schedule = m.projection.months.map((x) => {
-        const net = x.revenue - d.assumedMonthlyCost;
-        let toSavings = 0, toDebt = 0, toOwners = 0;
-        if (net <= 0) {
-          toSavings = net;                                  // a loss comes out of the reserve
-        } else {
-          const gap = Math.max(0, d.reserveTarget - reserve);
-          toSavings = Math.min(net, gap);
-          const rest = net - toSavings;
-          toDebt = Math.min(rest * (split.debt || 0), Math.max(0, debt));
-          toOwners = rest - toDebt;                         // the rest is distributed
-        }
-        reserve += toSavings;
-        debt -= toDebt;
-        return { ...x, net, toSavings, toDebt, toOwners, reserve, debt,
-                 phase: toSavings > 0 ? "building" : "funded" };
-      });
+      const schedule = allocate(m.projection.months, {
+        revenueFor: (x) => x.revenue, monthlyCost: d.assumedMonthlyCost,
+        reserveTarget: d.reserveTarget, startingReserve: d.startingReserve,
+        startingDebt: d.startingDebt, split, perDiem: raw.perDiem
+      }).map((x) => ({ ...x, phase: x.toSavings > 0 ? "building" : "funded" }));
+
       const tot = (k) => sum(schedule, (x) => x[k]);
       const owners = tot("toOwners");
       const equity = sum(d.members || [], (x) => x.equity);
@@ -214,6 +229,44 @@ const Model = (() => {
         },
         downside: m.ytd.realization
           ? sum(m.projection.months, (x) => x.revenue * m.ytd.realization - d.assumedMonthlyCost) : null
+      };
+    }
+
+
+    /* -- what-if scenario -------------------------------------------------- */
+    const sc = raw.scenario;
+    if (sc && m.projection && d) {
+      const split = d.split || { debt: 0, owners: 1 };
+      const base = {
+        monthlyCost: sc.monthlyCost, reserveTarget: d.reserveTarget,
+        startingReserve: d.startingReserve, startingDebt: d.startingDebt,
+        split, perDiem: raw.perDiem
+      };
+      const run = (perDay) => {
+        const rows = allocate(m.projection.months, { ...base, adcFor: () => perDay });
+        const t = (k) => sum(rows, (x) => x[k]);
+        const funded = rows.find((x) => x.reserve >= d.reserveTarget);
+        return {
+          perDay, rows,
+          revenue: t("revenue"), net: t("net"), savings: t("toSavings"),
+          debt: t("toDebt"), owners: t("toOwners"),
+          endReserve: rows.length ? rows[rows.length - 1].reserve : d.startingReserve,
+          fundedMonth: funded ? funded.full : null,
+          worstMonth: rows.reduce((a, x) => (a === null || x.net < a.net ? x : a), null)
+        };
+      };
+      const main = run(sc.childrenPerDay);
+      m.scenario = {
+        ...sc, ...main,
+        equity: m.distributions ? m.distributions.equity : null,
+        members: m.distributions
+          ? m.distributions.members.map((x) => ({ ...x, amount: main.owners * x.share })) : [],
+        // Children a day needed to cover cost, and to cover cost plus the gap.
+        breakEvenPerDay: div(sc.monthlyCost, m.projection.avgOpDays * raw.perDiem),
+        sensitivity: (sc.sensitivity || []).map((n) => {
+          const r = run(n);
+          return { perDay: n, revenue: r.revenue, net: r.net, owners: r.owners, fundedMonth: r.fundedMonth };
+        })
       };
     }
 

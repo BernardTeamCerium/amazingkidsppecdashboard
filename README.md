@@ -75,6 +75,7 @@ numbers they come from.
 | Roster movement | `months` (`dormant`, `started`, `stopped`) |
 | Staffing and the daily model | `staffing` |
 | Distributions and the reserve | `distributions` |
+| What-if scenario and sensitivity | `scenario` |
 | Marketing spend | `adSpend` |
 | Task board | `tasks` |
 
@@ -90,6 +91,10 @@ A few rules the file expects:
   board does not check this for you.
 - `projection.months` rows carry only `weekdays`, `closures` and `enrolled`.
   Operating days, daily census and revenue are calculated from them.
+- `scenario` is a what-if: a flat children-per-day figure and a flat monthly
+  cost run through the same operating-day calendar and the same distribution
+  policy as the live projection, so the two can never drift apart. Both inputs
+  are editable on the card itself.
 - `distributions` is a policy, not a forecast. Savings takes whatever is still
   needed to reach `reserveTarget` first; `split` then divides what is left
   between debt paydown and distributions, and the panel warns if those two do

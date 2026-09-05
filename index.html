@@ -182,6 +182,47 @@
         </div>
       </article>
 
+
+      <article class="card col-7" id="card-scenario">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">What if</div>
+            <h3 id="scenario-title">Scenario</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="scenario-chip">—</span></div>
+        </div>
+        <div class="inline-inputs">
+          <label class="ed-field">
+            <span class="ed-label">Children a day</span>
+            <input type="number" step="0.5" id="sc-per-day" data-path="scenario.childrenPerDay" inputmode="decimal">
+          </label>
+          <label class="ed-field">
+            <span class="ed-label">Monthly cost <em>$</em></span>
+            <input type="number" step="500" id="sc-cost" data-path="scenario.monthlyCost" inputmode="decimal">
+          </label>
+        </div>
+        <div class="stat-strip" id="scenario-stats"></div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-scenario">
+            <thead><tr><th>Month</th><th class="n">Days</th><th class="n">Revenue</th><th class="n">Net</th><th class="n">Savings</th><th class="n">Debt</th><th class="n">Owners</th><th class="n">Reserve after</th></tr></thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+        <p class="card-note" id="scenario-note"></p>
+      </article>
+
+      <article class="card col-5" id="card-sensitivity">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Sensitivity</div>
+            <h3>What each extra child a day is worth</h3>
+          </div>
+        </div>
+        <div class="chart" id="chart-sensitivity"></div>
+        <details class="twin" id="twin-sensitivity"><summary>Table view</summary></details>
+        <p class="card-note" id="sensitivity-note"></p>
+      </article>
     </div>
   </section>
 
