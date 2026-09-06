@@ -44,8 +44,23 @@ any HTML is sent.
    | `DASH_USER` | whatever username you want, e.g. `amazingkids` |
    | `DASH_PASS` | a long passphrase — four or five unrelated words beats a short scramble |
 
+   Two settings on each variable decide whether the password gate can actually
+   see it, and both default in ways that will bite you:
+
+   - **Scopes** — set to **All scopes**. A variable scoped only to *Builds* is
+     invisible to the edge function, which is the usual cause of a site that
+     keeps saying it is not configured after you have plainly configured it.
+   - **Deploy contexts** — set the value for *all deploy contexts*, or at least
+     for the one whose URL you are opening. A variable set only for Production
+     will not appear on a branch deploy or a deploy preview.
+
    Then *Deploys* → *Trigger deploy* → *Clear cache and deploy site*, so the
-   edge function picks the variables up.
+   edge function picks the variables up. Changing a variable without
+   redeploying changes nothing.
+
+   If the site still says it is not configured, the message names which of the
+   two variables is missing and which deploy context the request landed in —
+   enough to tell a typo from a scope problem. Values are never echoed.
 
    Until both variables exist the site returns "not configured yet" rather than
    the board. That is deliberate: a missing password must never mean an open
