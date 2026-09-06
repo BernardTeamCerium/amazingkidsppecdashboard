@@ -48,6 +48,33 @@ function env(name) {
   return "";
 }
 
+/* What the function can actually see. Names only, and only ones starting with
+   DASH — enough to spot a misspelled or wrongly-cased variable without dumping
+   the names of every other secret on the site. The total count separates "the
+   environment is not reaching this function at all" from "it is reaching it and
+   your variable is not in it": Netlify injects its own variables, so a healthy
+   environment is never empty. */
+function envReport() {
+  let keys = null;
+  try {
+    if (typeof Netlify !== "undefined" && Netlify.env && Netlify.env.toObject) {
+      keys = Object.keys(Netlify.env.toObject());
+    } else if (typeof Deno !== "undefined" && Deno.env && Deno.env.toObject) {
+      keys = Object.keys(Deno.env.toObject());
+    }
+  } catch { /* enumeration can be denied; the caller handles null */ }
+  if (!keys) return "The environment could not be listed from this runtime.";
+  const dash = keys.filter((k) => /^dash/i.test(k)).sort();
+  if (dash.length) {
+    return "Variables starting with DASH that this function CAN see: " + dash.join(", ") +
+      "\n(If the name you expected is not in that list, or is cased differently, that is the problem.)";
+  }
+  return "This function can see " + keys.length + " environment variables, and NONE of them start " +
+    "with DASH.\n" + (keys.length
+      ? "So the environment is reaching the function — your two variables are not in it. That is a scope or deploy-context setting, or they were added to a different site."
+      : "The environment is empty, which points at the deploy rather than at the variables.");
+}
+
 export default async (request, context) => {
   /* Trailing whitespace is easy to paste into a dashboard field and impossible
      to see there, so it never becomes part of the secret. */
@@ -68,6 +95,8 @@ export default async (request, context) => {
         (user || pass)
           ? "The other one is visible, so the variables are reaching this function — check the name of the missing one for a typo."
           : "Neither is visible. In Netlify: Site configuration → Environment variables.",
+        "",
+        envReport(),
         "",
         "Three things to check, in the order they usually go wrong:",
         "  1. Scopes — a variable scoped only to Builds is invisible here. Set it to All scopes.",

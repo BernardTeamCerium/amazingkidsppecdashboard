@@ -58,9 +58,12 @@ any HTML is sent.
    edge function picks the variables up. Changing a variable without
    redeploying changes nothing.
 
-   If the site still says it is not configured, the message names which of the
-   two variables is missing and which deploy context the request landed in —
-   enough to tell a typo from a scope problem. Values are never echoed.
+   If the site still says it is not configured, read the message: it names which
+   of the two variables is missing, lists every variable starting with `DASH`
+   that the gate can actually see, counts how many variables reach it at all,
+   and reports the deploy context the request landed in. Between those, a typo,
+   a scope problem and a wrong-site problem all look different. Only names are
+   shown — never a value.
 
    Until both variables exist the site returns "not configured yet" rather than
    the board. That is deliberate: a missing password must never mean an open
