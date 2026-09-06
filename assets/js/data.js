@@ -394,7 +394,11 @@ window.AKP_DATA = {
       owner: "Unassigned", due: null, status: "Not started", priority: "Medium", area: "Marketing" },
     { id: "T-13", title: "Create the Amazing Kids PPEC software",
       owner: "Unassigned", due: null, status: "In progress", priority: "High", area: "Software",
-      note: "Operations board is the first piece and is live on a shared link; remaining scope to be defined" }
+      note: "Operations board is the first piece and is live on a shared link; remaining scope to be defined" },
+    { id: "T-14", title: "Put the operations board on a password-protected subdomain",
+      owner: "Bernard Frazier", due: null, status: "In progress", priority: "High", area: "Software",
+      note: "Deploy scaffolding is committed — see deploy/README.md. Remaining: connect the host, " +
+        "set the password in its environment, and point the subdomain's DNS record" }
   ],
   /* TASKS:END */
   tasksNote: "Owners and due dates are maintained in the “Amazing Kids PPEC - Task Board” sheet " +

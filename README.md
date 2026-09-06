@@ -168,6 +168,15 @@ board displays travels inside the page, so anyone who can open the page can read
 the numbers whether or not a passcode is drawn on top — it would look like
 protection without being any.
 
+For a stable address of your own — `board.amazingkidsppec.com` rather than a
+Claude link — put the page behind a password the *server* enforces, so an
+unauthenticated request never receives the HTML at all. **`deploy/README.md`**
+walks through two routes: Netlify with one shared password, or Cloudflare Pages
+with a per-person login. `netlify.toml` and `netlify/edge-functions/protect.js`
+are committed and ready; the password lives in the host's environment, never in
+this repository. The hosted copy is read-only — Save needs the Claude runtime,
+so edits go through `data.js` and a redeploy.
+
 `distributions.showMembers` is the one switch that changes what a viewer can
 see: set it to `false` and the owner split collapses to a single pool with no
 names or shares.
@@ -209,11 +218,17 @@ assets/js/model.js       the calculation layer — everything derived lives here
 assets/js/charts.js      SVG chart primitives (line, column, bar, sparkline)
 assets/js/editor.js      the edit panel, and rebuilding the page to publish it
 assets/js/app.js         renders the cards from the computed model
-build.js                 inlines everything into dist/dashboard.html
+build.js                 inlines everything into dist/ and site/
 tools/import-tasks.js    pulls the task board in from the task sheet's CSV
-assets/img/logo.png      the logo (drop it in; not in the repo yet)
-dist/dashboard.html      one self-contained file, for sharing or publishing
+assets/img/logo.png      the logo
+dist/dashboard.html      one self-contained fragment, for publishing to Claude
+site/                    the same board as a standalone document, for web hosting
+netlify.toml             build and routing for the hosted copy
+netlify/edge-functions/  the password gate that runs before any HTML is sent
+deploy/README.md         how to get it onto a password-protected subdomain
 ```
+
+`site/` is generated — never edit it by hand.
 
 Rebuild the single-file version after editing data:
 

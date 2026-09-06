@@ -77,4 +77,43 @@ ${js}
 
 fs.mkdirSync(path.join(__dirname, "dist"), { recursive: true });
 fs.writeFileSync(path.join(__dirname, "dist/dashboard.html"), out);
-console.log(`dist/dashboard.html — ${(out.length / 1024).toFixed(0)} KB`);
+console.log(`dist/dashboard.html — ${(out.length / 1024).toFixed(0)} KB  (artifact fragment)`);
+
+/* A second output for ordinary web hosting. dist/dashboard.html is a fragment:
+   the Artifact publisher wraps it in its own document. A web server does not,
+   so the hosted copy needs to be a complete document — the same one the page
+   builds when someone saves an edit. */
+const site = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>${title}</title>
+<meta name="description" content="${desc}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+${fonts}
+<style id="app-style">
+${css}
+</style>
+</head>
+<body>
+<template id="board-template">
+${body}
+</template>
+<div id="app"></div>
+
+<script id="app-data" type="application/json">${dataJson}</script>
+<script id="app-code">
+${js}
+</script>
+</body>
+</html>
+`;
+fs.mkdirSync(path.join(__dirname, "site"), { recursive: true });
+fs.writeFileSync(path.join(__dirname, "site/index.html"), site);
+fs.writeFileSync(path.join(__dirname, "site/robots.txt"), "User-agent: *\nDisallow: /\n");
+fs.writeFileSync(path.join(__dirname, "site/_headers"),
+  "/*\n  X-Robots-Tag: noindex, nofollow\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n");
+console.log(`site/index.html      — ${(site.length / 1024).toFixed(0)} KB  (standalone, for hosting)`);

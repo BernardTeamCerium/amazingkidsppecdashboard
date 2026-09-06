@@ -1,0 +1,24 @@
+# Netlify deploy for the operations board.
+#
+# The build emits two things (see build.js):
+#   dist/dashboard.html — a fragment, for the Claude Artifact publisher
+#   site/               — a complete document, for a web server
+# Only site/ is published here.
+
+[build]
+  command = "node build.js"
+  publish = "site"
+
+# Every request — including the 404 page and the static assets — passes through
+# the password gate first. Nothing is served before the browser authenticates.
+[[edge_functions]]
+  path = "/*"
+  function = "protect"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"

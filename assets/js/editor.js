@@ -219,7 +219,7 @@ ${code.textContent}
   }
 
   async function save() {
-    if (!publisher) { status("Saving is only available on the published board.", "warning"); return; }
+    if (!publisher) { status("This copy is read-only. Save works only on the Claude board link.", "warning"); return; }
     const doc = buildDocument(window.AKP_STATE.raw);
     if (!doc) { status("This copy cannot rebuild itself — publish it first.", "warning"); return; }
     status("Saving…");
