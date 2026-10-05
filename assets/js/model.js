@@ -431,6 +431,23 @@ const Model = (() => {
     }
 
 
+    /* -- billing mix -------------------------------------------------------
+       Shares of child-days, plus what each is worth at the posted rate, so the
+       question "is this worth chasing" has a number attached to it. */
+    if (raw.billingMix && raw.billingMix.childDays) {
+      const b = raw.billingMix, total = b.childDays, rate = raw.perDiem;
+      const part = (x) => x && { ...x, share: div(x.childDays, total), atRate: x.childDays * rate };
+      m.billingMix = {
+        ...b,
+        fullDay: part(b.fullDay), shortDay: part(b.shortDay),
+        pendingAdmission: part(b.pendingAdmission),
+        /* The collection shortfall the realization rate implies, for the same
+           month — the thing the two groups above are candidates to explain. */
+        gapShare: m.ytd.realization ? 1 - m.ytd.realization : null,
+        gapAtRate: m.ytd.realization ? total * rate * (1 - m.ytd.realization) : null
+      };
+    }
+
     /* -- latest bank statement ---------------------------------------------- */
     const bk = raw.bankMonth;
     if (bk) {

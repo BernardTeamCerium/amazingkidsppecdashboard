@@ -8,7 +8,7 @@
    SOURCES — file ids given because two attendance exports exist and only one
    of them is authoritative.
      • Census, attendance, rooms, roster movement
-         "Monthly Student Attendance: Amazing Kids PPEC", Jan–Aug 2026
+         "Monthly Student Attendance: Amazing Kids PPEC", Jan–Sep 2026
          17wAFP-TfpzM9ZXLyaJlB8ZbGTwvWIH2RZnaQMFSImIs  ← THE ONE TO USE
          An older export (1po06YEzox_wHUPulB8OpWsCRgHtTUC-K6EqZzrzqyXc) covers
          Jan–May only and disagrees on some May figures. Ignore it.
@@ -40,12 +40,12 @@ window.AKP_DATA = {
     facility: "Amazing Kids PPEC",
     boardName: "Operations Board",
     asOf: "September 30, 2026",
-    period: "Census through Aug · P&L through Jul · bank through Sep",
+    period: "Census through Sep · P&L through Jul · bank through Sep",
     sampleData: false,
     logo: "assets/img/logo.png",
     logoAlt: "Amazing Kids PPEC — Prescribed Pediatric Extended Care",
     sourceNote: "Census and attendance are aggregated from the monthly attendance report " +
-      "(Jan–Aug 2026). Revenue, cost and cash come from the management report for the period " +
+      "(Jan–Sep 2026). Revenue, cost and cash come from the management report for the period " +
       "ended 7/31/2026, prepared 8/28/2026, on a cash basis; the bank statements run through " +
       "30 September 2026. Roster, day rate and staffing are as reported on September 1. No " +
       "child-level or member-level detail is stored on this page."
@@ -97,7 +97,8 @@ window.AKP_DATA = {
     { label: "May", full: "May 2026", enrolled: 18, onReport: 25, opDays: 20, childDays: 324, started: 1, stopped: 0, revenue: 96294.66, cost: 59424.22 },
     { label: "Jun", full: "Jun 2026", enrolled: 20, onReport: 25, opDays: 22, childDays: 346, started: 2, stopped: 0, revenue: 76100.84, cost: 64527.16 },
     { label: "Jul", full: "Jul 2026", enrolled: 20, onReport: 25, opDays: 23, childDays: 372, started: 2, stopped: 2, revenue: 90629.63, cost: 83919.86 },
-    { label: "Aug", full: "Aug 2026", enrolled: 20, onReport: 24, opDays: 20, childDays: 327, started: 1, stopped: 1, revenue: null, cost: null }
+    { label: "Aug", full: "Aug 2026", enrolled: 20, onReport: 24, opDays: 20, childDays: 327, started: 1, stopped: 1, revenue: null, cost: null },
+    { label: "Sep", full: "Sep 2026", enrolled: 21, onReport: 22, opDays: 21, childDays: 362, started: 2, stopped: 1, revenue: null, cost: null }
   ],
   financeNote: "Cash basis: income lands when the payment arrives, not when the care was " +
     "delivered, so a heavy claims batch inflates one month and starves the next. May's $96.3K " +
@@ -105,13 +106,16 @@ window.AKP_DATA = {
 
   /* ---- Rooms, latest month ----------------------------------------------- */
   rooms: {
-    month: "August 2026",
+    month: "September 2026",
     /* childDays per room; the daily census for each is calculated from the
-       operating days of the matching month. */
+       operating days of the matching month. Pending Admission is a room on the
+       attendance report, and the children in it are attending — see
+       billingMix for why that matters to revenue. */
     list: [
-      { name: "Main Room",       attending: 13, onReport: 15, childDays: 219 },
-      { name: "Total Care Room", attending:  5, onReport:  5, childDays:  71 },
-      { name: "Infant Room",     attending:  2, onReport:  4, childDays:  37 }
+      { name: "Main Room",         attending: 12, onReport: 12, childDays: 211 },
+      { name: "Total Care Room",   attending:  4, onReport:  4, childDays:  66 },
+      { name: "Pending Admission", attending:  4, onReport:  5, childDays:  66 },
+      { name: "Infant Room",       attending:  1, onReport:  1, childDays:  19 }
     ],
     partnerSchool: { name: "Sunflower Christian Academy", children: 14 }
   },
@@ -381,6 +385,27 @@ window.AKP_DATA = {
   },
 
   /* ---- Marketing --------------------------------------------------------- */
+  /* Why billed and collected differ. The attendance report carries hours as well
+     as days, so the day-length question can be answered rather than guessed; and
+     it names a Pending Admission room, whose children attend before approval.
+     Day length is each child's average across the month — the report gives no
+     day-by-day detail, so a child who is usually full day and occasionally short
+     counts as full day. Treat both as the size of a question, not a conclusion. */
+  billingMix: {
+    month: "September 2026",
+    childDays: 362,
+    fullDay: { childDays: 329, children: 19, label: "Average day of 5–12 hours" },
+    shortDay: { childDays: 33, children: 2, label: "Average day under 5 hours" },
+    pendingAdmission: { childDays: 66, children: 4, label: "In the Pending Admission room" },
+    avgHoursPerDay: 7.77,
+    note: "Collections run about 15% below billed. Two things on this report could explain it. " +
+      "9% of child-days are children whose average day is under five hours, which bills a lower " +
+      "tier than the full-day rate. And 18% of child-days are children in Pending Admission, who " +
+      "attend before approval — those days bill late, or not at all. The two groups may overlap. " +
+      "A remittance showing units by tier would settle it, and it is the largest number on the board " +
+      "that nobody is working on."
+  },
+
   adSpend: {
     months: [
       { label: "Jan", value: 1749.00 }, { label: "Feb", value: 2129.00 },

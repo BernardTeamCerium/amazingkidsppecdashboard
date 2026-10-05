@@ -655,6 +655,46 @@
     });
   }
 
+  /* ======================= Billing mix ================================== */
+  function renderBillingMix() {
+    const b = M.billingMix;
+    if (!need("card-billing-mix", null, b && b.childDays)) return;
+    $("#bmx-eyebrow").textContent = `${b.month} · ${F.int(b.childDays)} child-days`;
+
+    /* Both groups are candidates for the same gap, and they may overlap, so
+       they are shown side by side against it rather than stacked into a total
+       that would double-count. */
+    const rows = [
+      { ...b.fullDay, name: b.fullDay.label, sev: "" },
+      { ...b.shortDay, name: b.shortDay.label, sev: "warning" },
+      { ...b.pendingAdmission, name: b.pendingAdmission.label, sev: "warning" }
+    ];
+    Charts.bars($("#chart-bmx"), {
+      rows: rows.map((r) => ({ label: r.name, value: r.share, note: `${F.int(r.childDays)} days` })),
+      format: F.pct0, seriesName: "Share of child-days"
+    });
+
+    $("#tbl-bmx tbody").innerHTML = rows.map((r) =>
+      `<tr><td>${esc(r.name)}</td><td class="n">${F.int(r.children)}</td>` +
+      `<td class="n">${F.int(r.childDays)}</td>` +
+      `<td class="n">${r.sev ? chip(F.pct0(r.share), r.sev, true) : F.pct0(r.share)}</td>` +
+      `<td class="n">${F.usd(r.atRate)}</td></tr>`).join("");
+    $("#tbl-bmx tfoot").innerHTML = b.gapAtRate === null ? "" :
+      `<tr><td>The gap to explain — ${F.pct0(b.gapShare)} of billed, uncollected</td>` +
+      `<td class="n"></td><td class="n"></td><td class="n"></td>` +
+      `<td class="n">${F.usd(b.gapAtRate)}</td></tr>`;
+
+    const chipEl = $("#bmx-chip");
+    const flagged = b.shortDay.share + b.pendingAdmission.share;
+    chipEl.textContent = `${F.pct0(flagged)} of days flagged`;
+    chipEl.className = "chip warning";
+    $("#card-billing-mix").dataset.state = "warning";
+    $("#bmx-note").textContent = b.note +
+      ` Day length is each child's average across the month; the report carries no day-by-day detail,` +
+      ` so a child who is usually full day and occasionally short counts here as full day.` +
+      ` The two groups can overlap, so they are not added together.`;
+  }
+
   /* ======================= Cash ========================================= */
   function renderCash() {
     const c = M.cash;
@@ -720,6 +760,7 @@
 
   /* ======================= Attendance & rooms =========================== */
   function renderAttendance() {
+    renderBillingMix();
     renderRooms();
     if (!need("card-attendance", "Attendance", M.months)) return;
     const a = M.months;
