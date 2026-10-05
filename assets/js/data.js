@@ -67,7 +67,14 @@ window.AKP_DATA = {
   },
 
   /* ---- The day rate ------------------------------------------------------ */
-  perDiem: 281.68,
+  /* The full-day rate, for an attendance of 5–12 hours. A shorter day bills a
+     lower tier, which is one candidate for the gap between what is billed and
+     what is collected. A month that was billed at a different rate carries its
+     own `rate` in projection.months, so a change never rewrites history. */
+  perDiem: 300.73,
+  perDiemPrior: 281.68,
+  perDiemNote: "Full day, 5–12 hours. Raised from $281.68; the earlier rate still applies to " +
+    "everything billed before the change.",
 
   /* ---- Monthly actuals ---------------------------------------------------
      enrolled  = children who attended at least one day
@@ -114,6 +121,7 @@ window.AKP_DATA = {
       /* September is closed. It keeps its projection inputs so the plan can still
          be recomputed and compared, and carries what the bank actually did. */
       { label: "Sep", full: "Sep 2026", weekdays: 22, closures: 1, enrolled: 19, closureNote: "Labor Day, Mon Sep 7",
+        rate: 281.68,   /* billed before the rate change */
         closed: true,
         actual: {
           moneyIn: 75490.24,       /* four Medicaid remittances — every deposit in the month */
@@ -134,10 +142,11 @@ window.AKP_DATA = {
       "Operating days are weekdays less the closures named in the table. Adjust them there if the calendar differs.",
       "No stops, no rate change, and no cost projection — the management report gives no basis for forecasting cost."
     ],
-    caveat: "Year to date the centre has realized $238.65 per child-day against the posted rate. " +
-      "If that gap is denials, partial days or billing lag rather than a recent rate increase, the " +
-      "projection should be read at the realized rate instead. Worth settling before this number " +
-      "is used for planning."
+    caveat: "Year to date the centre has realized $238.65 per child-day against the $281.68 rate it " +
+      "was billing then — about 85%. The projection applies that same realization to the new rate, " +
+      "so the rate rise carries the gap forward with it rather than assuming it closes. Partial days " +
+      "bill a lower tier than the 5–12 hour full day, so some of that gap may be attendance length " +
+      "rather than denials or lag. Worth settling before this number is used for planning."
   },
 
 

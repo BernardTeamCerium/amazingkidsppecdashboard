@@ -313,7 +313,7 @@
     const onPlan = g && g.onPlanAtRealized;
     $("#pva-lead").textContent = pva.atRealized === null
       ? `Against the plan as published, money in came ${signedUsd(pva.rows[0].delta)} from forecast.`
-      : `The plan bills the posted ${usd2(RAW.perDiem)} day rate. Medicaid has actually paid ` +
+      : `The plan bills the ${usd2(pva.rate || RAW.perDiem)} day rate in force that month. Medicaid has actually paid ` +
         `${F.pct0(M.ytd.realization)} of that year to date, and at that rate the plan for ${pva.label} was ` +
         `${F.usd(pva.atRealized)}. The bank took in ${F.usd(pva.rows[0].actual)} — ` +
         `${signedUsd(pva.vsRealized)}, or ${signed(pva.vsRealizedPct * 100, 1)}%. ` +

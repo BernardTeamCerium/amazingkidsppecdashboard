@@ -73,7 +73,9 @@ const Model = (() => {
       net: sum(m.moneyMonths, (x) => x.net),
       perChildDay: div(ytdRev, ytdDays)
     };
-    m.ytd.realization = div(m.ytd.perChildDay, raw.perDiem);
+    /* Against the rate that was actually billed over those months. Dividing by a
+       newly raised rate would read a rate rise as a collapse in collections. */
+    m.ytd.realization = div(m.ytd.perChildDay, raw.perDiemPrior || raw.perDiem);
 
     /* -- projection ------------------------------------------------------- */
     const p = raw.projection;
@@ -82,7 +84,10 @@ const Model = (() => {
       const all = p.months.map((x) => {
         const opDays = x.weekdays - x.closures;
         const adc = x.enrolled * rate;
-        return { ...x, opDays, adc, revenue: adc * opDays * perDiem };
+        /* A month billed at a different rate keeps it, so a rate change never
+           rewrites what an earlier month was projected — or judged — against. */
+        const monthRate = x.rate || perDiem;
+        return { ...x, opDays, adc, monthRate, revenue: adc * opDays * monthRate };
       });
       /* A closed month keeps its inputs so its plan can still be recomputed and
          held against what happened, but it is no longer part of the forecast:
@@ -321,7 +326,7 @@ const Model = (() => {
           delta: actualV - planV, pct: div(actualV - planV, Math.abs(planV))
         });
         return {
-          label: x.label, full: x.full, source: a.source,
+          label: x.label, full: x.full, source: a.source, rate: x.monthRate,
           atRealized,
           /* The honest headline: the month against the rate the centre collects. */
           vsRealized: atRealized === null ? null : a.moneyIn - atRealized,
