@@ -34,7 +34,7 @@
     return false;
   }
 
-  const AS_OF = new Date("2026-08-31T00:00:00");
+  const AS_OF = new Date("2026-09-30T00:00:00");
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const chip = (text, state = "", plain = false) =>
     `<span class="chip ${state}${plain ? " plain" : ""}">${esc(text)}</span>`;
@@ -45,6 +45,12 @@
   const stats = (items) => items.map((s) =>
     `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
   const usd2 = (v) => "$" + v.toFixed(2);
+  const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+  /* The projection shrinks as months close, so nothing may say "four months". */
+  const spanWords = () => {
+    const n = M.projection ? M.projection.months.length : 0;
+    return `${WORDS[n] || n} month${n === 1 ? "" : "s"}`;
+  };
 
   function twin(node, headers, rows) {
     $$(".table-wrap", node).forEach((n) => n.remove());
@@ -283,6 +289,61 @@
     mc.className = "chip " + (mv >= 0.15 ? "good" : mv >= 0.05 ? "warning" : mv >= 0 ? "serious" : "critical");
   }
 
+  /* ======================= Plan against actual ========================== */
+  function renderPlanActual() {
+    const list = M.planVsActual;
+    if (!need("card-plan-actual", null, list && list.length)) return;
+    const pva = list[list.length - 1];
+    const g = M.planGap;
+
+    $("#pva-eyebrow").textContent = pva.source || "Plan against actual";
+    $("#pva-title").textContent = `${pva.full} against what the board projected`;
+
+    $("#tbl-plan-actual tbody").innerHTML = pva.rows.map((r) => {
+      /* A cost under plan is good news; everything else reads the other way. */
+      const good = r.lowerIsBetter ? r.delta <= 0 : r.delta >= 0;
+      const sev = Math.abs(r.pct) < 0.02 ? "" : good ? "good" : "critical";
+      return `<tr><td>${r.name}</td>` +
+        `<td class="n">${F.usd(r.plan)}</td>` +
+        `<td class="n">${F.usd(r.actual)}</td>` +
+        `<td class="n">${chip(signedUsd(r.delta), sev, true)}</td>` +
+        `<td class="n">${signed(r.pct * 100, 1)}%</td></tr>`;
+    }).join("");
+
+    const onPlan = g && g.onPlanAtRealized;
+    $("#pva-lead").textContent = pva.atRealized === null
+      ? `Against the plan as published, money in came ${signedUsd(pva.rows[0].delta)} from forecast.`
+      : `The plan bills the posted ${usd2(RAW.perDiem)} day rate. Medicaid has actually paid ` +
+        `${F.pct0(M.ytd.realization)} of that year to date, and at that rate the plan for ${pva.label} was ` +
+        `${F.usd(pva.atRealized)}. The bank took in ${F.usd(pva.rows[0].actual)} — ` +
+        `${signedUsd(pva.vsRealized)}, or ${signed(pva.vsRealizedPct * 100, 1)}%. ` +
+        (onPlan ? "On plan, once the plan is read at the rate the centre collects."
+                : "That is the gap worth explaining.");
+
+    $("#pva-stats").innerHTML = stats([
+      { v: signedUsd(pva.vsRealized), k: `Money in vs. plan at the collected rate` },
+      { v: signedUsd(-pva.rows[1].delta), k: "Cost under the $70K assumption" },
+      { v: F.usd(g.behindBy), k: "Cash behind the plan's month end" },
+      { v: g.targetMonth || "—", k: `Reserve now reaches ${F.usdk(M.distributions.reserveTarget)}` }
+    ]);
+
+    const chipEl = $("#pva-chip");
+    chipEl.textContent = onPlan ? "On schedule" : "Off schedule";
+    chipEl.className = "chip " + (onPlan ? "good" : "warning");
+    $("#card-plan-actual").dataset.state = onPlan ? "good" : "warning";
+
+    const weeks = g.weeksBehind;
+    $("#pva-note").textContent =
+      `Plan and actual are not the same kind of number. The plan is billed revenue against a flat ` +
+      `${F.usdk(M.distributions.assumedMonthlyCost)} cost assumption; the actual is cash through the ` +
+      `bank, which lags billing by the claim cycle and excludes anything still sitting on the credit ` +
+      `card. Read the direction and the size, not the second decimal. ` +
+      (weeks !== null && weeks > 0
+        ? `At the run rate the next month projects, the ${F.usd(g.behindBy)} shortfall is about ` +
+          `${weeks < 1 ? "half a week" : Math.round(weeks) + " week" + (Math.round(weeks) === 1 ? "" : "s")} of earnings.`
+        : "");
+  }
+
   /* ======================= Projection =================================== */
   function renderProjection() {
     const p = M.projection;
@@ -290,6 +351,10 @@
       const a = document.getElementById("card-assumptions"); if (a) a.hidden = true;
       return;
     }
+    /* The span shrinks as months close, so it is read off the months, not typed. */
+    const span = $("#proj-span");
+    if (span) span.textContent = p.months.length === 1 ? p.months[0].full
+      : `${p.months[0].label}–${p.months[p.months.length - 1].label} ${(p.months[0].full.match(/\d{4}/) || [""])[0]}`;
     Charts.columns($("#chart-projection"), {
       labels: p.months.map((x) => x.label),
       sublabels: p.months.map((x) => x.full.slice(-4)),
@@ -386,7 +451,7 @@
     chipEl.textContent = `${F.usdk(d.totals.owners)} to owners over ${d.schedule.length} months`;
     chipEl.className = "chip accent";
     $("#dist-note").textContent = d.note + " " + d.caveat +
-      ` At the realized rate the four months net about ${F.usdk(d.downside)} rather than ${F.usdk(d.totals.net)}, which funds the reserve later and leaves less to distribute.`;
+      ` At the realized rate the ${spanWords()} net about ${F.usdk(d.downside)} rather than ${F.usdk(d.totals.net)}, which funds the reserve later and leaves less to distribute.`;
 
     if (!need("card-reserve", null, d.reserveTarget)) return;
     const pctFunded = d.startingReserve / d.reserveTarget;
@@ -513,11 +578,13 @@
       sublabels: s.sensitivity.map((x) => (x.perDay === todayLevel ? "today" : x.perDay === goalLevel ? "goal" : "a day")),
       values: s.sensitivity.map((x) => x.revenue),
       states: s.sensitivity.map((x) => (x.perDay === todayLevel || x.perDay === goalLevel ? "--series-1" : "--ord-2")),
-      format: F.usd, yFormat: F.usdk, height: 210, seriesName: "Revenue over 4 months",
+      format: F.usd, yFormat: F.usdk, height: 210, seriesName: `Revenue over ${spanWords()}`,
       tipTitle: (i) => `${s.sensitivity[i].perDay} children a day`,
       tipNote: (i) => `${F.usd(s.sensitivity[i].monthlyRevenue)} a month · ${F.usd(s.sensitivity[i].owners)} distributable`
     });
 
+    const revHead = document.querySelector("#tbl-levels thead th:nth-child(2)");
+    if (revHead) revHead.textContent = `Revenue, ${spanWords()}`;
     $("#tbl-levels tbody").innerHTML = s.sensitivity.map((x) => {
       const mark = x.perDay === todayLevel ? chip("today", "accent")
                  : x.perDay === goalLevel ? chip("the goal", "good") : "";
@@ -539,9 +606,9 @@
     const a = s.sensitivity[0], b = s.sensitivity[s.sensitivity.length - 1];
     const perChild = (b.revenue - a.revenue) / (b.perDay - a.perDay);
     $("#levels-note").textContent =
-      `Every line is the same four months — ${M.projection.totalOpDays} operating days at ` +
+      `Every line is the same ${spanWords()} — ${M.projection.totalOpDays} operating days at ` +
       `${usd2(RAW.perDiem)} a child-day — with cost held at ${F.usdk(s.monthlyCost)} a month. ` +
-      `One more child a day is worth ${F.usd(perChild)} of revenue over the four months, ` +
+      `One more child a day is worth ${F.usd(perChild)} of revenue over the ${spanWords()}, ` +
       `${F.usd(perChild / s.rows.length)} a month. ` +
       (todayLevel ? `The centre is running about ${F.dec1(today)} a day today. ` : "") +
       (goalLevel ? `The enrollment goal of ${RAW.targets.enrollment} at ${F.pct0(M.projection.attendanceRate)} attendance is ${F.dec1(goal)} a day.` : "");
@@ -614,9 +681,9 @@
   }
 
 
-  /* ======================= August bank statement ======================== */
+  /* ======================= Latest bank statement ======================== */
   function renderBank() {
-    const b = M.bankAugust;
+    const b = M.bankMonth;
     if (!need("card-bank", null, b)) return;
     $("#bank-eyebrow").textContent = b.source;
     $("#bank-title").textContent = `${b.period} cash movement`;
@@ -971,6 +1038,7 @@
     renderLead();
     renderTargets();
     renderTrends();
+    renderPlanActual();
     renderProjection();
     renderLevels();
     renderDistributions();

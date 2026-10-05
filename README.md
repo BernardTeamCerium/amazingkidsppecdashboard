@@ -13,7 +13,8 @@ system fonts without it.
 | Section | Source | Covers |
 |---|---|---|
 | Census, attendance, rooms, roster movement | "Monthly Student Attendance: Amazing Kids PPEC" (Drive) | Jan–Aug 2026 |
-| Revenue, operating cost, margin, cash position | "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026 | Jan–Jul 2026 |
+| Revenue, operating cost, margin | "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026 | Jan–Jul 2026 |
+| Cash in bank, cash movement, plan vs. actual | Truist consolidated statements | Aug–Sep 2026 |
 | Targets | "Amazing Kids PPEC - Growth Plan" | 20 children in Q1; $60–65K monthly budget |
 | Task board | "Amazing Kids PPEC - Task Board" sheet (Drive) | 12 items |
 | Roster, day rate, staffing | Reported directly | as of Sep 1, 2026 |
@@ -25,6 +26,29 @@ recorded at the top of `data.js`.
 
 Still unsourced, so those cards stay hidden: referral pipeline, removal reasons,
 campaign results, and a per-category budget.
+
+### Closing a month
+
+A month in `projection.months` carries its forecast inputs — weekdays, closures,
+enrolled. When it closes, add `closed: true` and an `actual` block with what the
+bank did, and leave everything else alone:
+
+```js
+{ label: "Oct", full: "Oct 2026", weekdays: 22, closures: 0, enrolled: 23,
+  closed: true,
+  actual: { moneyIn: 0, moneyOut: 0, closingCash: 0, debtService: 0, toOwners: 0,
+            source: "Truist consolidated statement, 31 October 2026" } }
+```
+
+Three things then happen on their own. The month drops out of the forward
+projection, so "projected revenue" only ever covers what is still ahead. The
+distribution schedule restarts from the actual closing cash rather than from
+where the plan assumed it would be, so a light month pushes the reserve date
+back instead of vanishing. And the plan-vs-actual card recomputes that month's
+plan from the same inputs and sets it against the bank.
+
+Nothing hardcodes how many months the projection spans — the headings and the
+prose read it off the data.
 
 ### Three definitions worth knowing
 

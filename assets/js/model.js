@@ -79,15 +79,20 @@ const Model = (() => {
     const p = raw.projection;
     if (p && p.months && p.months.length) {
       const rate = p.attendanceRate, perDiem = raw.perDiem;
-      const months = p.months.map((x) => {
+      const all = p.months.map((x) => {
         const opDays = x.weekdays - x.closures;
         const adc = x.enrolled * rate;
         return { ...x, opDays, adc, revenue: adc * opDays * perDiem };
       });
+      /* A closed month keeps its inputs so its plan can still be recomputed and
+         held against what happened, but it is no longer part of the forecast:
+         everything forward-looking runs on the months still to come. */
+      const closed = all.filter((x) => x.closed);
+      const months = all.filter((x) => !x.closed);
       const totalOpDays = sum(months, (x) => x.opDays);
       const pendingMonths = months.filter((x) => x.enrolled > (raw.roster ? raw.roster.enrolled : 0));
       m.projection = {
-        ...p, months, totalOpDays,
+        ...p, months, closed, all, totalOpDays,
         totalWeekdays: sum(months, (x) => x.weekdays),
         totalClosures: sum(months, (x) => x.closures),
         totalRevenue: sum(months, (x) => x.revenue),
@@ -183,12 +188,28 @@ const Model = (() => {
        the target, then the split applies to what is left. A loss draws the
        reserve down rather than being distributed. */
     const d = raw.distributions;
+    const closedMonths = (m.projection && m.projection.closed) || [];
+
+    /* The schedule starts where the bank actually is, not where the plan assumed
+       it would be. Every closed month moves the opening reserve and the debt by
+       what really happened, so a month that came in light shows up as a later
+       target date rather than quietly disappearing. The scenario runs off the
+       same opening, or it would answer a question about a different company. */
+    const opening = !d ? null : closedMonths.reduce((acc, x) => {
+      const a = x.actual || {};
+      return {
+        reserve: a.closingCash !== undefined && a.closingCash !== null
+          ? a.closingCash : acc.reserve + (a.moneyIn - a.moneyOut),
+        debt: acc.debt - (a.debtService || 0)
+      };
+    }, { reserve: d.startingReserve, debt: d.startingDebt });
+
     if (d && m.projection) {
       const split = d.split || { debt: 0, owners: 1 };
       const schedule = allocate(m.projection.months, {
         revenueFor: (x) => x.revenue, monthlyCost: d.assumedMonthlyCost,
-        reserveTarget: d.reserveTarget, startingReserve: d.startingReserve,
-        startingDebt: d.startingDebt, split, perDiem: raw.perDiem,
+        reserveTarget: d.reserveTarget, startingReserve: opening.reserve,
+        startingDebt: opening.debt, split, perDiem: raw.perDiem,
         ongoingSavings: d.ongoingSavings
       }).map((x) => ({
         ...x,
@@ -206,7 +227,7 @@ const Model = (() => {
       /* What it takes to fund the reserve, in money and then in children.
          The gap is the only thing savings has to cover, so the revenue needed
          is that gap plus the cost of running the months it is earned over. */
-      const gap = Math.max(0, d.reserveTarget - d.startingReserve);
+      const gap = Math.max(0, d.reserveTarget - opening.reserve);
       const n = m.projection.months.length;
       const requiredRevenue = gap + n * d.assumedMonthlyCost;
       const perDiem = raw.perDiem, rate = m.projection.attendanceRate;
@@ -217,9 +238,12 @@ const Model = (() => {
 
       m.distributions = {
         ...d, schedule, split,
+        /* Overrides the raw input: "today" is after every closed month. */
+        startingReserve: opening.reserve, startingDebt: opening.debt,
+        anchorReserve: d.startingReserve,
         totals: { net: tot("net"), savings: tot("toSavings"), debt: tot("toDebt"), owners },
-        endReserve: schedule.length ? schedule[schedule.length - 1].reserve : d.startingReserve,
-        endDebt: schedule.length ? schedule[schedule.length - 1].debt : d.startingDebt,
+        endReserve: schedule.length ? schedule[schedule.length - 1].reserve : opening.reserve,
+        endDebt: schedule.length ? schedule[schedule.length - 1].debt : opening.debt,
         targetMonth: funded ? funded.full : null,
         shareTotal,
         shareBalanced: Math.abs(shareTotal - 1) < 0.0005,
@@ -245,7 +269,7 @@ const Model = (() => {
             && x.reserve - x.toSavings >= d.reserveTarget);
           const perMonth = funded.length ? sum(funded, (x) => x.toSavings) / funded.length : null;
           const twoMonths = 2 * d.assumedMonthlyCost;
-          const end = schedule.length ? schedule[schedule.length - 1].reserve : d.startingReserve;
+          const end = schedule.length ? schedule[schedule.length - 1].reserve : opening.reserve;
           return { perMonth, twoMonths,
                    monthsToTwoMonths: perMonth && end < twoMonths
                      ? Math.ceil((twoMonths - end) / perMonth) : (end >= twoMonths ? 0 : null) };
@@ -269,13 +293,71 @@ const Model = (() => {
     }
 
 
+    /* -- plan against actual ----------------------------------------------
+       For every month that has closed since the projection was published: what
+       the board said would happen, and what the bank says did. The plan is
+       recomputed from the same inputs rather than stored, so it cannot drift
+       away from the projection it is supposed to be judged against.
+
+       Revenue is compared twice. The plan bills the posted day rate; the bank
+       receives what Medicaid actually pays, which year to date has been about
+       fifteen percent less. Holding cash against the gross rate reads as a miss
+       every single month, so the realized rate is shown beside it — that is the
+       comparison that tells you whether the month was good. */
+    if (d && closedMonths.length && m.projection) {
+      const planRows = allocate(closedMonths, {
+        revenueFor: (x) => x.revenue, monthlyCost: d.assumedMonthlyCost,
+        reserveTarget: d.reserveTarget, startingReserve: d.startingReserve,
+        startingDebt: d.startingDebt, split: d.split || { debt: 0, owners: 1 },
+        perDiem: raw.perDiem, ongoingSavings: d.ongoingSavings
+      });
+
+      m.planVsActual = closedMonths.map((x, i) => {
+        const plan = planRows[i], a = x.actual || {};
+        const actualNet = a.moneyIn - a.moneyOut;
+        const atRealized = m.ytd.realization ? plan.revenue * m.ytd.realization : null;
+        const row = (name, planV, actualV, lowerIsBetter) => ({
+          name, plan: planV, actual: actualV, lowerIsBetter: !!lowerIsBetter,
+          delta: actualV - planV, pct: div(actualV - planV, Math.abs(planV))
+        });
+        return {
+          label: x.label, full: x.full, source: a.source,
+          atRealized,
+          /* The honest headline: the month against the rate the centre collects. */
+          vsRealized: atRealized === null ? null : a.moneyIn - atRealized,
+          vsRealizedPct: atRealized ? div(a.moneyIn - atRealized, atRealized) : null,
+          rows: [
+            row("Money in", plan.revenue, a.moneyIn),
+            row("Money out", d.assumedMonthlyCost, a.moneyOut, true),
+            row("Net for the month", plan.net, actualNet),
+            row("Cash at month end", plan.reserve, a.closingCash),
+            row("Paid to owners", plan.toOwners, a.toOwners || 0)
+          ]
+        };
+      });
+
+      /* How far behind the reserve is, in money and then in time — the only
+         form of "off schedule" that matters for when distributions start. */
+      const last = m.planVsActual[m.planVsActual.length - 1];
+      const cashRow = last.rows.find((r) => r.name === "Cash at month end");
+      const nextNet = m.distributions && m.distributions.schedule.length
+        ? m.distributions.schedule[0].net : null;
+      m.planGap = {
+        period: last.full,
+        behindBy: -cashRow.delta,
+        onPlanAtRealized: last.vsRealizedPct !== null && Math.abs(last.vsRealizedPct) < 0.05,
+        weeksBehind: nextNet && nextNet > 0 ? (-cashRow.delta) / (nextNet / 4.33) : null,
+        targetMonth: m.distributions ? m.distributions.targetMonth : null
+      };
+    }
+
     /* -- what-if scenario -------------------------------------------------- */
     const sc = raw.scenario;
     if (sc && m.projection && d) {
       const split = d.split || { debt: 0, owners: 1 };
       const base = {
         monthlyCost: sc.monthlyCost, reserveTarget: d.reserveTarget,
-        startingReserve: d.startingReserve, startingDebt: d.startingDebt,
+        startingReserve: opening.reserve, startingDebt: opening.debt,
         split, perDiem: raw.perDiem, ongoingSavings: d.ongoingSavings
       };
       const run = (perDay) => {
@@ -286,7 +368,7 @@ const Model = (() => {
           perDay, rows,
           revenue: t("revenue"), net: t("net"), savings: t("toSavings"),
           debt: t("toDebt"), owners: t("toOwners"),
-          endReserve: rows.length ? rows[rows.length - 1].reserve : d.startingReserve,
+          endReserve: rows.length ? rows[rows.length - 1].reserve : opening.reserve,
           fundedMonth: funded ? funded.full : null,
           worstMonth: rows.reduce((a, x) => (a === null || x.net < a.net ? x : a), null)
         };
@@ -344,21 +426,27 @@ const Model = (() => {
     }
 
 
-    /* -- August bank statement --------------------------------------------- */
-    const bk = raw.bankAugust;
+    /* -- latest bank statement ---------------------------------------------- */
+    const bk = raw.bankMonth;
     if (bk) {
       const target = raw.targets ? raw.targets.monthlyCost : null;
       const julyCost = m.latestMoney ? m.latestMoney.cost : null;
-      m.bankAugust = {
+      const pr = bk.prior;
+      m.bankMonth = {
         ...bk,
         net: bk.moneyIn - bk.moneyOut,
         movement: bk.closing - bk.opening,
         vsTarget: target === null ? null : bk.moneyOut - target,
         vsPlan: raw.distributions ? bk.moneyOut - raw.distributions.assumedMonthlyCost : null,
         vsPriorCost: julyCost === null ? null : bk.moneyOut - julyCost,
+        /* Against the month before, which is the comparison the statement itself
+           supports — unlike the P&L, which has not been shared since July. */
+        vsPriorIn: pr ? bk.moneyIn - pr.moneyIn : null,
+        vsPriorOut: pr ? bk.moneyOut - pr.moneyOut : null,
+        priorNet: pr ? pr.moneyIn - pr.moneyOut : null,
         largestShare: bk.largest.map((x) => ({ ...x, share: div(x.amount, bk.moneyOut) }))
       };
-      m.bankAugust.reconciles = Math.abs(m.bankAugust.net - m.bankAugust.movement) < 0.01;
+      m.bankMonth.reconciles = Math.abs(m.bankMonth.net - m.bankMonth.movement) < 0.01;
     }
 
     return m;

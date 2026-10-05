@@ -32,15 +32,16 @@ window.AKP_DATA = {
   meta: {
     facility: "Amazing Kids PPEC",
     boardName: "Operations Board",
-    asOf: "August 31, 2026",
-    period: "Census through Aug · financials through Jul",
+    asOf: "September 30, 2026",
+    period: "Census through Aug · P&L through Jul · bank through Sep",
     sampleData: false,
     logo: "assets/img/logo.png",
     logoAlt: "Amazing Kids PPEC — Prescribed Pediatric Extended Care",
     sourceNote: "Census and attendance are aggregated from the monthly attendance report " +
       "(Jan–Aug 2026). Revenue, cost and cash come from the management report for the period " +
-      "ended 7/31/2026, prepared 8/28/2026, on a cash basis. Roster, day rate and staffing are " +
-      "as reported on September 1. No child-level or member-level detail is stored on this page."
+      "ended 7/31/2026, prepared 8/28/2026, on a cash basis; the bank statements run through " +
+      "30 September 2026. Roster, day rate and staffing are as reported on September 1. No " +
+      "child-level or member-level detail is stored on this page."
   },
 
   /* ---- The roster today -------------------------------------------------- */
@@ -110,7 +111,18 @@ window.AKP_DATA = {
     pendingStartLabel: "October 2026",
     realizedPerChildDay: 238.65,
     months: [
-      { label: "Sep", full: "Sep 2026", weekdays: 22, closures: 1, enrolled: 19, closureNote: "Labor Day, Mon Sep 7" },
+      /* September is closed. It keeps its projection inputs so the plan can still
+         be recomputed and compared, and carries what the bank actually did. */
+      { label: "Sep", full: "Sep 2026", weekdays: 22, closures: 1, enrolled: 19, closureNote: "Labor Day, Mon Sep 7",
+        closed: true,
+        actual: {
+          moneyIn: 75490.24,       /* four Medicaid remittances — every deposit in the month */
+          moneyOut: 62928.32,
+          closingCash: 93943.45,   /* both Truist accounts at 30 Sep */
+          debtService: 1559.96,    /* Truist instalment 1,010.96 + card payment 549.00 */
+          toOwners: 0,
+          source: "Truist consolidated statement, 30 September 2026"
+        } },
       { label: "Oct", full: "Oct 2026", weekdays: 22, closures: 0, enrolled: 23, closureNote: "no closure assumed" },
       { label: "Nov", full: "Nov 2026", weekdays: 21, closures: 2, enrolled: 23, closureNote: "Thanksgiving, Thu Nov 26 and Fri Nov 27" },
       { label: "Dec", full: "Dec 2026", weekdays: 23, closures: 2, enrolled: 23, closureNote: "Christmas Eve and Christmas Day, Thu Dec 24 and Fri Dec 25" }
@@ -171,7 +183,7 @@ window.AKP_DATA = {
     caveat: "Two things would change this materially. Cost is held at the $70,000 target; July " +
       "ran $83,920, and at that level the distributable net nearly disappears. And revenue is the " +
       "projection at the posted day rate; at the rate actually realized year to date, net over the " +
-      "four months is roughly half."
+      "remaining months is roughly half."
   },
 
 
@@ -277,13 +289,13 @@ window.AKP_DATA = {
 
   /* ---- Cash -------------------------------------------------------------- */
   cash: {
-    asOf: "August 31, 2026",
+    asOf: "September 30, 2026",
     priorLabel: "a year earlier",
     /* Cash is from the August bank statement. The three obligations are still
        at July 31 — no August balance sheet has been shared — so each line
        carries its own date rather than implying they share one. */
     lines: [
-      { name: "Cash in bank",         value:  81381.53, prior: 8998.70, asOf: "Aug 31" },
+      { name: "Cash in bank",         value:  93943.45, prior: 8998.70, asOf: "Sep 30" },
       { name: "Accounts payable",     value:  -1091.51, prior: null, asOf: "Jul 31" },
       { name: "Credit card balance",  value: -19172.01, prior: null, asOf: "Jul 31" },
       { name: "Line of credit drawn", value: -33962.98, prior: null, asOf: "Jul 31" }
@@ -291,9 +303,9 @@ window.AKP_DATA = {
     ytdNet: 50659.05,
     ytdNetPrior: -242951.91,
     totalEquity: 319099.07,
-    note: "Cash is the August bank balance; the three obligations are still where the July balance " +
-      "sheet left them, so the net figure will move when the August one arrives. The year-to-date " +
-      "net income is through July."
+    note: "Cash is the September bank balance. The three obligations are still where the July " +
+      "balance sheet left them — no balance sheet has been shared since — so the net figure will " +
+      "move when a newer one arrives. The year-to-date net income is through July."
   },
 
   /* ---- August, from the bank statement -----------------------------------
@@ -301,24 +313,28 @@ window.AKP_DATA = {
      actually paid; money out is what left the accounts, which excludes
      anything bought on the credit card and includes items that are not
      operating expenses. It answers the cash question, not the margin one. */
-  bankAugust: {
-    period: "August 2026",
-    source: "Truist consolidated statement, 31 August 2026",
-    opening: 71116.36,
-    closing: 81381.53,
-    moneyIn: 80931.62,
-    moneyInNote: "four Medicaid claim payments",
-    moneyOut: 70666.45,
+  /* The most recent bank statement. Rename nothing here when a new month lands —
+     replace the figures and move the old month into `prior`. */
+  bankMonth: {
+    period: "September 2026",
+    source: "Truist consolidated statement, 30 September 2026",
+    opening: 81381.53,
+    closing: 93943.45,
+    moneyIn: 75490.24,
+    moneyInNote: "four Medicaid claim payments — every deposit in the month",
+    moneyOut: 62928.32,
     largest: [
-      { name: "Two ACH settlements", amount: 42480.07, note: "twice-monthly, the size and timing of payroll" },
+      { name: "Payroll", amount: 41964.90, note: "two semi-monthly ACH settlements" },
       { name: "Rent", amount: 11767.09, note: "matches the rent line on the July P&L exactly" },
-      { name: "Zelle payments to people and vendors", amount: 5256.07, note: "ten payments" },
-      { name: "AHCA licence fee", amount: 2077.75, note: "the renewal on the task board" },
-      { name: "Everything else", amount: 9085.47, note: "supplies, utilities, software, card payment, bank charges" }
+      { name: "Contract labour, by Zelle", amount: 1950.60, note: "six payments" },
+      { name: "Debt service", amount: 1559.96, note: "Truist instalment and a credit card payment" },
+      { name: "Utilities", amount: 1108.24, note: "power, cable and mobile" },
+      { name: "Everything else", amount: 4577.53, note: "supplies, software, insurance, accounting, ads, fees" }
     ],
-    caveat: "Money out excludes anything paid on the credit card — only $533 of card payment cleared " +
-      "the bank in August — so the true operating cost for the month will be higher than this. The " +
-      "August management report is still needed for revenue, cost and margin."
+    prior: { period: "August 2026", moneyIn: 80931.62, moneyOut: 70666.45, closing: 81381.53 },
+    caveat: "Money out excludes anything sitting on the credit card — only $549 of card payment " +
+      "cleared the bank in September — so the true operating cost for the month is higher than this. " +
+      "No management report has been shared since July, so this is cash, not profit."
   },
 
   /* ---- Staffing ---------------------------------------------------------- */
