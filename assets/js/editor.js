@@ -40,11 +40,35 @@ const Editor = (() => {
         ["revenue", "Revenue", "usd2"], ["cost", "Cost", "usd2"]] } }
     ] },
 
+    /* What the bank actually did in a month that has closed. These drive the
+       schedule — the reserve walks forward from the latest closing cash — so
+       this is the section to fill in when a new statement arrives. */
+    { title: "Closed months — what the bank did", blocks: [
+      { rows: { path: "projection.months", label: "full",
+        filter: (x) => x.closed,
+        empty: "No month is closed yet. Mark one closed in data.js to enter its actuals here.",
+        cols: [["actual.moneyIn", "Money in", "usd2"], ["actual.moneyOut", "Money out", "usd2"],
+               ["actual.closingCash", "Cash at month end", "usd2"],
+               ["actual.debtService", "Debt paid", "usd2"], ["actual.toOwners", "To owners", "usd2"]] } }
+    ] },
+
+    { title: "Latest bank statement", blocks: [
+      { fields: [
+        ["bankMonth.opening", "Opening balance", "usd2"],
+        ["bankMonth.closing", "Closing balance", "usd2"],
+        ["bankMonth.moneyIn", "Money in", "usd2"],
+        ["bankMonth.moneyOut", "Money out", "usd2"]
+      ] },
+      { rows: { path: "bankMonth.largest", label: "name", cols: [["amount", "Amount", "usd2"]] } }
+    ] },
+
     { title: "Distributions and savings", blocks: [
       { fields: [
         ["distributions.reserveTarget", "Savings target", "usd"],
         ["distributions.assumedMonthlyCost", "Assumed monthly cost", "usd2"],
-        ["distributions.startingReserve", "Reserve in the bank today", "usd2"],
+        /* Only the starting point. Once a month is closed its actual closing
+           cash takes over, so labelling this "today" would be a lie. */
+        ["distributions.startingReserve", "Cash before the first closed month", "usd2"],
         ["distributions.startingDebt", "Revolving debt outstanding", "usd2"],
         ["distributions.ongoingSavings", "Of net after the target, to savings", "pct"],
         ["distributions.split.debt", "Of what is left, to debt", "pct"],
@@ -122,13 +146,19 @@ const Editor = (() => {
   }
 
   function rowsBlock(spec) {
-    const list = get(window.AKP_STATE.raw, spec.path) || [];
+    const all = get(window.AKP_STATE.raw, spec.path) || [];
+    /* Keep each row's real index: the input path addresses the array, so
+       filtering must not renumber what it edits. */
+    const list = all.map((row, i) => ({ row, i }))
+      .filter(({ row }) => (spec.filter ? spec.filter(row) : true));
+    if (!list.length) return `<p class="ed-label">${esc(spec.empty || "Nothing here yet.")}</p>`;
     return `<div class="ed-rows"><table class="ed-table">
       <thead><tr><th></th>${spec.cols.map((c) => `<th>${esc(c[1])}</th>`).join("")}</tr></thead>
-      <tbody>${list.map((row, i) => `<tr>
+      <tbody>${list.map(({ row, i }) => `<tr>
         <th scope="row">${esc(row[spec.label])}</th>
         ${spec.cols.map(([key, , type]) => {
-          const v = toInput(row[key], type);
+          /* A key may reach into the row, e.g. "actual.moneyIn". */
+          const v = toInput(get(row, key), type);
           return `<td><input type="number" step="${step(type)}" value="${v === "" ? "" : esc(v)}"
                     data-path="${esc(spec.path)}.${i}.${esc(key)}" data-type="${type}"
                     aria-label="${esc(row[spec.label])} ${esc(key)}" inputmode="decimal"></td>`;
