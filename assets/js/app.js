@@ -950,7 +950,11 @@
   const writeDone = (s) => { try { localStorage.setItem(DONE_KEY, JSON.stringify([...s])); } catch { /* private mode */ } };
   let taskFilter = "open";
   const isDone = (t, done) => t.status === "Done" || done.has(t.id);
-  const isOverdue = (t, done) => !!t.due && !isDone(t, done) && new Date(t.due + "T00:00:00") < AS_OF;
+  /* Overdue is measured against the real date, not the board's as-of. The
+     financial as-of is the last closed statement and will always be in the
+     past, so using it would mean nothing on this list ever came due. */
+  const today = () => { const n = new Date(); n.setHours(0, 0, 0, 0); return n; };
+  const isOverdue = (t, done) => !!t.due && !isDone(t, done) && new Date(t.due + "T00:00:00") < today();
 
   function renderTasks() {
     if (!need("card-tasks", "Task board", RAW.tasks)) return;

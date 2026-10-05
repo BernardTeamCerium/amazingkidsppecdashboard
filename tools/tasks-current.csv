@@ -1,0 +1,21 @@
+ID,Task,Area,Owner,Due date,Priority,Status,Note
+T-01,Generator servicing,Facilities,Unassigned,2026-09-30,High,Not started,Scheduled for September 2026
+T-02,Hire a respiratory therapist or an RN with vent experience,Staffing,Unassigned,,High,Not started,
+T-03,Hire EMTs for the transportation routes,Staffing,Unassigned,,High,Not started,
+T-04,Add teaching staff for the total care room,Staffing,Unassigned,,High,Not started,For the children with higher support needs
+T-05,Move to the new accounting arrangement,Finance,Unassigned,,High,Not started,
+T-06,Settle member distributions,Finance,Unassigned,,High,Not started,
+T-07,Spring cleaning — clear unused items and repaint the walls,Facilities,Unassigned,,Medium,Not started,
+T-08,Settle the divider layout and mock up the indoor playground,Facilities,Unassigned,,High,Not started,"How the floor is sectioned off decides room capacity, so it gates the 25-child staffing model"
+T-09,Follow up with the fence company and finish the outside area,Facilities,Unassigned,,Medium,Not started,Waiting on the contractor
+T-10,Install blinds in the second total care room,Facilities,Unassigned,,Medium,Not started,
+T-11,"Order branded promo material — blankets, onesies and the rest",Marketing,Unassigned,,Low,Not started,
+T-12,Raise the marketing budget and run more campaigns,Marketing,Unassigned,,High,Not started,Includes video footage and local exposure. Spend is running far below last year — $6.9K year to date against $20.8K — and the new monthly figure is not set yet
+T-13,Create the Amazing Kids PPEC software,Software,Unassigned,,High,In progress,Operations board is the first piece and is live on a shared link; remaining scope to be defined
+T-14,Put the operations board on a password-protected subdomain,Software,Bernard Frazier,,High,In progress,"Deploy scaffolding is committed — see deploy/README.md. Remaining: connect the host, set the password in its environment, and point the subdomain's DNS record"
+T-15,Get ready for the annual AHCA inspection,Compliance,Unassigned,,Critical,Not started,No date set on this board yet. Everything else competes with this one — the licence does not
+T-16,Set up the company structure for Amazing Kids Therapy,Ventures,Unassigned,,High,Not started,"The entity and licensing behind the therapy lines on the Ventures tab — respiratory, physical, occupational and speech"
+T-17,Rebuild the staffing structure and the schedule,Staffing,Unassigned,,High,Not started,"The daily model on this board is the target: 1 RN, 2 LPNs and 4 techs to carry 25 children, excluding the total care children"
+T-18,Build out the school program,Programs,Unassigned,,High,Not started,"Feeds the Education tab — Step Up funding applies to children aged 4 and up, and how many of those are enrolled has not been shared yet"
+T-19,Update the flooring,Facilities,Unassigned,,Medium,Not started,Sequence against the divider layout so the floor is not cut twice
+T-20,Find a new cleaning company,Facilities,Unassigned,,Medium,Not started,Janitorial ran $29.99 in July; whatever replaces it will cost more than the line carries
