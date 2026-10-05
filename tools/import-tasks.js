@@ -38,6 +38,18 @@ function parseCsv(text) {
   return rows.filter((r) => r.some((c) => c.trim() !== ""));
 }
 
+/* The ids already on the board, read straight out of data.js — enough to tell
+   an import that adds from one that quietly deletes. */
+function currentTaskIds() {
+  try {
+    const src = fs.readFileSync(path.join(__dirname, "..", "assets", "js", "data.js"), "utf8");
+    const begin = src.indexOf("/* TASKS:BEGIN");
+    const end = src.indexOf("/* TASKS:END */");
+    if (begin === -1 || end === -1) return [];
+    return [...src.slice(begin, end).matchAll(/\bid:\s*"([^"]+)"/g)].map((m) => m[1]);
+  } catch { return []; }
+}
+
 const norm = (s) => String(s || "").trim();
 const key = (s) => norm(s).toLowerCase().replace(/[^a-z]/g, "");
 
@@ -101,6 +113,20 @@ function main() {
   if (problems.length) {
     console.error("Nothing was written. Fix these rows in the sheet and export again:\n  " +
       problems.join("\n  "));
+    process.exit(1);
+  }
+
+  /* An import replaces the whole list, so a sheet that has fallen behind the
+     board silently deletes every task added since it was last exported. That is
+     the one mistake this tool could make that loses work, so it refuses instead
+     and names what would go. */
+  const dropped = currentTaskIds().filter((id) => !seen.has(id));
+  if (dropped.length && !process.argv.includes("--allow-drop")) {
+    console.error(
+      `Nothing was written. This CSV has ${tasks.length} tasks, but the board has ` +
+      `${dropped.length} the CSV does not mention:\n  ${dropped.join(", ")}\n\n` +
+      "The sheet is probably behind the board. Either add those rows to the sheet and\n" +
+      "export again, or re-run with --allow-drop if you really mean to delete them.");
     process.exit(1);
   }
 

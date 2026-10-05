@@ -16,8 +16,15 @@
          "AMAZING KIDS PPEC LLC — Management Report", period ended 7/31/2026,
          prepared 8/28/2026. Cash basis. August is not published yet.
      • Targets, day rate, roster, staffing — reported directly, Sep 1 2026.
-     • Task board — "Amazing Kids PPEC - Task Board" sheet
-         1pF-bVz0iMmPji9RTBhIlO7EH5bVhCp5ArkfumYKcwjU
+     • Task board — two files in Drive, and BOTH are behind this board.
+         "Amazing Kids PPEC - Task Board" sheet, the importer's source
+           1pF-bVz0iMmPji9RTBhIlO7EH5bVhCp5ArkfumYKcwjU   (T-01..T-12 only)
+         "Tasks and Topics @ Amazing Kids PPEC" doc, a prose discussion list
+           186Td_8En4t52zyVAcgqMEpNemzwCX12MC446jyJIB5E   (9 items, a subset)
+         Importing the sheet as it stands would delete T-13..T-20, so the
+         importer refuses and names them. tools/tasks-current.csv is this
+         board in the importer's own format — paste it into the sheet to
+         bring the two level.
 
    ENROLLED means a child who attended at least one day that month. Children on
    the report with zero days are counted separately as records with no
@@ -446,9 +453,10 @@ window.AKP_DATA = {
       note: "Janitorial ran $29.99 in July; whatever replaces it will cost more than the line carries" }
   ],
   /* TASKS:END */
-  tasksNote: "Owners and due dates are maintained in the “Amazing Kids PPEC - Task Board” sheet " +
-    "in Drive. Fill them in there, download the sheet as CSV, and run the importer in tools/. " +
-    "Until a task has a date it counts as unscheduled, never as late.",
+  tasksNote: "This board is the current list; the task sheet and the topics doc in Drive both hold " +
+    "less than it does. Owners and due dates belong in the sheet — fill them in, download it as " +
+    "CSV, and run the importer in tools/, which refuses an import that would delete a task rather " +
+    "than doing it quietly. Until a task has a date it counts as unscheduled, never as late.",
 
   /* ---- Waiting on a source ----------------------------------------------- */
   budget: null,
