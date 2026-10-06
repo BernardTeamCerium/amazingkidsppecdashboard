@@ -71,39 +71,41 @@ function envReport() {
   }
   return "This function can see " + keys.length + " environment variables, and NONE of them start " +
     "with DASH.\n" + (keys.length
-      ? "So the environment is reaching the function — your two variables are not in it. That is a scope or deploy-context setting, or they were added to a different site."
+      ? "So the environment is reaching the function — DASH_PASS is not in it. That is a scope or deploy-context setting, or it was added to a different site."
       : "The environment is empty, which points at the deploy rather than at the variables.");
 }
 
 export default async (request, context) => {
   /* Trailing whitespace is easy to paste into a dashboard field and impossible
      to see there, so it never becomes part of the secret. */
-  const user = env("DASH_USER").trim();
   const pass = env("DASH_PASS").trim();
+  /* A username is not a secret, and one less variable to set is one less way
+     for the deploy to come up unconfigured. The password has no default. */
+  const user = env("DASH_USER").trim() || "admin@amazingkidsppec.com";
 
   /* Missing credentials must fail closed. Serving the board because the site
      was deployed without its environment set is the one failure that matters.
      Name which variable is missing — that is a deployment fact, not a secret,
      and without it the only debugging move is guessing. */
-  if (!user || !pass) {
-    const missing = [!user && "DASH_USER", !pass && "DASH_PASS"].filter(Boolean);
+  if (!pass) {
     return new Response(
       [
         "This site is not configured yet.",
         "",
-        "Not visible to the edge function: " + missing.join(" and ") + ".",
-        (user || pass)
-          ? "The other one is visible, so the variables are reaching this function — check the name of the missing one for a typo."
-          : "Neither is visible. In Netlify: Site configuration → Environment variables.",
+        "DASH_PASS is not visible to the password gate, so nothing can be served.",
+        "Set it in Netlify: Project configuration (older accounts say Site configuration)",
+        "  -> Environment variables -> Add a variable -> DASH_PASS",
         "",
         envReport(),
         "",
         "Three things to check, in the order they usually go wrong:",
-        "  1. Scopes — a variable scoped only to Builds is invisible here. Set it to All scopes.",
-        "  2. Deploy contexts — set the value for all contexts, or at least the one you are viewing.",
-        "  3. Redeploy after changing either. Deploys → Trigger deploy → Clear cache and deploy site.",
+        "  1. Scopes - a variable scoped only to Builds is invisible here. Set it to All scopes.",
+        "  2. Deploy contexts - set the value for all contexts, or at least the one you are viewing.",
+        "  3. Redeploy after changing either. Deploys -> Trigger deploy -> Clear cache and deploy.",
         "",
-        "Deploy context of this request: " + (context && context.deploy ? (context.deploy.context || "unknown") : "unknown") + "."
+        "The username defaults to " + user + ". Set DASH_USER only to change it.",
+        "Deploy context of this request: " +
+          (context && context.deploy ? (context.deploy.context || "unknown") : "unknown") + "."
       ].join("\n"),
       { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } }
     );
