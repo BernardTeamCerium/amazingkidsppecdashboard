@@ -660,6 +660,8 @@
     const b = M.billingMix;
     if (!need("card-billing-mix", null, b && b.childDays)) return;
     $("#bmx-eyebrow").textContent = `${b.month} · ${F.int(b.childDays)} child-days`;
+    const t = $("#bmx-title");
+    if (t && b.gapShare !== null) t.textContent = `Where the uncollected ${F.pct0(b.gapShare)} could be`;
 
     /* Both groups are candidates for the same gap, and they may overlap, so
        they are shown side by side against it rather than stacked into a total
@@ -693,6 +695,12 @@
       ` Day length is each child's average across the month; the report carries no day-by-day detail,` +
       ` so a child who is usually full day and occasionally short counts here as full day.` +
       ` The two groups can overlap, so they are not added together.`;
+  }
+
+  /* The money section's subtitle names the period the P&L actually covers. */
+  function renderMoneyNote() {
+    const n = $("#money-note");
+    if (n && M.latestMoney) n.textContent = `Management report, cash basis, through ${M.latestMoney.full}`;
   }
 
   /* ======================= Cash ========================================= */
@@ -749,12 +757,17 @@
     if (over !== null && over > 2000) $("#card-bank").dataset.state = "warning";
     else delete $("#card-bank").dataset.state;
 
+    /* Both comparisons name their month and their direction. Hardcoding either
+       is how a note ends up calling September "July" and an underspend "over". */
+    const dir = (v) => (v >= 0 ? "over" : "under");
     $("#bank-note").textContent =
       (b.vsPriorCost !== null
-        ? `Against July's ${F.usd(M.latestMoney.cost)} of operating cost this is ${F.usd(-b.vsPriorCost)} lower. `
+        ? `Against ${M.latestMoney.label}'s ${F.usd(M.latestMoney.cost)} of operating cost on the ` +
+          `P&L, cash out is ${F.usd(Math.abs(b.vsPriorCost))} ${dir(b.vsPriorCost)}. `
         : "") +
       (b.vsTarget !== null
-        ? `Against the ${F.usdk(RAW.targets.monthlyCost)} budget on the scorecard it is ${F.usd(b.vsTarget)} over. `
+        ? `Against the ${F.usdk(RAW.targets.monthlyCost)} budget on the scorecard it is ` +
+          `${F.usd(Math.abs(b.vsTarget))} ${dir(b.vsTarget)}. `
         : "") + b.caveat;
   }
 
@@ -1089,6 +1102,7 @@
     renderDistributions();
     renderScenario();
     renderCosts();
+    renderMoneyNote();
     renderCash();
     renderBank();
     renderAttendance();

@@ -97,8 +97,8 @@ window.AKP_DATA = {
     { label: "May", full: "May 2026", enrolled: 18, onReport: 25, opDays: 20, childDays: 324, started: 1, stopped: 0, revenue: 96294.66, cost: 59424.22 },
     { label: "Jun", full: "Jun 2026", enrolled: 20, onReport: 25, opDays: 22, childDays: 346, started: 2, stopped: 0, revenue: 76100.84, cost: 64527.16 },
     { label: "Jul", full: "Jul 2026", enrolled: 20, onReport: 25, opDays: 23, childDays: 372, started: 2, stopped: 2, revenue: 90629.63, cost: 83919.86 },
-    { label: "Aug", full: "Aug 2026", enrolled: 20, onReport: 24, opDays: 20, childDays: 327, started: 1, stopped: 1, revenue: null, cost: null },
-    { label: "Sep", full: "Sep 2026", enrolled: 21, onReport: 22, opDays: 21, childDays: 362, started: 2, stopped: 1, revenue: null, cost: null }
+    { label: "Aug", full: "Aug 2026", enrolled: 20, onReport: 24, opDays: 20, childDays: 327, started: 1, stopped: 1, revenue: 80931.62, cost: 69410.54 },
+    { label: "Sep", full: "Sep 2026", enrolled: 21, onReport: 22, opDays: 21, childDays: 362, started: 2, stopped: 1, revenue: 75490.24, cost: 61774.21 }
   ],
   financeNote: "Cash basis: income lands when the payment arrives, not when the care was " +
     "delivered, so a heavy claims batch inflates one month and starves the next. May's $96.3K " +
@@ -127,7 +127,7 @@ window.AKP_DATA = {
   projection: {
     attendanceRate: 0.80,
     pendingStartLabel: "October 2026",
-    realizedPerChildDay: 238.65,
+    realizedPerChildDay: 235.91,
     months: [
       /* September is closed. It keeps its projection inputs so the plan can still
          be recomputed and compared, and carries what the bank actually did. */
@@ -138,7 +138,7 @@ window.AKP_DATA = {
           moneyIn: 75490.24,       /* four Medicaid remittances — every deposit in the month */
           moneyOut: 62928.32,
           closingCash: 93943.45,   /* both Truist accounts at 30 Sep */
-          debtService: 1559.96,    /* Truist instalment 1,010.96 + card payment 549.00 */
+          closingDebt: 51234.97,   /* card 19,293.91 + line of credit 31,941.06 at 30 Sep */
           toOwners: 0,
           source: "Truist consolidated statement, 30 September 2026"
         } },
@@ -178,7 +178,7 @@ window.AKP_DATA = {
     ongoingSavings: 0.15,
     assumedMonthlyCost: 70000,
     startingReserve: 81381.53,          /* cash in bank at Aug 31 */
-    startingDebt: 53134.99,             /* credit card + line of credit drawn */
+    startingDebt: 52389.08,   /* card + line of credit at 31 Aug, per the balance sheet */             /* credit card + line of credit drawn */
     /* Reserve first: savings takes whatever is still needed to reach the target,
        then 15% of what is left pays down debt and the rest is distributed. */
     reserveFirst: true,
@@ -284,26 +284,30 @@ window.AKP_DATA = {
   },
 
   /* ---- Cost structure ---------------------------------------------------- */
+  /* Straight off the Jan–Sep P&L (cash basis). Cost on this board is cost of
+     goods sold plus total expenses, which is what nets against income. */
   costLines: {
-    current: "July 2026",
-    prior: "June 2026",
+    current: "September 2026",
+    prior: "August 2026",
     lines: [
-      { name: "Payroll, taxes & benefits", prior: 40952.03, current: 61613.44 },
+      { name: "Payroll, taxes & benefits", prior: 42480.07, current: 41964.90 },
       { name: "Rent",                      prior: 11767.09, current: 11767.09 },
-      { name: "Contract labor & supplies", prior:  2809.60, current:  4128.71 },
-      { name: "Dues & subscriptions",      prior:  1075.60, current:  1075.60 },
-      { name: "Bank service charges",      prior:   811.94, current:   788.00 },
-      { name: "Internet & telephone",      prior:  1250.58, current:   764.32 },
-      { name: "Direct care supplies",      prior:   729.56, current:   762.61 },
-      { name: "Advertising & promotion",   prior:   537.92, current:   689.46 },
-      { name: "Licenses & permits",        prior:     0.00, current:   663.59 },
-      { name: "Electricity",               prior:   572.95, current:   560.76 },
-      { name: "Insurance",                 prior:   426.33, current:   445.70 },
-      { name: "Meals & entertainment",     prior:  1288.95, current:   365.63 },
-      { name: "Repairs & maintenance",     prior:  2014.21, current:   160.00 },
-      { name: "Office expenses",           prior:   105.42, current:   104.96 },
-      { name: "Janitorial",                prior:    59.98, current:    29.99 },
-      { name: "Professional fees",         prior:   125.00, current:     0.00 }
+      { name: "Contract labor & supplies", prior:  2839.71, current:  2090.60 },
+      { name: "Janitorial",                prior:  3285.40, current:   968.79 },
+      { name: "Direct care supplies",      prior:  1402.67, current:   730.72 },
+      { name: "Internet & telephone",      prior:   682.47, current:   682.47 },
+      { name: "Electricity",               prior:   587.81, current:   525.77 },
+      { name: "Dues & subscriptions",      prior:  1730.78, current:   522.26 },
+      { name: "Professional fees",         prior:     0.00, current:   500.00 },
+      { name: "Bank service charges",      prior:   442.80, current:   442.80 },
+      { name: "Advertising & promotion",   prior:   942.36, current:   412.16 },
+      { name: "Insurance",                 prior:     0.00, current:   401.13 },
+      { name: "Interest",                  prior:   358.11, current:   356.85 },
+      { name: "Office expenses",           prior:   176.88, current:   191.14 },
+      { name: "Repairs & maintenance",     prior:   302.00, current:   160.00 },
+      { name: "Meals & entertainment",     prior:   334.64, current:    31.33 },
+      { name: "Children meals",            prior:     0.00, current:    26.20 },
+      { name: "Licenses & permits",        prior:  2077.75, current:     0.00 }
     ]
   },
 
@@ -311,21 +315,20 @@ window.AKP_DATA = {
   cash: {
     asOf: "September 30, 2026",
     priorLabel: "a year earlier",
-    /* Cash is from the August bank statement. The three obligations are still
-       at July 31 — no August balance sheet has been shared — so each line
-       carries its own date rather than implying they share one. */
+    /* Every line is now from the same balance sheet, so the net figure no
+       longer mixes dates. */
     lines: [
       { name: "Cash in bank",         value:  93943.45, prior: 8998.70, asOf: "Sep 30" },
-      { name: "Accounts payable",     value:  -1091.51, prior: null, asOf: "Jul 31" },
-      { name: "Credit card balance",  value: -19172.01, prior: null, asOf: "Jul 31" },
-      { name: "Line of credit drawn", value: -33962.98, prior: null, asOf: "Jul 31" }
+      { name: "Accounts payable",     value:  -1091.51, prior: null, asOf: "Sep 30" },
+      { name: "Credit card balance",  value: -19293.91, prior: null, asOf: "Sep 30" },
+      { name: "Line of credit drawn", value: -31941.06, prior: null, asOf: "Sep 30" }
     ],
-    ytdNet: 50659.05,
+    ytdNet: 75896.16,
     ytdNetPrior: -242951.91,
-    totalEquity: 319099.07,
-    note: "Cash is the September bank balance. The three obligations are still where the July " +
-      "balance sheet left them — no balance sheet has been shared since — so the net figure will " +
-      "move when a newer one arrives. The year-to-date net income is through July."
+    totalEquity: 344336.18,
+    note: "Cash, payables and borrowings are all from the balance sheet at 30 September 2026, and " +
+      "the cash line agrees with the bank statement to the cent. Year-to-date net income is " +
+      "through September on a cash basis."
   },
 
   /* ---- August, from the bank statement -----------------------------------
@@ -352,9 +355,9 @@ window.AKP_DATA = {
       { name: "Everything else", amount: 4577.53, note: "supplies, software, insurance, accounting, ads, fees" }
     ],
     prior: { period: "August 2026", moneyIn: 80931.62, moneyOut: 70666.45, closing: 81381.53 },
-    caveat: "Money out excludes anything sitting on the credit card — only $549 of card payment " +
-      "cleared the bank in September — so the true operating cost for the month is higher than this. " +
-      "No management report has been shared since July, so this is cash, not profit."
+    caveat: "Cash out and the P&L's operating cost are different numbers and should not agree: " +
+      "only $549 of credit card payment cleared the bank in September, while the card balance " +
+      "fell by $143, and the P&L counts the spending rather than the repayment."
   },
 
   /* ---- Staffing ---------------------------------------------------------- */
@@ -398,12 +401,12 @@ window.AKP_DATA = {
     shortDay: { childDays: 33, children: 2, label: "Average day under 5 hours" },
     pendingAdmission: { childDays: 66, children: 4, label: "In the Pending Admission room" },
     avgHoursPerDay: 7.77,
-    note: "Collections run about 15% below billed. Two things on this report could explain it. " +
-      "9% of child-days are children whose average day is under five hours, which bills a lower " +
-      "tier than the full-day rate. And 18% of child-days are children in Pending Admission, who " +
-      "attend before approval — those days bill late, or not at all. The two groups may overlap. " +
-      "A remittance showing units by tier would settle it, and it is the largest number on the board " +
-      "that nobody is working on."
+    note: "Revenue on the P&L is cash collected, and it runs well below the posted rate times " +
+      "child-days. Two things on this report could explain the difference. Some child-days are " +
+      "children whose average day is under five hours, which bills a lower tier than the full day. " +
+      "And some are children in Pending Admission, who attend before approval — those days bill " +
+      "late, or not at all. The two groups may overlap. A remittance showing units by tier would " +
+      "settle it, and it is the largest number on the board that nobody is working on."
   },
 
   adSpend: {
@@ -411,7 +414,8 @@ window.AKP_DATA = {
       { label: "Jan", value: 1749.00 }, { label: "Feb", value: 2129.00 },
       { label: "Mar", value:  386.41 }, { label: "Apr", value:  566.17 },
       { label: "May", value:  856.45 }, { label: "Jun", value:  537.92 },
-      { label: "Jul", value:  689.46 }
+      { label: "Jul", value:  689.46 }, { label: "Aug", value:  942.36 },
+      { label: "Sep", value:  412.16 }
     ],
     ytdPrior: 20795.07,
     note: "Advertising is running at a fraction of last year's pace while enrolment climbed and " +

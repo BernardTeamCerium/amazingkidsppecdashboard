@@ -205,7 +205,11 @@ const Model = (() => {
       return {
         reserve: a.closingCash !== undefined && a.closingCash !== null
           ? a.closingCash : acc.reserve + (a.moneyIn - a.moneyOut),
-        debt: acc.debt - (a.debtService || 0)
+        /* A balance sheet beats an inferred paydown: cash debt service includes
+           interest and misses new card spending, so the closing balance is the
+           truth when it is available. */
+        debt: a.closingDebt !== undefined && a.closingDebt !== null
+          ? a.closingDebt : acc.debt - (a.debtService || 0)
       };
     }, { reserve: d.startingReserve, debt: d.startingDebt });
 
