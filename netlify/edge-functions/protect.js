@@ -116,7 +116,13 @@ export default async (request, context) => {
 
   let decoded;
   try {
-    decoded = atob(header.slice(6).trim());
+    /* The browser sends the pair UTF-8 encoded, then base64. atob alone gives
+       one JavaScript character per BYTE, so any non-ASCII character in the
+       password — an accent, a curly apostrophe pasted from a document — comes
+       back mangled and can never match. Decode the bytes properly. */
+    const raw = atob(header.slice(6).trim());
+    const bytes = Uint8Array.from(raw, (ch) => ch.charCodeAt(0));
+    decoded = new TextDecoder("utf-8").decode(bytes);
   } catch {
     return challenge("Authentication required.");
   }
@@ -127,10 +133,33 @@ export default async (request, context) => {
   const gotPass = split === -1 ? "" : decoded.slice(split + 1);
 
   /* Both comparisons always run, so a wrong username costs the same as a
-     wrong password. */
-  const okUser = timingSafeEqual(gotUser, user);
+     wrong password. Usernames are compared case-insensitively: this one is an
+     email address, and no one should be locked out by a capital A. */
+  const okUser = timingSafeEqual(gotUser.trim().toLowerCase(), user.toLowerCase());
   const okPass = timingSafeEqual(gotPass, pass);
-  if (!okUser || !okPass) return challenge("Not authorized.");
+  if (!okUser || !okPass) {
+    /* A dead end with no explanation is how a login becomes unfixable. The
+       expected username is not a secret; the password is never described. */
+    return challenge([
+      "Not authorized.",
+      "",
+      "This page expects the username:  " + user,
+      (env("DASH_USER")
+        ? "That comes from the DASH_USER variable set on this site."
+        : "That is the built-in default, because DASH_USER is not set."),
+      "",
+      "If you expected a different username, DASH_USER is the thing to change",
+      "or delete in Netlify: Project configuration -> Environment variables.",
+      "",
+      "If the username above is right and the password still fails:",
+      "  - Check DASH_PASS in Netlify for quotes or a trailing space that got",
+      "    pasted in with it. The value is used exactly as stored.",
+      "  - Redeploy after any change: Deploys -> Trigger deploy ->",
+      "    Clear cache and deploy. A changed variable does nothing until then.",
+      "  - Try a fresh private window. Browsers cache the failed attempt and",
+      "    will keep resending it without asking you again."
+    ].join("\n"));
+  }
 
   const response = await context.next();
   /* A shared cache holding an authenticated page would hand it to the next
