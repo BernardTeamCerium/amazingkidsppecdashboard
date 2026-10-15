@@ -55,8 +55,8 @@ window.AKP_DATA = {
   roster: {
     asOf: "September 1, 2026",
     enrolled: 19,
-    medicaidApproved: 16,
-    pending: 4
+    medicaidApproved: 17,
+    pending: 2
   },
 
   /* ---- Targets ----------------------------------------------------------- */
@@ -175,12 +175,12 @@ window.AKP_DATA = {
           toOwners: 0,
           source: "Truist consolidated statement, 30 September 2026"
         } },
-      { label: "Oct", full: "Oct 2026", weekdays: 22, closures: 0, enrolled: 23, closureNote: "no closure assumed" },
-      { label: "Nov", full: "Nov 2026", weekdays: 21, closures: 2, enrolled: 23, closureNote: "Thanksgiving, Thu Nov 26 and Fri Nov 27" },
-      { label: "Dec", full: "Dec 2026", weekdays: 23, closures: 2, enrolled: 23, closureNote: "Christmas Eve and Christmas Day, Thu Dec 24 and Fri Dec 25" }
+      { label: "Oct", full: "Oct 2026", weekdays: 22, closures: 0, enrolled: 21, closureNote: "no closure assumed" },
+      { label: "Nov", full: "Nov 2026", weekdays: 21, closures: 2, enrolled: 21, closureNote: "Thanksgiving, Thu Nov 26 and Fri Nov 27" },
+      { label: "Dec", full: "Dec 2026", weekdays: 23, closures: 2, enrolled: 21, closureNote: "Christmas Eve and Christmas Day, Thu Dec 24 and Fri Dec 25" }
     ],
     assumptions: [
-      "19 children enrolled today, and the 4 pending children all start in October — 23 from October on.",
+      "19 children enrolled today, and the 2 pending children both start in October — 21 from October on.",
       "80% attendance, applied to enrolment. August ran close to that, so it matches the recent run rate.",
       "The day rate is billed for every day a child attends.",
       "Operating days are weekdays less the closures named in the table. Adjust them there if the calendar differs.",
@@ -245,7 +245,7 @@ window.AKP_DATA = {
      same operating-day calendar and the same distribution policy as the live
      projection. Both numbers are editable on the card. */
   scenario: {
-    childrenPerDay: 15,
+    childrenPerDay: 17,
     monthlyCost: 70000,
     sensitivity: [14, 15, 16, 17, 18, 19, 20, 21, 22]
   },
