@@ -64,13 +64,46 @@ window.AKP_DATA = {
     enrollment: 25,
     enrollmentOwner: "Growth plan",
     enrollmentHorizon: "Q3–Q4 2026",
-    monthlyCost: 65000,
-    costOwner: "Growth plan",
+    monthlyCost: 67500,
+    costOwner: "Goal",
     costHorizon: "Monthly",
+    monthlyRevenue: 100000,
+    census: 17,
     note: "The enrolment goal is 25 children through Q3 and Q4. The roster stands at 19, with 4 " +
       "more pending — so even with every pending child starting, the centre lands at 23 and needs " +
-      "two more beyond the current pipeline. Operating cost has cleared the $65K budget in three " +
-      "of seven months; July's was almost entirely wages, $57.4K against a $38K run rate."
+      "two more beyond the current pipeline. The monthly budget is the $67,500 goal; September " +
+      "came in at $61.8K, the first month under it."
+  },
+
+  /* What a day of census is worth, which is the question the overview exists to
+     answer. Operating days are weekdays less closures: about 21 a month and 250
+     a year once holidays are taken out. Change these and every figure on the
+     revenue breakdown moves with them. */
+  revenueBasis: {
+    daysPerWeek: 5,
+    opDaysPerMonth: 21,
+    opDaysPerYear: 250,
+    levels: [14, 15, 16, 17, 18, 19, 20, 21, 22],
+    note: "At the posted rate, and at the rate actually collected year to date. The second column " +
+      "is the one to plan on until the collection gap is closed."
+  },
+
+  /* The goals, as set by the owners. Each one either measures itself against a
+     number already on this board or tracks a task, so nothing here needs its
+     own separate updating. */
+  goals: {
+    period: "Monthly",
+    list: [
+      { id: "G-1", name: "Monthly revenue",            target: 100000, kind: "money",  metric: "revenue" },
+      { id: "G-2", name: "Daily census",               target: 17,     kind: "census", metric: "adc" },
+      { id: "G-3", name: "Monthly budget",             target: 67500,  kind: "money",  metric: "cost", lowerIsBetter: true },
+      { id: "G-4", name: "Start the school program",   kind: "milestone", task: "T-18" },
+      { id: "G-5", name: "Launch our own management and communication system", kind: "milestone", task: "T-13" },
+      { id: "G-6", name: "Start the therapy program",  kind: "milestone", task: "T-16" },
+      { id: "G-7", name: "Monthly investor distribution", target: 25000, kind: "money", metric: "distribution" },
+      { id: "G-8", name: "New patients a month",       target: 2, targetMax: 3, kind: "count", metric: "started" },
+      { id: "G-9", name: "Concept and plan for a second location", kind: "milestone", task: null }
+    ]
   },
 
   /* ---- The day rate ------------------------------------------------------ */

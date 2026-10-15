@@ -8,6 +8,23 @@ Open `index.html` in a browser. No build step, no server, no dependencies. The
 only network request is the Google Fonts stylesheet; the page falls back to
 system fonts without it.
 
+## The five tabs
+
+The board is five pages, not one scroll, and the tab bar carries the two
+counts worth seeing without clicking: goals met and tasks open.
+
+| Tab | What it answers |
+|---|---|
+| **Overview** | How full is the centre, are we on budget, what is a day of census worth |
+| **Goals** | Where each of the nine goals stands, scored against numbers the board already computes |
+| **Projections** | Last month against plan, revenue to year end, census levels, distributions, scenarios |
+| **Operations** | Revenue and cost detail, cash, attendance, rooms, roster, staffing, marketing, ventures |
+| **Tasks** | The task board |
+
+A goal never stores its own number. A money or census goal reads the last
+closed month; a programme goal reads the status of its task on the Tasks tab.
+Mark the task done and the goal follows — there is no second place to update.
+
 ## Where the numbers come from
 
 | Section | Source | Covers |

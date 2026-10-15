@@ -45,33 +45,69 @@
   <span class="hint">Scopes the census, revenue and margin charts. Everything else is the latest closed period.</span>
 </div>
 
+<nav class="toptabs" id="toptabs" role="tablist" aria-label="Board sections"></nav>
+
 <main class="board">
+
+  <div class="tab-panel" data-tab="overview">
 
   <section class="section" aria-label="Headline numbers">
     <div class="lead" id="lead"></div>
   </section>
 
+  <!-- ================= ON BUDGET / OFF BUDGET ================= -->
+  <section class="section" id="section-budget">
+    <div class="section-head">
+      <h2>On budget</h2>
+      <span class="section-note" id="budget-month">—</span>
+    </div>
+    <div class="grid">
+      <article class="card col-5" id="card-budget">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow">Against the goals</div>
+            <h3 id="budget-title">Last closed month</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="budget-chip">—</span></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-budget">
+            <thead><tr><th>&nbsp;</th><th class="n">Actual</th><th class="n">Goal</th><th class="n">Difference</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="card-note" id="budget-note"></p>
+      </article>
+
+      <article class="card col-7" id="card-revcensus">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow" id="revc-eyebrow">What a day of census is worth</div>
+            <h3>Revenue by census</h3>
+          </div>
+          <div class="card-meta"><span class="chip accent" id="revc-chip">—</span></div>
+        </div>
+        <div class="stat-strip" id="revc-stats"></div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-revcensus">
+            <thead><tr><th>Children a day</th><th class="n">A week</th><th class="n">A month</th><th class="n">A year</th><th class="n">A month, collected</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="card-note" id="revc-note"></p>
+      </article>
+    </div>
+  </section>
+
   <!-- ================= TARGETS & CENSUS ================= -->
   <section class="section" id="section-census">
     <div class="section-head">
-      <h2>Targets &amp; census</h2>
-      <span class="section-note">Where the operation stands against the growth plan</span>
+      <h2>Average census</h2>
+      <span class="section-note">Children enrolled, and how many attend on an average day</span>
     </div>
     <div class="grid">
 
-      <article class="card col-4" id="card-targets">
-        <div class="card-head">
-          <div class="titles">
-            <div class="eyebrow">Scorecard</div>
-            <h3>Targets</h3>
-          </div>
-          <div class="card-meta"><span class="chip" id="targets-summary">—</span></div>
-        </div>
-        <div class="meters" id="meters"></div>
-        <p class="card-note" id="targets-note"></p>
-      </article>
-
-      <article class="card col-8" id="card-census">
+      <article class="card col-12" id="card-census">
         <div class="card-head">
           <div class="titles">
             <div class="eyebrow">Census</div>
@@ -89,6 +125,37 @@
 
     </div>
   </section>
+
+  </div><!-- /overview -->
+
+  <div class="tab-panel" data-tab="goals" hidden>
+  <section class="section" id="section-goals">
+    <div class="section-head">
+      <h2>Goals</h2>
+      <span class="section-note">Each one reads a number this board already tracks</span>
+    </div>
+    <div class="grid">
+      <article class="card col-12" id="card-goals">
+        <div class="card-head">
+          <div class="titles">
+            <div class="eyebrow" id="goals-eyebrow">Scorecard</div>
+            <h3>Where each goal stands</h3>
+          </div>
+          <div class="card-meta"><span class="chip" id="goals-chip">—</span></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="tbl-goals">
+            <thead><tr><th>Goal</th><th class="n">Now</th><th class="n">Target</th><th>Progress</th><th class="n">Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="card-note" id="goals-note"></p>
+      </article>
+    </div>
+  </section>
+  </div><!-- /goals -->
+
+  <div class="tab-panel" data-tab="projections" hidden>
 
   <!-- ================= PROJECTION ================= -->
   <section class="section" id="section-projection">
@@ -254,6 +321,10 @@
 
     </div>
   </section>
+
+  </div><!-- /projections -->
+
+  <div class="tab-panel" data-tab="operations" hidden>
 
   <!-- ================= MONEY ================= -->
   <section class="section" id="section-money">
@@ -541,6 +612,10 @@
     </div>
   </section>
 
+  </div><!-- /operations -->
+
+  <div class="tab-panel" data-tab="tasks" hidden>
+
   <!-- ================= TASKS ================= -->
   <section class="section" id="section-tasks">
     <div class="section-head">
@@ -580,6 +655,7 @@
       </article>
     </div>
   </section>
+  </div><!-- /tasks -->
 
   <footer class="board-foot">
     <div class="grow">

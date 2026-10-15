@@ -45,6 +45,7 @@
   const stats = (items) => items.map((s) =>
     `<div class="stat"><span class="v num">${esc(s.v)}</span><span class="k">${esc(s.k)}</span></div>`).join("");
   const usd2 = (v) => "$" + v.toFixed(2);
+  const div = (a, b) => (b ? a / b : null);
   const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
   /* The projection shrinks as months close, so nothing may say "four months". */
   const spanWords = () => {
@@ -62,6 +63,169 @@
       `<tbody>${rows.map((r) => `<tr>${r
         .map((c, i) => `<td${i ? ' class="n"' : ""}>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
     node.appendChild(wrap);
+  }
+
+  /* ======================= Top-level tabs =============================== */
+  const TABS = [
+    { id: "overview",    name: "Overview" },
+    { id: "goals",       name: "Goals" },
+    { id: "projections", name: "Projections" },
+    { id: "operations",  name: "Operations" },
+    { id: "tasks",       name: "Tasks" }
+  ];
+  let activeTab = "overview";
+
+  function renderTabs() {
+    const bar = $("#toptabs");
+    if (!bar) return;
+    /* A badge only earns its place when it says something the tab name does
+       not: goals met, tasks open. */
+    const badge = (id) => {
+      if (id === "goals" && M.goals) return { text: `${M.goals.met}/${M.goals.total}`, warn: M.goals.met < M.goals.total };
+      if (id === "tasks" && RAW.tasks) {
+        const done = readDone();
+        const open = RAW.tasks.filter((t) => !isDone(t, done));
+        return { text: String(open.length), warn: open.some((t) => isOverdue(t, done)) };
+      }
+      return null;
+    };
+    bar.innerHTML = TABS.map((t) => {
+      const b = badge(t.id);
+      return `<button type="button" role="tab" data-tab="${t.id}" aria-selected="${t.id === activeTab}">` +
+        `${esc(t.name)}${b ? `<span class="tab-badge${b.warn ? " warn" : ""}">${esc(b.text)}</span>` : ""}</button>`;
+    }).join("");
+    bar.querySelectorAll("button").forEach((btn) =>
+      btn.addEventListener("click", () => showTab(btn.dataset.tab)));
+    syncPanels();
+  }
+
+  function syncPanels() {
+    $$(".tab-panel").forEach((p) => { p.hidden = p.dataset.tab !== activeTab; });
+    $$("#toptabs button").forEach((b) =>
+      b.setAttribute("aria-selected", String(b.dataset.tab === activeTab)));
+  }
+
+  function showTab(id) {
+    if (!TABS.some((t) => t.id === id)) return;
+    activeTab = id;
+    syncPanels();
+    /* Charts in a hidden panel were laid out at zero width, so they are drawn
+       again now that the panel has one. */
+    renderAll();
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  /* ======================= Budget ======================================= */
+  function renderBudget() {
+    const b = M.budget;
+    if (!need("card-budget", null, b && b.lines && b.lines.length)) return;
+    $("#budget-month").textContent = `${b.month}, the last closed month`;
+    $("#budget-title").textContent = b.month;
+
+    $("#tbl-budget tbody").innerHTML = b.lines.map((l) => {
+      const sev = l.good ? "good" : Math.abs(l.delta) <= l.target * 0.1 ? "warning" : "critical";
+      return `<tr><td>${esc(l.name)}</td>` +
+        `<td class="n">${F.usd(l.actual)}</td>` +
+        `<td class="n">${F.usd(l.target)}</td>` +
+        `<td class="n">${chip(signedUsd(l.delta), sev, true)}</td></tr>`;
+    }).join("");
+
+    const chipEl = $("#budget-chip");
+    chipEl.textContent = b.onBudget ? "On budget" : `${b.offCount} of ${b.lines.length} short`;
+    chipEl.className = "chip " + (b.onBudget ? "good" : "warning");
+    $("#card-budget").dataset.state = b.onBudget ? "good" : "warning";
+
+    const cost = b.lines.find((l) => l.name === "Operating cost");
+    const rev = b.lines.find((l) => l.name === "Revenue");
+    $("#budget-note").textContent =
+      (cost && cost.good ? `Cost is ${F.usd(-cost.delta)} under the ${F.usdk(cost.target)} budget. ` : "") +
+      (rev && !rev.good ? `Revenue is the one to fix: ${F.usd(-rev.delta)} short of ${F.usdk(rev.target)}. ` : "") +
+      "Net income is measured against the distribution goal, since that is what it has to cover.";
+  }
+
+  /* ======================= Revenue by census ============================ */
+  function renderRevenueByCensus() {
+    const r = M.revenueByCensus;
+    if (!need("card-revcensus", null, r && r.rows && r.rows.length)) return;
+    $("#revc-eyebrow").textContent =
+      `${usd2(r.rate)} a child-day · ${r.daysPerWeek} days a week · ${r.opDaysPerMonth} a month · ${r.opDaysPerYear} a year`;
+
+    const need100 = r.censusForRevenue;
+    $("#revc-stats").innerHTML = stats([
+      { v: F.dec1(r.current.census), k: "Children a day today" },
+      { v: F.usdk(r.current.monthly), k: "A month at the posted rate" },
+      { v: F.usdk(r.current.monthlyNet), k: "A month, at what is collected" },
+      need100 && need100.collected
+        ? { v: F.dec1(need100.collected), k: `Children a day for a ${F.usdk(RAW.targets.monthlyRevenue)} month` }
+        : { v: "—", k: "" }
+    ]);
+
+    /* Today and the goal sit above the ladder, so the two rows anyone actually
+       looks for are not buried in it. */
+    const special = [
+      { ...r.current, cls: "row-now", name: `${F.dec1(r.current.census)} — running today` },
+      { ...r.goal, cls: "row-goal", name: `${F.int(r.goal.census)} — the goal` }
+    ];
+    const row = (x, cls, name) =>
+      `<tr${cls ? ` class="${cls}"` : ""}><td>${esc(name)}</td>` +
+      `<td class="n">${F.usd(x.weekly)}</td><td class="n">${F.usd(x.monthly)}</td>` +
+      `<td class="n">${F.usd(x.annual)}</td>` +
+      `<td class="n">${x.monthlyNet === null ? "—" : F.usd(x.monthlyNet)}</td></tr>`;
+    $("#tbl-revcensus tbody").innerHTML =
+      special.map((x) => row(x, x.cls, x.name)).join("") +
+      r.rows.map((x) => row(x, "", `${F.int(x.census)} a day`)).join("");
+
+    const ch = $("#revc-chip");
+    ch.textContent = `${F.usdk(r.current.weekly)} a week today`;
+
+    $("#revc-note").textContent =
+      `${r.note} ` +
+      (need100 && need100.collected
+        ? `The ${F.usdk(RAW.targets.monthlyRevenue)} revenue goal needs ${F.dec1(need100.posted)} children a day ` +
+          `at the posted rate, but ${F.dec1(need100.collected)} at the rate actually collected — ` +
+          `so the ${F.int(r.goal.census)}-a-day census goal and the ${F.usdk(RAW.targets.monthlyRevenue)} ` +
+          `revenue goal do not currently agree. Closing the collection gap is worth more than ` +
+          `${F.dec1(need100.collected - need100.posted)} children a day.`
+        : "");
+  }
+
+  /* ======================= Goals ======================================== */
+  function renderGoals() {
+    const g = M.goals;
+    if (!need("card-goals", null, g && g.list && g.list.length)) return;
+    $("#goals-eyebrow").textContent = `${g.period} · measured against ${M.latestMoney ? M.latestMoney.full : "the latest closed month"}`;
+
+    const fmt = (v, kind) =>
+      v === null || v === undefined ? "—"
+      : kind === "money" ? F.usd(v)
+      : kind === "census" ? F.dec1(v)
+      : F.int(v);
+
+    $("#tbl-goals tbody").innerHTML = g.list.map((x) => {
+      const target = x.targetMax ? `${fmt(x.target, x.kind)}–${fmt(x.targetMax, x.kind)}` : fmt(x.target, x.kind);
+      const pct = x.isMilestone ? null
+        : x.lowerIsBetter ? Math.min(1, div(x.target, x.actual) || 0) : Math.min(1, x.pct || 0);
+      const bar = pct === null ? ""
+        : `<div class="goal-track"><div class="goal-fill ${x.state}" style="width:${(pct * 100).toFixed(1)}%"></div></div>`;
+      return `<tr><td class="goal-name">${esc(x.name)}` +
+        (x.taskTitle ? `<span class="sub">Task ${esc(x.task)} — ${esc(x.taskTitle)}</span>` : "") +
+        (x.projected ? `<span class="sub">Projected ${F.usd(x.projected)} a month once distributions start</span>` : "") +
+        `</td>` +
+        `<td class="n">${x.isMilestone ? "—" : fmt(x.actual, x.kind)}</td>` +
+        `<td class="n">${x.isMilestone ? "—" : target}</td>` +
+        `<td>${bar}</td>` +
+        `<td class="n">${chip(x.label, x.state, true)}</td></tr>`;
+    }).join("");
+
+    const ch = $("#goals-chip");
+    ch.textContent = `${g.met} of ${g.total} met`;
+    ch.className = "chip " + (g.met === g.total ? "good" : g.met >= g.total / 2 ? "warning" : "critical");
+
+    const milestones = g.list.filter((x) => x.isMilestone);
+    $("#goals-note").textContent =
+      `Numbers are read from the last closed month, so they move when a new month is loaded rather ` +
+      `than being typed in twice. The ${milestones.length} programme goals track their task on the ` +
+      `Tasks tab — mark the task done there and the goal follows.`;
   }
 
   /* ======================= Lead band ==================================== */
@@ -128,6 +292,12 @@
     return t;
   }
 
+  /* The overview answers three questions: how full is the centre, are we on
+     budget, and what is a day worth. Tiles that answer none of them live on
+     the Operations tab, where the detail belongs. */
+  const OVERVIEW_TILES = ["Enrolled now", "Pending enrollment", "Attendance rate",
+    "Revenue", "Operating cost", "Net income", "Cash in bank"];
+
   function renderLead() {
     const lead = $("#lead");
     const l = M.latest;
@@ -144,14 +314,17 @@
          <div class="hero-row">
            <span class="delta ${M.prior && l.adc >= M.prior.adc ? "up" : "down"}">${
              M.prior ? signed(l.adc - M.prior.adc, 2) + " vs. " + M.prior.label : ""}</span>
-           ${RAW.targets ? chip("Target " + RAW.targets.enrollment, "", true) : ""}
+           ${RAW.targets && RAW.targets.census
+             ? chip("Goal " + RAW.targets.census + " a day",
+                    l.adc >= RAW.targets.census ? "good" : "warning")
+             : ""}
          </div>
          <div class="chart" id="hero-spark" style="margin:-4px 0 -2px"></div>
          <p class="card-note">${l.childDays} child-days across ${l.opDays} operating days.
            ${l.enrolled} children attended at least once; ${l.dormant} more sit on the report with
            no attendance.</p>
        </article>` +
-      tiles().map((k) =>
+      tiles().filter((k) => OVERVIEW_TILES.includes(k.label)).map((k) =>
         `<article class="card tile"${k.state ? ` data-state="${k.state}"` : ""}>
           <div class="eyebrow">${esc(k.label)}</div>
           <div class="tile-value">${esc(k.v)}</div>
@@ -167,6 +340,9 @@
   /* ======================= Targets ====================================== */
   function renderTargets() {
     const tg = RAW.targets;
+    /* The targets scorecard moved to the Goals tab, which says the same thing
+       against a longer list. The renderer stays harmless if the card is gone. */
+    if (!document.getElementById("card-targets")) return;
     if (!need("card-targets", "Targets", tg) || !M.roster || !M.latestMoney) return;
     const rows = [
       { name: "Children enrolled", actual: M.roster.enrolled, target: tg.enrollment,
@@ -567,8 +743,11 @@
     const s = M.scenario;
     if (!need("card-levels", null, s && s.sensitivity)) return;
     const today = M.latest ? M.latest.adc : null;
-    const goal = RAW.targets && M.projection
-      ? RAW.targets.enrollment * M.projection.attendanceRate : null;
+    /* The census goal is a census, set directly. Deriving one from the
+       enrolment target instead would mark a different number as "the goal"
+       than the Goals tab does. */
+    const goal = RAW.targets && RAW.targets.census ? RAW.targets.census
+      : (RAW.targets && M.projection ? RAW.targets.enrollment * M.projection.attendanceRate : null);
     const nearest = (v) => v === null ? null
       : s.sensitivity.reduce((a, x) => (Math.abs(x.perDay - v) < Math.abs(a.perDay - v) ? x : a)).perDay;
     const todayLevel = nearest(today), goalLevel = nearest(goal);
@@ -611,7 +790,9 @@
       `One more child a day is worth ${F.usd(perChild)} of revenue over the ${spanWords()}, ` +
       `${F.usd(perChild / s.rows.length)} a month. ` +
       (todayLevel ? `The centre is running about ${F.dec1(today)} a day today. ` : "") +
-      (goalLevel ? `The enrollment goal of ${RAW.targets.enrollment} at ${F.pct0(M.projection.attendanceRate)} attendance is ${F.dec1(goal)} a day.` : "");
+      (goalLevel ? `The census goal is ${F.dec1(goal)} a day; the enrolment goal of ` +
+        `${RAW.targets.enrollment} at ${F.pct0(M.projection.attendanceRate)} attendance would be ` +
+        `${F.dec1(RAW.targets.enrollment * M.projection.attendanceRate)} a day.` : "");
   }
 
   /* ======================= Cost structure & mix ========================= */
@@ -1093,7 +1274,11 @@
     $$(".card").forEach((c) => { c.hidden = false; });
     $$("section.section").forEach((s) => { s.hidden = false; });
     renderChrome();
+    renderTabs();
     renderLead();
+    renderBudget();
+    renderRevenueByCensus();
+    renderGoals();
     renderTargets();
     renderTrends();
     renderPlanActual();

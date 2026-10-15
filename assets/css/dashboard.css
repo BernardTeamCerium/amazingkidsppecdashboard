@@ -967,3 +967,86 @@ table.data tr.stage-row:hover td { background: var(--surface-2); }
 .needs li { margin-bottom: 5px; }
 .needs li:last-child { margin-bottom: 0; }
 .needs-head { margin: 14px 0 6px; }
+
+
+/* ---- Top-level tabs -------------------------------------------------------
+   The board is five pages now, not one scroll. The bar sits under the masthead
+   and stays put, so the current page is always answerable without scrolling. */
+.toptabs {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 10px 24px 0;
+  background: var(--plane);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.toptabs button {
+  appearance: none;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: -1px;
+}
+.toptabs button:hover { background: var(--surface-2); color: var(--ink); }
+.toptabs button[aria-selected="true"] {
+  background: var(--surface);
+  border-color: var(--rule-strong);
+  border-bottom: 1px solid var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+.toptabs .tab-badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 9px;
+  background: var(--surface-3);
+  color: var(--ink-3);
+}
+.toptabs button[aria-selected="true"] .tab-badge { background: var(--accent-wash); color: var(--accent-ink); }
+.toptabs .tab-badge.warn { background: var(--warning-wash); color: var(--warning-ink); }
+
+.tab-panel { display: flex; flex-direction: column; gap: 26px; }
+
+@media (max-width: 760px) {
+  .toptabs { padding-left: 14px; padding-right: 14px; }
+  .toptabs button { padding: 8px 11px; font-size: 12.5px; }
+}
+
+/* A row the reader should find without hunting: where the centre is now, and
+   the goal it is measured against. */
+table.data tr.row-now td { background: var(--accent-wash); font-weight: 600; }
+table.data tr.row-now:hover td { background: var(--accent-wash); }
+table.data tr.row-goal td { border-top: 1px solid var(--rule-strong); font-weight: 600; }
+
+/* Goal progress, inline in a table row. */
+.goal-track {
+  position: relative;
+  height: 7px;
+  min-width: 90px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.goal-fill { height: 100%; border-radius: 4px; background: var(--accent); }
+.goal-fill.good { background: var(--good); }
+.goal-fill.warning { background: var(--warning); }
+.goal-fill.critical { background: var(--critical); }
+.goal-name { font-size: 13px; }
+.goal-name .sub { display: block; color: var(--ink-3); font-size: 11.5px; }

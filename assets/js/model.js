@@ -435,6 +435,117 @@ const Model = (() => {
     }
 
 
+    /* -- revenue by census -------------------------------------------------
+       What a day of census is worth, weekly, monthly and annually. Shown at the
+       posted rate and at the rate actually collected, because the difference
+       between them is the difference between the goal looking met and being
+       met. */
+    const rb = raw.revenueBasis;
+    if (rb && raw.perDiem) {
+      const rate = raw.perDiem, realized = m.ytd.realization || null;
+      const row = (c) => {
+        const at = (days) => c * days * rate;
+        return {
+          census: c,
+          weekly: at(rb.daysPerWeek), monthly: at(rb.opDaysPerMonth), annual: at(rb.opDaysPerYear),
+          weeklyNet: realized ? at(rb.daysPerWeek) * realized : null,
+          monthlyNet: realized ? at(rb.opDaysPerMonth) * realized : null,
+          annualNet: realized ? at(rb.opDaysPerYear) * realized : null
+        };
+      };
+      const goalCensus = raw.targets ? raw.targets.census : null;
+      const now = m.latest ? m.latest.adc : null;
+      m.revenueByCensus = {
+        ...rb, rate, realized,
+        rows: rb.levels.map(row),
+        /* The two rows that matter are where the centre is and where it is
+           trying to be, so they are computed exactly rather than rounded to a
+           level in the table. */
+        current: now === null ? null : { ...row(now), label: "Running today" },
+        goal: goalCensus === null ? null : { ...row(goalCensus), label: "The goal" },
+        /* The census a $100K month needs, at each rate. */
+        censusForRevenue: raw.targets && raw.targets.monthlyRevenue
+          ? { posted: div(raw.targets.monthlyRevenue, rb.opDaysPerMonth * rate),
+              collected: realized ? div(raw.targets.monthlyRevenue, rb.opDaysPerMonth * rate * realized) : null }
+          : null
+      };
+    }
+
+    /* -- budget -------------------------------------------------------------
+       On budget or off, for the last closed month, in the three terms the
+       owners set: revenue, cost and what is left. */
+    if (m.latestMoney && raw.targets) {
+      const t = raw.targets, lm = m.latestMoney;
+      const line = (name, actual, target, lowerIsBetter) => {
+        if (target === null || target === undefined) return null;
+        const delta = actual - target;
+        const good = lowerIsBetter ? delta <= 0 : delta >= 0;
+        return { name, actual, target, delta, lowerIsBetter: !!lowerIsBetter, good,
+                 pct: div(actual, target) };
+      };
+      const distTarget = raw.goals && (raw.goals.list.find((g) => g.metric === "distribution") || {}).target;
+      m.budget = {
+        month: lm.full,
+        lines: [
+          line("Revenue", lm.revenue, t.monthlyRevenue, false),
+          line("Operating cost", lm.cost, t.monthlyCost, true),
+          line("Net income", lm.net, distTarget === undefined ? null : distTarget, false)
+        ].filter(Boolean)
+      };
+      m.budget.onBudget = m.budget.lines.every((l) => l.good);
+      m.budget.offCount = m.budget.lines.filter((l) => !l.good).length;
+    }
+
+    /* -- goals --------------------------------------------------------------
+       Each goal reads a number this board already computes, or the status of a
+       task already on the board, so there is one place to update and the goals
+       cannot drift from what they measure. */
+    if (raw.goals && raw.goals.list) {
+      const tasks = raw.tasks || [];
+      const lm = m.latestMoney, lc = m.latest, d = m.distributions;
+      /* Distributions: nothing has been paid yet, so the honest actual is zero
+         and the projection is context, not achievement. */
+      const paidToOwners = (m.planVsActual || []).reduce(
+        (a, x) => a + ((x.rows.find((r) => r.name === "Paid to owners") || {}).actual || 0), 0);
+      const projectedOwners = d && d.schedule.length
+        ? d.totals.owners / d.schedule.length : null;
+
+      const read = {
+        revenue:      lm ? { actual: lm.revenue, when: lm.full } : null,
+        cost:         lm ? { actual: lm.cost, when: lm.full } : null,
+        adc:          lc ? { actual: lc.adc, when: lc.full } : null,
+        started:      lc ? { actual: lc.started, when: lc.full } : null,
+        distribution: { actual: paidToOwners, when: lm ? lm.full : null, projected: projectedOwners }
+      };
+
+      m.goals = {
+        ...raw.goals,
+        list: raw.goals.list.map((g) => {
+          if (g.kind === "milestone") {
+            const t = tasks.find((x) => x.id === g.task);
+            const status = t ? t.status : "Not started";
+            return { ...g, isMilestone: true, taskStatus: status, taskTitle: t ? t.title : null,
+              state: status === "Done" ? "good" : status === "In progress" ? "warning" : "",
+              label: status };
+          }
+          const r = read[g.metric] || {};
+          const actual = r.actual === undefined ? null : r.actual;
+          if (actual === null) return { ...g, actual: null, state: "", label: "No data yet" };
+          const hit = g.lowerIsBetter ? actual <= g.target : actual >= g.target;
+          /* Within a tenth of the target is "close", not "failed" — a goal that
+             reads red at 99% teaches people to ignore the colour. */
+          const near = g.lowerIsBetter
+            ? actual <= g.target * 1.1 : actual >= g.target * 0.9;
+          return { ...g, actual, when: r.when, projected: r.projected,
+            pct: div(actual, g.target), delta: actual - g.target,
+            state: hit ? "good" : near ? "warning" : "critical",
+            label: hit ? "Met" : near ? "Close" : "Behind" };
+        })
+      };
+      m.goals.met = m.goals.list.filter((g) => g.state === "good").length;
+      m.goals.total = m.goals.list.length;
+    }
+
     /* -- billing mix -------------------------------------------------------
        Shares of child-days, plus what each is worth at the posted rate, so the
        question "is this worth chasing" has a number attached to it. */
