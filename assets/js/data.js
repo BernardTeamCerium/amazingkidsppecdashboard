@@ -64,10 +64,11 @@ window.AKP_DATA = {
     enrollment: 25,
     enrollmentOwner: "Growth plan",
     enrollmentHorizon: "Q3–Q4 2026",
-    monthlyCost: 67500,
+    monthlyCost: 70000,
     costOwner: "Goal",
     costHorizon: "Monthly",
     monthlyRevenue: 100000,
+    monthlyNet: 20000,   /* the floor: what has to be left after expenses */
     census: 17,
     note: "The enrolment goal is 25 children through Q3 and Q4. The roster stands at 19, with 4 " +
       "more pending — so even with every pending child starting, the centre lands at 23 and needs " +
@@ -94,9 +95,9 @@ window.AKP_DATA = {
   goals: {
     period: "Monthly",
     list: [
-      { id: "G-1", name: "Monthly revenue",            target: 100000, kind: "money",  metric: "revenue" },
-      { id: "G-2", name: "Daily census",               target: 17,     kind: "census", metric: "adc" },
-      { id: "G-3", name: "Monthly budget",             target: 67500,  kind: "money",  metric: "cost", lowerIsBetter: true },
+      { id: "G-1", name: "Monthly revenue",            kind: "money",  metric: "revenue" }   /* target: targets.monthlyRevenue */,
+      { id: "G-2", name: "Daily census",               kind: "census", metric: "adc" }       /* target: targets.census */,
+      { id: "G-3", name: "Monthly budget",             kind: "money",  metric: "cost", lowerIsBetter: true }  /* target: targets.monthlyCost */,
       { id: "G-4", name: "Start the school program",   kind: "milestone", task: "T-18" },
       { id: "G-5", name: "Launch our own management and communication system", kind: "milestone", task: "T-13" },
       { id: "G-6", name: "Start the therapy program",  kind: "milestone", task: "T-16" },
@@ -231,6 +232,17 @@ window.AKP_DATA = {
       { name: "Matt Klynsmith",  share: 0.10 },
       { name: "Bernard Frazier", share: 0.10 }
     ],
+    /* The 2026 goal, as the owners set it: a fixed amount per 20% of ownership,
+       every month. A 10% holder takes half of it. The pool is whatever that
+       adds up to — stated per share rather than as a total so it stays right
+       if the share register ever changes. */
+    goal: {
+      year: 2026,
+      perFullShare: 5000,
+      fullShare: 0.20,
+      cadence: "a month",
+      note: "$5,000 a month for each 20% held, so $2,500 for each 10%."
+    },
     note: "Distributions are paid from cash actually collected, not from projected revenue, and " +
       "never below one month of operating cost left in the bank.",
     caveat: "Two things would change this materially. Cost is held at the $70,000 target; July " +

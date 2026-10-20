@@ -360,6 +360,59 @@ const Model = (() => {
       };
     }
 
+    /* -- the distribution goal ---------------------------------------------
+       What the owners set, what it costs, and what has to be true for it to be
+       paid. The last part is arithmetic and is not softened: a net income floor
+       below the pool cannot fund the pool, whatever the split policy says. */
+    if (d && d.goal && d.members && d.members.length) {
+      const g = d.goal;
+      const perMember = d.members.map((mem) => ({
+        ...mem, amount: div(mem.share, g.fullShare) * g.perFullShare
+      }));
+      const monthly = sum(perMember, (x) => x.amount);
+      const cost = raw.targets && raw.targets.monthlyCost ? raw.targets.monthlyCost : d.assumedMonthlyCost;
+      const rate = raw.perDiem, realized = m.ytd.realization || null;
+      const opDays = raw.revenueBasis ? raw.revenueBasis.opDaysPerMonth : null;
+
+      /* Two routes to the same pool. Under the standing policy savings and debt
+         take their share first, so net has to be bigger than the pool; if every
+         dollar of net is distributed instead, net only has to equal it. */
+      const keep = (1 - (d.ongoingSavings || 0)) * ((d.split && d.split.owners) || 1);
+      const route = (netNeeded) => {
+        const revenue = netNeeded + cost;
+        return {
+          net: netNeeded, revenue,
+          censusPosted: opDays ? div(revenue, opDays * rate) : null,
+          censusCollected: opDays && realized ? div(revenue, opDays * rate * realized) : null
+        };
+      };
+      const underPolicy = route(div(monthly, keep));
+      const everyDollar = route(monthly);
+
+      /* The floor the owners set, measured against the pool it is meant to fund. */
+      const floor = raw.targets ? raw.targets.monthlyNet : null;
+      const floorYields = floor === null ? null : {
+        underPolicy: floor * keep, everyDollar: floor,
+        gapUnderPolicy: floor * keep - monthly, gapEveryDollar: floor - monthly
+      };
+
+      m.distributionGoal = {
+        ...g, monthly, annual: monthly * 12, perMember, cost, keep,
+        underPolicy, everyDollar, floor, floorYields,
+        /* True when the stated floor cannot reach the pool by any route — a
+           statement about arithmetic, not about the plan's ambition. */
+        floorShort: floorYields ? floorYields.gapEveryDollar < 0 : false,
+        paidSoFar: (m.planVsActual || []).reduce(
+          (a, x) => a + ((x.rows.find((r) => r.name === "Paid to owners") || {}).actual || 0), 0),
+        projectedMonthly: d.schedule && d.schedule.length ? null : null
+      };
+      if (m.distributions && m.distributions.schedule.length) {
+        m.distributionGoal.projectedMonthly =
+          m.distributions.totals.owners / m.distributions.schedule.length;
+        m.distributionGoal.projectedGap = m.distributionGoal.projectedMonthly - monthly;
+      }
+    }
+
     /* -- what-if scenario -------------------------------------------------- */
     const sc = raw.scenario;
     if (sc && m.projection && d) {
@@ -483,13 +536,16 @@ const Model = (() => {
         return { name, actual, target, delta, lowerIsBetter: !!lowerIsBetter, good,
                  pct: div(actual, target) };
       };
-      const distTarget = raw.goals && (raw.goals.list.find((g) => g.metric === "distribution") || {}).target;
+      /* Net income is measured against the floor set for it, not against the
+         distribution pool — the two are different numbers, and conflating them
+         hid the fact that the floor does not reach the pool. */
+      const netTarget = t.monthlyNet;
       m.budget = {
         month: lm.full,
         lines: [
           line("Revenue", lm.revenue, t.monthlyRevenue, false),
           line("Operating cost", lm.cost, t.monthlyCost, true),
-          line("Net income", lm.net, distTarget === undefined ? null : distTarget, false)
+          line("Net income", lm.net, netTarget === undefined ? null : netTarget, false)
         ].filter(Boolean)
       };
       m.budget.onBudget = m.budget.lines.every((l) => l.good);
@@ -518,9 +574,17 @@ const Model = (() => {
         distribution: { actual: paidToOwners, when: lm ? lm.full : null, projected: projectedOwners }
       };
 
+      /* A goal that keeps its own copy of a target will eventually disagree with
+         the target. Where both exist, the target wins and there is one number. */
+      const FROM_TARGET = { revenue: "monthlyRevenue", cost: "monthlyCost", adc: "census" };
+      const t = raw.targets || {};
+
       m.goals = {
         ...raw.goals,
-        list: raw.goals.list.map((g) => {
+        list: raw.goals.list.map((raw_g) => {
+          const key = FROM_TARGET[raw_g.metric];
+          const g = key && t[key] !== undefined && t[key] !== null
+            ? { ...raw_g, target: t[key] } : raw_g;
           if (g.kind === "milestone") {
             const t = tasks.find((x) => x.id === g.task);
             const status = t ? t.status : "Not started";

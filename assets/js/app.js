@@ -70,6 +70,7 @@
     { id: "overview",    name: "Overview" },
     { id: "goals",       name: "Goals" },
     { id: "projections", name: "Projections" },
+    { id: "distributions", name: "Distributions" },
     { id: "operations",  name: "Operations" },
     { id: "tasks",       name: "Tasks" }
   ];
@@ -113,6 +114,93 @@
        again now that the panel has one. */
     renderAll();
     window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  /* ======================= The distribution goal ======================== */
+  function renderDistributionGoal() {
+    const g = M.distributionGoal;
+    if (!need("card-distgoal", null, g && g.perMember && g.perMember.length)) {
+      const r = document.getElementById("card-distreq"); if (r) r.hidden = true;
+      return;
+    }
+    $("#dg-head").textContent =
+      `${F.usd(g.perFullShare)} a month for every ${F.pct0(g.fullShare)} held`;
+    $("#dg-eyebrow").textContent = `${g.year} · ${g.cadence}`;
+    $("#dg-chip").textContent = `${F.usdk(g.monthly)} a month`;
+
+    $("#dg-stats").innerHTML = stats([
+      { v: F.usdk(g.monthly), k: "The pool, every month" },
+      { v: F.usdk(g.annual), k: `Across ${g.year}` },
+      { v: F.usd(g.perFullShare), k: `Each ${F.pct0(g.fullShare)} holder` },
+      { v: F.usd(g.perFullShare / 2), k: `Each ${F.pct0(g.fullShare / 2)} holder` }
+    ]);
+
+    $("#tbl-distgoal tbody").innerHTML = g.perMember.map((x) =>
+      `<tr><td>${esc(x.name)}</td><td class="n">${F.pct1(x.share)}</td>` +
+      `<td class="n">${F.usd(x.amount)}</td><td class="n">${F.usd(x.amount * 12)}</td></tr>`).join("");
+    $("#tbl-distgoal tfoot").innerHTML =
+      `<tr><td>The pool</td><td class="n">100.0%</td>` +
+      `<td class="n">${F.usd(g.monthly)}</td><td class="n">${F.usd(g.annual)}</td></tr>`;
+    $("#dg-note").textContent = g.note +
+      ` Stated per share rather than as a total, so the pool stays right if the share register changes.`;
+
+    renderDistributionRequirement(g);
+  }
+
+  function renderDistributionRequirement(g) {
+    const card = document.getElementById("card-distreq");
+    if (!card) return;
+    card.hidden = false;
+    $("#dr-title").textContent = `What has to be true to pay ${F.usdk(g.monthly)} a month`;
+
+    const routes = [
+      { name: `Under the current policy — ${F.pct0(1 - (RAW.distributions.ongoingSavings || 0))} after savings, ` +
+              `then ${F.pct0(RAW.distributions.split.owners)} of what is left`, r: g.underPolicy },
+      { name: "If every dollar of net income is paid out", r: g.everyDollar }
+    ];
+    $("#tbl-distreq tbody").innerHTML = routes.map(({ name, r }) =>
+      `<tr><td>${esc(name)}</td><td class="n">${F.usd(r.net)}</td>` +
+      `<td class="n">${F.usd(r.revenue)}</td>` +
+      `<td class="n">${r.censusCollected === null ? "—" : F.dec1(r.censusCollected)}</td></tr>`).join("") +
+      (g.floor === null ? "" :
+        `<tr class="row-now"><td>The stated floor of ${F.usdk(g.floor)} net, if every dollar is paid</td>` +
+        `<td class="n">${F.usd(g.floor)}</td><td class="n">${F.usd(g.floor + g.cost)}</td>` +
+        `<td class="n">${M.revenueByCensus && M.revenueByCensus.realized
+          ? F.dec1((g.floor + g.cost) / (RAW.revenueBasis.opDaysPerMonth * RAW.perDiem * M.revenueByCensus.realized))
+          : "—"}</td></tr>`);
+
+    const warn = $("#dr-warning");
+    if (g.floorShort) {
+      warn.hidden = false;
+      warn.textContent =
+        `${F.usdk(g.floor)} of net income a month cannot pay ${F.usdk(g.monthly)} of distributions. ` +
+        `Paying every dollar of it out still leaves the pool ${F.usd(-g.floorYields.gapEveryDollar)} short, ` +
+        `and under the current savings-and-debt policy it leaves ${F.usd(g.floorYields.underPolicy)} for ` +
+        `owners — ${F.usd(-g.floorYields.gapUnderPolicy)} short. The floor and the pool need to agree: ` +
+        `either net has to reach ${F.usd(g.underPolicy.net)}, or the policy has to stop taking its share ` +
+        `once the reserve is full.`;
+      card.dataset.state = "warning";
+    } else {
+      warn.hidden = true;
+      delete card.dataset.state;
+    }
+
+    const ch = $("#dr-chip");
+    if (g.projectedMonthly !== null && g.projectedMonthly !== undefined) {
+      const ok = g.projectedGap >= 0;
+      ch.textContent = `${F.usdk(g.projectedMonthly)} a month projected`;
+      ch.className = "chip " + (ok ? "good" : "warning");
+    } else { ch.textContent = "—"; ch.className = "chip"; }
+
+    $("#dr-note").textContent =
+      `Revenue needed is the net plus the ${F.usdk(g.cost)} budget. The census column is at the rate ` +
+      `actually collected, not the posted rate — at the posted rate every figure here looks about ` +
+      `three children a day easier than it is. ` +
+      (g.projectedMonthly
+        ? `The Oct–Dec schedule projects ${F.usd(g.projectedMonthly)} a month, ` +
+          `${g.projectedGap >= 0 ? `${F.usd(g.projectedGap)} above` : `${F.usd(-g.projectedGap)} below`} the goal. `
+        : "") +
+      `Nothing has been distributed yet this year.`;
   }
 
   /* ======================= Budget ======================================= */
@@ -1279,6 +1367,7 @@
     renderBudget();
     renderRevenueByCensus();
     renderGoals();
+    renderDistributionGoal();
     renderTargets();
     renderTrends();
     renderPlanActual();
